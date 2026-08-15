@@ -1,0 +1,13 @@
+{
+  "admins": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "admin123",
+      "displayName": "Administrador"
+    }
+  ],
+  "players": [],
+  "cards": [],
+  "battles": []
+}

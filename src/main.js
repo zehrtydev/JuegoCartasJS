@@ -1,0 +1,4 @@
+import './styles/main.css'
+import { renderApp } from './app.js'
+
+renderApp(document.querySelector('#app'))

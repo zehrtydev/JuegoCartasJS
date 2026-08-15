@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-arena: #020617;
+  --color-surface: #0f172a;
+  --color-action: #facc15;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-defense: #60a5fa;
+}

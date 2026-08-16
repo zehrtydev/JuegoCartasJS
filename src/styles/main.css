@@ -28,6 +28,321 @@
 }
 
 @layer components {
+  .gameHeader {
+    position: relative;
+    z-index: 10;
+    border-bottom: 4px solid #6f4e12;
+    background: #080807;
+    box-shadow: 0 5px 0 #1b1308;
+  }
+
+  .gameHeader--home {
+    position: absolute;
+    width: 100%;
+    border-bottom: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .gameHeader__homeInner {
+    max-width: none;
+    padding-top: clamp(1.5rem, 3vh, 2.25rem);
+  }
+
+  .gameHeader--home .gameMarquee {
+    width: min(62vw, 62rem);
+    justify-content: center;
+    padding-block: clamp(1.1rem, 2.4vh, 1.6rem);
+  }
+
+  .gameMarquee__seal {
+    flex: 0 0 auto;
+    width: 2.5rem;
+  }
+
+  .gameMarquee {
+    border: 4px solid var(--color-brass);
+    background: linear-gradient(#1b1a17, #080807);
+    box-shadow: inset 0 0 0 3px #e7b82c, 5px 5px 0 #291b09;
+    clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+  }
+
+  .gameMarquee__title,
+  .gameTitle {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    text-wrap: balance;
+    text-shadow: 3px 3px 0 #6f4e12;
+  }
+
+  .gameNavLink {
+    display: block;
+    border: 2px solid #5f4b27;
+    background: #181611;
+    color: var(--color-muted);
+    box-shadow: 2px 2px 0 #080807;
+    transition-property: color, background-color, border-color, transform;
+    transition-duration: 120ms;
+  }
+
+  .gameNavLink:hover,
+  .gameNavLink--active {
+    border-color: var(--color-action);
+    background: #2b2416;
+    color: var(--color-action);
+  }
+
+  .gameNavLink:active {
+    transform: translate(2px, 2px);
+  }
+
+  .registrationScene {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    overflow-x: clip;
+    background-color: #0a0a09;
+    background-image: url('/assets/images/ui/kantoLeagueHall.png');
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+    image-rendering: pixelated;
+  }
+
+  .registrationScene__shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(8, 8, 7, 0.05) 30%, rgba(8, 8, 7, 0.22) 65%, rgba(8, 8, 7, 0.68));
+    pointer-events: none;
+  }
+
+  .registrationLayout {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 54rem) minmax(0, 32rem);
+    gap: clamp(1.5rem, 2.5vw, 2.5rem);
+    align-items: start;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: clamp(15rem, 29vh, 18rem) clamp(1rem, 5vw, 5rem) 3rem;
+  }
+
+  .trainerConsole {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background-image: url('/assets/images/ui/trainerConsoleFrame.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    filter: drop-shadow(8px 8px 0 rgba(5, 4, 3, 0.75));
+    image-rendering: pixelated;
+  }
+
+  .trainerConsole__content {
+    display: flex;
+    gap: clamp(1rem, 2vw, 1.5rem);
+    align-items: center;
+    height: 100%;
+    padding: 21% 14% 28%;
+  }
+
+  .trainerSpriteFrame {
+    flex: 0 0 clamp(7.5rem, 28%, 11rem);
+    border: 5px solid #4a2b14;
+    background: #ead7a5;
+    box-shadow: inset 0 0 0 3px #a77a38, 4px 4px 0 #080807;
+  }
+
+  .trainerSpriteFrame img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    image-rendering: pixelated;
+    outline: 1px solid rgba(0, 0, 0, 0.12);
+    outline-offset: -1px;
+  }
+
+  .trainerConsole__formColumn {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .trainerConsole__title {
+    color: var(--color-cream);
+    font-family: ui-monospace, monospace;
+    font-size: clamp(0.85rem, 1.2vw, 1.05rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .trainerForm {
+    margin-top: 1rem;
+  }
+
+  .trainerLabel {
+    display: block;
+    color: var(--color-action);
+    font-family: ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  .trainerInput {
+    width: 100%;
+    min-height: 2.75rem;
+    margin-top: 0.45rem;
+    border: 4px solid #8c5f1d;
+    background: #f1e4bf;
+    padding: 0.6rem 0.9rem;
+    color: var(--color-arena-deep);
+    font-family: ui-monospace, monospace;
+    font-size: 0.85rem;
+    outline: none;
+    box-shadow: inset 3px 3px 0 rgba(78, 49, 16, 0.25), 3px 3px 0 #080807;
+  }
+
+  .trainerInput::placeholder {
+    color: #78674b;
+  }
+
+  .trainerInput:focus {
+    box-shadow: inset 3px 3px 0 rgba(78, 49, 16, 0.25), 3px 3px 0 #080807, 0 0 0 4px rgba(246, 201, 69, 0.4);
+  }
+
+  .trainerHelp {
+    margin-top: 0.35rem;
+    color: var(--color-muted);
+    font-size: 0.65rem;
+    line-height: 1.25;
+    text-wrap: pretty;
+  }
+
+  .gameStartButton {
+    width: 100%;
+    min-height: 3rem;
+    margin-top: 0.85rem;
+    border: 4px solid #8c5f1d;
+    background: var(--color-action);
+    padding: 0.65rem 1.25rem;
+    color: var(--color-arena-deep);
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    box-shadow: inset 0 0 0 3px #ffe373, 5px 5px 0 #080807;
+    transition-property: background-color, box-shadow, transform;
+    transition-duration: 120ms;
+  }
+
+  .gameStartButton:enabled:hover {
+    background: #ffda45;
+  }
+
+  .gameStartButton:enabled:active {
+    box-shadow: inset 0 0 0 3px #ffe373, 2px 2px 0 #080807;
+    transform: translate(3px, 3px);
+  }
+
+  .gameStartButton:disabled {
+    background: #d6ad35;
+    color: #241807;
+    cursor: not-allowed;
+    opacity: 0.78;
+  }
+
+  .profileLedger {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    border: 0;
+    background-color: transparent;
+    background-image: url('/assets/images/ui/profileLedgerFrame.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    color: #2f2519;
+    filter: drop-shadow(8px 8px 0 rgba(5, 4, 3, 0.75));
+    image-rendering: pixelated;
+    margin-top: calc(-2.5rem - 10px);
+  }
+
+  .profileLedger__tab {
+    width: 62%;
+    margin: calc(9% + 25px) auto 0;
+    border: 4px solid #355027;
+    background: #56733b;
+    padding: 0.65rem 0.75rem;
+    color: #fff3c8;
+    text-align: center;
+    box-shadow: inset 0 0 0 2px #8da866, 3px 3px 0 #6d4d25;
+  }
+
+  .profileLedger__tab h2 {
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .profileLedger__page {
+    height: 65%;
+    margin: 0 26% 0 14%;
+    padding: 1rem 0.4rem 12% 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-color: #8c5f1d rgba(111, 78, 18, 0.2);
+    scrollbar-width: thin;
+  }
+
+  .profileLedger__page::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .profileLedger__page::-webkit-scrollbar-track {
+    background: rgba(111, 78, 18, 0.2);
+  }
+
+  .profileLedger__page::-webkit-scrollbar-thumb {
+    border: 2px solid #e4cb91;
+    background: #8c5f1d;
+  }
+
+  .profileList {
+    padding-bottom: 0.25rem;
+  }
+
+  .profileSelectButton {
+    min-height: 44px;
+  }
+
+  .profileAlias {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .profilePoints {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .uiStatePanel--parchment {
+    border-color: #987240 !important;
+    background: rgba(255, 246, 216, 0.22) !important;
+  }
+
+  .uiStatePanel--parchment h2 {
+    color: #2f2519 !important;
+  }
+
+  .uiStatePanel--parchment p {
+    color: #5b4933 !important;
+  }
+
   .pixelFrame {
     border: 2px solid var(--color-brass);
     box-shadow: 4px 4px 0 var(--color-arena-deep), inset 0 0 0 1px rgba(255, 246, 216, 0.1);
@@ -126,5 +441,159 @@
     font-family: ui-monospace, monospace;
     font-size: 1.4rem;
     font-weight: 900;
+  }
+
+  .pixelLoader {
+    display: block;
+    width: 2.5rem;
+    aspect-ratio: 1;
+    border: 3px solid var(--color-brass);
+    border-top-color: var(--color-action);
+    border-radius: 9999px;
+    animation: arenaSpin 0.85s steps(8, end) infinite;
+  }
+
+  .stateErrorMark {
+    display: grid;
+    width: 2.5rem;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 2px solid var(--color-danger);
+    color: var(--color-danger);
+    font-family: ui-monospace, monospace;
+    font-size: 1.35rem;
+    font-weight: 900;
+  }
+
+  @keyframes arenaSpin {
+    to { transform: rotate(1turn); }
+  }
+
+  @media (max-width: 1100px) {
+    .gameHeader--home .gameMarquee {
+      width: min(78vw, 48rem);
+    }
+
+    .registrationScene {
+      background-position: 50% top;
+      background-size: auto 100%;
+    }
+
+    .registrationLayout {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      padding-top: clamp(12rem, 24vh, 15rem);
+    }
+
+    .trainerConsole {
+      width: min(100%, 54rem);
+      justify-self: center;
+    }
+
+    .profileLedger {
+      width: min(100%, 30rem);
+      justify-self: center;
+      margin-top: 0;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .gameHeader__homeInner {
+      padding: 0.75rem 0.5rem 0;
+    }
+
+    .gameHeader--home .gameMarquee {
+      width: 100%;
+      padding: 0.8rem 0.65rem;
+    }
+
+    .gameHeader--home .gameMarquee__title {
+      font-size: clamp(1.15rem, 7vw, 1.65rem);
+      letter-spacing: 0.04em;
+      text-align: center;
+      text-shadow: 2px 2px 0 #6f4e12;
+    }
+
+    .registrationScene {
+      background-position: 50% top;
+      background-size: auto 100%;
+    }
+
+    .registrationLayout {
+      gap: 0.5rem;
+      padding: 8.75rem 0.35rem 1.5rem;
+    }
+
+    .trainerConsole__content {
+      flex-direction: row;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 20% 9% 27%;
+    }
+
+    .trainerSpriteFrame {
+      flex: 0 0 clamp(4rem, 24%, 5.25rem);
+      border-width: 3px;
+      box-shadow: inset 0 0 0 2px #a77a38, 2px 2px 0 #080807;
+    }
+
+    .trainerConsole__title {
+      font-size: clamp(0.6rem, 2.9vw, 0.8rem);
+      letter-spacing: 0.06em;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .trainerForm {
+      margin-top: 0.35rem;
+    }
+
+    .trainerLabel {
+      font-size: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .trainerInput {
+      min-height: 2rem;
+      margin-top: 0.2rem;
+      border-width: 3px;
+      padding: 0.3rem 0.45rem;
+      font-size: 0.65rem;
+      box-shadow: inset 2px 2px 0 rgba(78, 49, 16, 0.25), 2px 2px 0 #080807;
+    }
+
+    .trainerHelp {
+      margin-top: 0.18rem;
+      font-size: 0.47rem;
+      line-height: 1.1;
+    }
+
+    .gameStartButton {
+      min-height: 2.25rem;
+      margin-top: 0.35rem;
+      border-width: 3px;
+      padding: 0.3rem 0.45rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.05em;
+      box-shadow: inset 0 0 0 2px #ffe373, 3px 3px 0 #080807;
+    }
+
+    .profileLedger {
+      width: min(100%, 24rem);
+    }
+
+    .profileLedger__tab {
+      width: auto;
+      margin: 11% 16% 0;
+      padding: 0.5rem;
+    }
+
+    .profileLedger__tab h2 {
+      font-size: 0.62rem;
+    }
+
+    .gameTitle {
+      font-size: 1.85rem;
+    }
   }
 }

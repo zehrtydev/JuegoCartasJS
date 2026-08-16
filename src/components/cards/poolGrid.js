@@ -1,5 +1,6 @@
 class PoolGrid extends HTMLElement {
   #cards = []
+  #state = 'empty'
 
   set cards(value) {
     this.#cards = Array.isArray(value) ? value : []
@@ -8,6 +9,15 @@ class PoolGrid extends HTMLElement {
 
   get cards() {
     return this.#cards
+  }
+
+  set state(value) {
+    this.#state = value
+    if (this.isConnected) this.#render()
+  }
+
+  get state() {
+    return this.#state
   }
 
   connectedCallback() {
@@ -25,11 +35,7 @@ class PoolGrid extends HTMLElement {
           <p class="border border-brass bg-surface px-3 py-2 font-mono text-xs font-bold tracking-wider text-cream">SELECCIONADOS: <span class="text-action">0 / 5</span></p>
         </header>
         <div class="p-6 sm:p-10">
-          <div class="border border-dashed border-brass bg-arena-deep/50 p-6 text-center sm:p-10" role="status">
-            <span class="captureSeal mx-auto scale-125" aria-hidden="true"></span>
-            <h2 class="mt-5 text-xl font-black tracking-wide text-cream">EL POOL AÚN NO ESTÁ DISPONIBLE</h2>
-            <p class="mx-auto mt-3 max-w-xl leading-7 text-muted">No hay cartas activas cargadas desde la API local. Cuando el catálogo esté disponible, aquí aparecerán las cartas para escoger cinco Pokémon diferentes.</p>
-          </div>
+          <ui-state state="empty" title="EL POOL AÚN NO ESTÁ DISPONIBLE" message="No hay cartas activas cargadas desde la API local. Cuando el catálogo esté disponible, aquí aparecerán las cartas para escoger cinco Pokémon diferentes."></ui-state>
           <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5" aria-hidden="true">
             ${Array.from({ length: 5 }, () => '<div class="cardBack aspect-[3/4]"><span class="captureSeal scale-75"></span></div>').join('')}
           </div>
@@ -37,6 +43,12 @@ class PoolGrid extends HTMLElement {
         </div>
       </section>
     `
+
+    const state = this.querySelector('ui-state')
+    state.state = this.#state
+    state.addEventListener('retry-requested', () => {
+      this.dispatchEvent(new CustomEvent('retry-cards-requested', { bubbles: true }))
+    })
   }
 }
 

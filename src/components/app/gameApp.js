@@ -40,7 +40,9 @@ class GameApp extends HTMLElement {
     this.append(header)
 
     const main = document.createElement('main')
-    main.className = 'mx-auto min-h-[calc(100vh-92px)] w-full max-w-6xl px-5 py-8 sm:py-12'
+    main.className = this.#currentView === 'home'
+      ? 'min-h-[calc(100vh-92px)] w-full'
+      : 'mx-auto min-h-[calc(100vh-92px)] w-full max-w-6xl px-5 py-8 sm:py-12'
     main.append(this.#createView())
     this.append(main)
   }
@@ -56,6 +58,30 @@ class GameApp extends HTMLElement {
       const pool = document.createElement('pool-grid')
       pool.cards = []
       return pool
+    }
+
+    if (this.#currentView === 'team') {
+      const teamBuilder = document.createElement('team-builder')
+      teamBuilder.cards = []
+      return teamBuilder
+    }
+
+    if (this.#currentView === 'arena') {
+      const arena = document.createElement('battle-arena')
+      arena.battle = null
+      return arena
+    }
+
+    if (this.#currentView === 'history') {
+      const history = document.createElement('match-history')
+      history.records = []
+      return history
+    }
+
+    if (this.#currentView === 'leaderboard') {
+      const leaderboard = document.createElement('leaderboard-view')
+      leaderboard.players = []
+      return leaderboard
     }
 
     const section = document.createElement('section')

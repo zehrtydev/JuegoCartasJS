@@ -32,6 +32,9 @@ El azul no forma parte de fondos ni paneles. Solo puede comunicar una acción o 
 - Las etiquetas de estado usan una fuente monoespaciada, mayúsculas y espaciado entre letras; los títulos pueden ser más grandes, pero no deben convertir la interfaz en una hero page.
 - El tablero de cinco espacios de carta es una referencia visual constante cuando ayude a orientar al jugador; no debe presentar cartas ficticias como datos reales.
 - Los reversos de carta vacíos usan un patrón propio y un emblema de captura estilizado. El encabezado y los separadores pueden incorporar focos de estadio y un retrato genérico de entrenador hechos con CSS. Son ornamentos de la interfaz, no recursos oficiales ni sustitutos de los sprites locales.
+- La pantalla de Inicio representa una terminal de registro dentro de una liga pixel-art. No muestra espacios de cartas porque el equipo todavía no existe en ese punto del flujo.
+- Los recursos originales `public/assets/images/ui/kantoLeagueHall.png` y `trainerSilhouette.png` establecen el nivel de detalle 16-bit para los demás escenarios y personajes genéricos de la interfaz.
+- Los contenedores principales también son arte 16-bit modular: `trainerConsoleFrame.png` define la terminal y `profileLedgerFrame.png` la libreta. El HTML se superpone únicamente en las áreas interiores destinadas al contenido.
 - En móvil, los controles conservan objetivos táctiles claros y los paneles se apilan sin perder la jerarquía.
 
 ## 4. Accesibilidad

@@ -1,4 +1,5 @@
 import './components/app/appHeader.js'
+import './components/app/appFooter.js'
 import './components/app/gameApp.js'
 import './components/auth/playerRegister.js'
 import './components/battle/battleArena.js'

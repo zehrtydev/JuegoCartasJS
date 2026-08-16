@@ -1,4 +1,7 @@
+import { getPreviewMode, previewCards, previewPlayers } from './previewMode.js'
+
 const viewLabels = {
+  home: 'Inicio',
   pool: 'Elige tu equipo',
   team: 'Construye tu equipo',
   arena: 'Arena de batalla',
@@ -8,7 +11,8 @@ const viewLabels = {
 }
 
 class GameApp extends HTMLElement {
-  #currentView = 'home'
+  #preview = getPreviewMode()
+  #currentView = this.#preview.view
 
   connectedCallback() {
     this.addEventListener('navigate', this.#handleNavigation)
@@ -37,26 +41,28 @@ class GameApp extends HTMLElement {
 
     const header = document.createElement('app-header')
     header.setAttribute('active-view', this.#currentView)
+    header.setAttribute('preview', String(this.#preview.active))
     this.append(header)
 
     const main = document.createElement('main')
-    main.className = this.#currentView === 'home'
-      ? 'min-h-[calc(100vh-92px)] w-full'
-      : 'mx-auto min-h-[calc(100vh-92px)] w-full max-w-6xl px-5 py-8 sm:py-12'
+    main.className = 'gameMain'
+
     main.append(this.#createView())
     this.append(main)
+
+    this.append(document.createElement('app-footer'))
   }
 
   #createView() {
     if (this.#currentView === 'home') {
       const register = document.createElement('player-register')
-      register.players = []
+      register.players = this.#preview.active ? previewPlayers : []
       return register
     }
 
     if (this.#currentView === 'pool') {
       const pool = document.createElement('pool-grid')
-      pool.cards = []
+      pool.cards = this.#preview.active ? previewCards : []
       return pool
     }
 

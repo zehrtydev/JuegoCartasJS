@@ -16,22 +16,42 @@ class PlayerRegister extends HTMLElement {
 
   #render() {
     this.innerHTML = `
-      <section class="mx-auto grid max-w-5xl overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl shadow-slate-950/40 lg:grid-cols-[1.15fr_0.85fr]" aria-labelledby="welcome-title">
+      <section class="mx-auto max-w-6xl" aria-labelledby="welcome-title">
+        <div class="pixelFrame arenaStage bg-surface p-2 sm:p-3">
+          <div class="relative border border-brass/60 bg-arena-deep px-5 py-4 sm:px-7">
+            <div class="absolute left-4 top-1/2 hidden -translate-y-1/2 sm:block" aria-hidden="true"><div class="stadiumLights">${'<span></span>'.repeat(8)}</div></div>
+            <div class="absolute right-4 top-1/2 hidden -translate-y-1/2 sm:block" aria-hidden="true"><div class="stadiumLights">${'<span></span>'.repeat(8)}</div></div>
+            <div class="flex flex-wrap items-center justify-center gap-3 font-mono text-xs font-bold tracking-wider text-muted">
+              <span class="flex items-center gap-2"><span class="captureSeal scale-75" aria-hidden="true"></span>ARENA DE ENTRENADORES</span>
+              <span class="text-action">EQUIPO: 5 CARTAS · COMBATE POR TURNOS</span>
+            </div>
+          </div>
+          <div class="grid lg:grid-cols-[1.25fr_0.75fr]">
         <div class="p-7 sm:p-10">
-          <p class="text-sm font-bold tracking-[0.2em] text-amber-300">ARENA DE ENTRENADORES</p>
-          <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-100 sm:text-5xl" id="welcome-title">Elige tu próximo combate.</h1>
-          <p class="mt-5 max-w-xl text-base leading-7 text-slate-300">Escribe un alias para continuar o elige un perfil existente.</p>
+          <div class="flex items-center gap-4">
+            <span class="trainerPortrait shrink-0" aria-hidden="true"></span>
+            <div>
+              <p class="font-mono text-xs font-bold tracking-[0.2em] text-action">REGISTRO DE ENTRENADOR</p>
+              <h1 class="mt-2 text-4xl font-black tracking-[0.04em] text-cream sm:text-5xl" id="welcome-title">ENTRA A LA ARENA.</h1>
+            </div>
+          </div>
+          <p class="mt-5 max-w-xl text-base leading-7 text-muted">Escribe un alias para continuar o elige un perfil existente.</p>
           <form class="mt-8 max-w-lg" novalidate>
-            <label class="block text-sm font-bold text-slate-100" for="player-alias">Tu alias</label>
-            <input class="mt-2 w-full rounded-lg border border-slate-600 bg-slate-950 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/30" id="player-alias" name="alias" type="text" autocomplete="nickname" maxlength="24" placeholder="Ej. Entrenador Azul" required aria-describedby="alias-help" />
-            <p class="mt-2 text-sm text-slate-400" id="alias-help">Debe ser único. Máximo 24 caracteres.</p>
-            <button class="mt-5 w-full rounded-lg bg-amber-300 px-5 py-3 font-bold text-slate-950 transition enabled:hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:ring-offset-2 focus:ring-offset-slate-900" type="submit" disabled>Continuar / crear perfil</button>
+            <label class="block font-mono text-xs font-bold tracking-wider text-cream" for="player-alias">TU ALIAS</label>
+            <input class="mt-2 w-full border-2 border-brass bg-arena-deep px-4 py-3 font-mono text-cream outline-none placeholder:text-muted/60 focus:border-action focus:ring-2 focus:ring-action/30" id="player-alias" name="alias" type="text" autocomplete="nickname" maxlength="24" placeholder="Ej. Entrenador Rojo" required aria-describedby="alias-help" />
+            <p class="mt-2 text-sm text-muted" id="alias-help">Debe ser único. Máximo 24 caracteres.</p>
+            <button class="pixelButton mt-5 w-full bg-action px-5 py-3 font-mono text-base font-black tracking-[0.12em] text-arena-deep transition enabled:hover:bg-[#ffda68] disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-cream focus:ring-offset-2 focus:ring-offset-surface" type="submit" disabled>EMPEZAR COMBATE</button>
           </form>
         </div>
-        <aside class="border-t border-slate-700 bg-slate-950/50 p-7 sm:p-10 lg:border-t-0 lg:border-l" aria-labelledby="profiles-title">
-          <h2 class="text-lg font-black text-slate-100" id="profiles-title">Perfiles existentes</h2>
+        <aside class="border-t-2 border-brass bg-panel p-7 sm:p-10 lg:border-t-0 lg:border-l-2" aria-labelledby="profiles-title">
+          <h2 class="font-mono text-sm font-black tracking-wider text-cream" id="profiles-title">PERFILES EXISTENTES</h2>
           <div class="mt-4" data-profiles></div>
         </aside>
+          </div>
+          <div class="grid grid-cols-5 gap-2 border-t-2 border-brass bg-arena-deep p-4" aria-label="Cinco espacios de cartas para tu futuro equipo">
+            ${Array.from({ length: 5 }, () => '<div class="cardBack aspect-[3/4]" aria-hidden="true"><span class="captureSeal scale-75"></span></div>').join('')}
+          </div>
+        </div>
       </section>
     `
 
@@ -57,12 +77,12 @@ class PlayerRegister extends HTMLElement {
 
   #renderProfiles(container) {
     if (this.#players.length === 0) {
-      container.innerHTML = '<p class="rounded-lg border border-dashed border-slate-700 p-4 text-sm leading-6 text-slate-400">Aún no hay perfiles disponibles. Crea el primero para empezar.</p>'
+      container.innerHTML = '<p class="border border-dashed border-brass/70 bg-arena-deep/40 p-4 text-sm leading-6 text-muted">Aún no hay perfiles disponibles. Crea el primero para empezar.</p>'
       return
     }
 
     container.innerHTML = `<ul class="space-y-3">${this.#players.map((player) => `
-      <li><button class="w-full rounded-lg border border-slate-700 px-4 py-3 text-left transition hover:border-amber-300 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-300" type="button" data-player-id="${player.id}"><span class="block font-bold text-slate-100">${player.alias}</span><span class="text-sm text-amber-300">${player.points} pts</span></button></li>
+      <li><button class="w-full border border-brass/70 bg-arena-deep/40 px-4 py-3 text-left transition hover:border-action hover:bg-arena-deep focus:outline-none focus:ring-2 focus:ring-action" type="button" data-player-id="${player.id}"><span class="block font-mono font-bold text-cream">${player.alias}</span><span class="font-mono text-sm text-action">${player.points} pts</span></button></li>
     `).join('')}</ul>`
 
     container.querySelectorAll('[data-player-id]').forEach((button) => {

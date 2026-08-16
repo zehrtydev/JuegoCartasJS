@@ -6,7 +6,8 @@
 
 ## 1. Dirección visual y accesibilidad
 
-- Arena oscura azul/gris, superficies gris azulado, acción amarilla, éxito verde, peligro rojo y defensa azul acero.
+- Arena de torneo en obsidiana y grafito, con superficies carbón. La acción usa amarillo eléctrico; el rojo Poké Ball se reserva para acentos y peligro; el verde representa éxito. El azul acero queda limitado a estados de defensa, nunca como color de fondo.
+- La interfaz combina una estructura de arena de torneo con detalles retro de Kanto: marcos pixelados sutiles, tipografía de etiquetas monoespaciada y zonas de cartas que recuerdan un tablero táctico. La especificación completa vive en `docs/identidad-visual.md`.
 - Las etiquetas de tipo, HP, turno, defensa y cooldown se expresan con texto e iconos; el color nunca es la única señal.
 - Escritorio: arena y registro en dos columnas. Móvil: una columna, con acciones en cuadrícula de dos columnas.
 - Las cartas son compactas y reutilizables: imagen, nombre, tipo(s), HP y estado de selección/KO.

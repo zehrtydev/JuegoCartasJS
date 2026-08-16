@@ -40,7 +40,7 @@ class GameApp extends HTMLElement {
     this.append(header)
 
     const main = document.createElement('main')
-    main.className = 'mx-auto min-h-[calc(100vh-101px)] w-full max-w-6xl px-5 py-10 sm:py-16'
+    main.className = 'mx-auto min-h-[calc(100vh-92px)] w-full max-w-6xl px-5 py-8 sm:py-12'
     main.append(this.#createView())
     this.append(main)
   }
@@ -52,13 +52,19 @@ class GameApp extends HTMLElement {
       return register
     }
 
+    if (this.#currentView === 'pool') {
+      const pool = document.createElement('pool-grid')
+      pool.cards = []
+      return pool
+    }
+
     const section = document.createElement('section')
-    section.className = 'mx-auto max-w-2xl rounded-2xl border border-slate-700 bg-slate-900 p-8 text-center shadow-2xl shadow-slate-950/40 sm:p-12'
+    section.className = 'pixelFrame mx-auto max-w-2xl bg-surface p-8 text-center sm:p-12'
     section.innerHTML = `
-      <p class="text-sm font-bold tracking-[0.2em] text-amber-300">CARD BATTLE ARENA</p>
-      <h1 class="mt-3 text-3xl font-black text-slate-100 sm:text-4xl">${viewLabels[this.#currentView] || 'Pantalla no disponible'}</h1>
-      <p class="mt-4 text-slate-300">Esta vista ya forma parte de la navegación. Su contenido funcional se implementará en su bloque correspondiente.</p>
-      <button class="mt-8 rounded-lg bg-amber-300 px-5 py-3 font-bold text-slate-950 transition hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:ring-offset-2 focus:ring-offset-slate-900" type="button" data-view="home">Volver al inicio</button>
+      <p class="font-mono text-xs font-bold tracking-[0.2em] text-action">CARD BATTLE ARENA</p>
+      <h1 class="mt-3 text-3xl font-black text-cream sm:text-4xl">${viewLabels[this.#currentView] || 'Pantalla no disponible'}</h1>
+      <p class="mt-4 text-muted">Esta vista ya forma parte de la navegación. Su contenido funcional se implementará en su bloque correspondiente.</p>
+      <button class="pixelButton mt-8 bg-action px-5 py-3 font-mono text-sm font-black tracking-wide text-arena-deep transition hover:bg-[#ffda68] focus:outline-none focus:ring-2 focus:ring-cream focus:ring-offset-2 focus:ring-offset-surface" type="button" data-view="home">VOLVER AL INICIO</button>
     `
     section.querySelector('[data-view]').addEventListener('click', () => {
       this.#currentView = 'home'

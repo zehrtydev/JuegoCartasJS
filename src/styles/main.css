@@ -1,10 +1,130 @@
 @import "tailwindcss";
 
 @theme {
-  --color-arena: #020617;
-  --color-surface: #0f172a;
-  --color-action: #facc15;
-  --color-success: #22c55e;
-  --color-danger: #ef4444;
-  --color-defense: #60a5fa;
+  --color-arena: #14130f;
+  --color-arena-deep: #0b0a08;
+  --color-surface: #24221c;
+  --color-panel: #302d24;
+  --color-brass: #9b7a32;
+  --color-action: #f6c945;
+  --color-cream: #fff6d8;
+  --color-muted: #c7bfa8;
+  --color-success: #78a65a;
+  --color-danger: #c94a3e;
+  --color-defense: #718092;
+}
+
+@layer base {
+  body {
+    min-width: 320px;
+    background-color: var(--color-arena-deep);
+    background-image:
+      linear-gradient(rgba(246, 201, 69, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(246, 201, 69, 0.035) 1px, transparent 1px),
+      radial-gradient(circle at 50% -20%, rgba(201, 74, 62, 0.16), transparent 42%);
+    background-size: 18px 18px, 18px 18px, auto;
+    color: var(--color-cream);
+  }
+}
+
+@layer components {
+  .pixelFrame {
+    border: 2px solid var(--color-brass);
+    box-shadow: 4px 4px 0 var(--color-arena-deep), inset 0 0 0 1px rgba(255, 246, 216, 0.1);
+  }
+
+  .pixelButton {
+    border: 2px solid #d6a924;
+    box-shadow: 3px 3px 0 #6f4e12, inset 0 1px 0 rgba(255, 246, 216, 0.55);
+  }
+
+  .pixelButton:enabled:active {
+    box-shadow: 1px 1px 0 #6f4e12;
+    transform: translate(2px, 2px);
+  }
+
+  .arenaStage {
+    position: relative;
+    overflow: hidden;
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(246, 201, 69, 0.13), transparent 42%),
+      linear-gradient(135deg, transparent 48%, rgba(155, 122, 50, 0.1) 49%, transparent 50%),
+      linear-gradient(45deg, transparent 48%, rgba(155, 122, 50, 0.08) 49%, transparent 50%);
+    background-size: auto, 22px 22px, 22px 22px;
+  }
+
+  .stadiumLights {
+    display: grid;
+    grid-template-columns: repeat(4, 0.45rem);
+    gap: 0.2rem;
+    width: max-content;
+  }
+
+  .stadiumLights span {
+    aspect-ratio: 1;
+    background: var(--color-action);
+    box-shadow: 0 0 7px rgba(246, 201, 69, 0.75);
+  }
+
+  .captureSeal {
+    position: relative;
+    display: inline-block;
+    width: 1.5rem;
+    aspect-ratio: 1;
+    border: 2px solid var(--color-cream);
+    border-radius: 9999px;
+    background: linear-gradient(to bottom, var(--color-danger) 0 43%, var(--color-cream) 43% 57%, var(--color-arena-deep) 57% 100%);
+    box-shadow: 0 0 0 2px var(--color-arena-deep), 0 0 0 3px var(--color-brass);
+  }
+
+  .captureSeal::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.48rem;
+    aspect-ratio: 1;
+    border: 2px solid var(--color-arena-deep);
+    border-radius: 9999px;
+    background: var(--color-action);
+    content: '';
+    transform: translate(-50%, -50%);
+  }
+
+  .trainerPortrait {
+    display: grid;
+    width: 4.5rem;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 2px solid var(--color-brass);
+    background:
+      linear-gradient(135deg, transparent 45%, rgba(246, 201, 69, 0.22) 46% 54%, transparent 55%),
+      var(--color-arena-deep);
+  }
+
+  .trainerPortrait::before {
+    width: 1.75rem;
+    height: 2.2rem;
+    border: 2px solid var(--color-muted);
+    border-radius: 45% 45% 18% 18%;
+    content: '';
+  }
+
+  .cardBack {
+    display: grid;
+    min-height: 7.25rem;
+    place-items: center;
+    border: 2px solid var(--color-brass);
+    background-image:
+      repeating-linear-gradient(45deg, transparent 0 6px, rgba(246, 201, 69, 0.06) 6px 7px),
+      linear-gradient(145deg, var(--color-panel), var(--color-arena-deep));
+    box-shadow: inset 0 0 0 3px var(--color-arena-deep), inset 0 0 0 4px rgba(246, 201, 69, 0.2);
+  }
+
+  .cardBack::after {
+    color: var(--color-muted);
+    content: '?';
+    font-family: ui-monospace, monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+  }
 }

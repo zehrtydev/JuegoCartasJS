@@ -11,8 +11,10 @@ import './components/ui/uiState.js'
 
 /**
  * Monta el componente raíz. La navegación y la sesión temporal viven dentro
- * de game-app; las integraciones con la API se conectarán desde los servicios.
+ * de game-app; los servicios de dominio se integran desde cada componente.
  */
 export function renderApp(root) {
+  if (!root) return
+
   root.replaceChildren(document.createElement('game-app'))
 }

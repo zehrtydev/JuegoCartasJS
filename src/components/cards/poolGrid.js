@@ -93,7 +93,9 @@ class PoolGrid extends HTMLElement {
       <li>
         <button class="poolCard ${isSelected ? 'poolCard--selected' : ''}" type="button" data-card-id="${this.#escapeHtml(cardId)}" aria-pressed="${isSelected}" aria-label="${isSelected ? 'Quitar' : 'Seleccionar'} a ${name}">
           <span class="poolCard__topline"><span>#${number}</span><span class="poolCard__selectMark">${isSelected ? '✓' : '+'}</span></span>
-          <span class="poolCard__sprite poolCard__sprite--${typeClass}" aria-hidden="true"></span>
+          <span class="poolCard__sprite poolCard__sprite--${typeClass}" aria-hidden="true">
+            <img src="${this.#escapeHtml(card.imageUrl || card.image)}" alt="${name}" class="w-full h-full object-contain" />
+          </span>
           <span class="poolCard__name">${name}</span>
           <span class="poolCard__details"><span class="poolCard__type poolCard__type--${typeClass}">${this.#escapeHtml(type)}</span><span>HP ${hp}</span></span>
         </button>
@@ -109,7 +111,9 @@ class PoolGrid extends HTMLElement {
     return `
       <li class="poolTeamSlot poolTeamSlot--filled" aria-label="Espacio ${index + 1}: ${this.#escapeHtml(card.name)}">
         <span>${index + 1}</span>
-        <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" aria-hidden="true"></i>
+        <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" aria-hidden="true">
+          <img src="${this.#escapeHtml(card.imageUrl || card.image)}" class="w-full h-full object-contain" />
+        </i>
         <strong>${this.#escapeHtml(card.name)}</strong>
       </li>
     `

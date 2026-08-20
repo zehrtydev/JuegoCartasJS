@@ -28,6 +28,7 @@ class GameApp extends HTMLElement {
   #playersList = []
   #playerDeck = []
   #battleState = null
+  #machineTurnTimer = null
 
   async connectedCallback() {
     this.addEventListener('navigate', this.#handleNavigation)
@@ -46,6 +47,7 @@ class GameApp extends HTMLElement {
     this.removeEventListener('select-player', this.#handleSelectPlayer)
     this.removeEventListener('team-selection-confirmed', this.#handleTeamSelection)
     this.removeEventListener('battle-action', this.#handleBattleAction)
+    clearTimeout(this.#machineTurnTimer)
   }
 
   async #loadInitialData() {
@@ -121,6 +123,7 @@ class GameApp extends HTMLElement {
       this.#battleState = combat.state
       this.#currentView = 'arena'
       this.#render()
+      this.#scheduleMachineTurn()
     } else {
       alert(combat.message || 'Error al iniciar el combate')
     }
@@ -132,19 +135,35 @@ class GameApp extends HTMLElement {
     if (result.success) {
       this.#battleState = result.state
       this.#render()
-
-      if (!this.#battleState.battleFinished && this.#battleState.currentTurn === 'machine') {
-        setTimeout(() => {
-          const machineResult = performMachineAction(this.#battleState)
-          if (machineResult.success) {
-            this.#battleState = machineResult.state
-            this.#render()
-          }
-        }, 1000)
-      }
+      this.#scheduleMachineTurn()
     } else {
       alert(result.message)
     }
+  }
+
+  #scheduleMachineTurn() {
+    if (
+      !this.#battleState ||
+      this.#battleState.battleFinished ||
+      this.#battleState.currentTurn !== 'machine' ||
+      this.#machineTurnTimer !== null
+    ) {
+      return
+    }
+
+    this.#machineTurnTimer = setTimeout(() => {
+      this.#machineTurnTimer = null
+
+      if (!this.#battleState || this.#battleState.battleFinished || this.#battleState.currentTurn !== 'machine') {
+        return
+      }
+
+      const machineResult = performMachineAction(this.#battleState)
+      if (machineResult.success) {
+        this.#battleState = machineResult.state
+        this.#render()
+      }
+    }, 1000)
   }
 
   #render() {

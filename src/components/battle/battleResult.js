@@ -21,7 +21,7 @@ class BattleResult extends HTMLElement {
       : 'El combate terminó, pero no fue posible guardar el resultado.'
 
     this.innerHTML = `
-      <section class="pixelFrame arenaStage mx-auto max-w-2xl bg-surface p-2 sm:p-3" aria-labelledby="result-title">
+      <section class="battleResult ${won ? 'battleResult--victory' : 'battleResult--defeat'} pixelFrame arenaStage mx-auto max-w-2xl bg-surface p-2 sm:p-3" aria-labelledby="result-title">
         <header class="border border-brass/60 bg-arena-deep px-5 py-4 text-center sm:px-7">
           <p class="font-mono text-xs font-bold tracking-[0.2em] text-action">COMBATE FINALIZADO</p>
           <h1 class="mt-1 text-3xl font-black tracking-[0.06em] ${won ? 'text-success' : 'text-danger'}" id="result-title">${title}</h1>

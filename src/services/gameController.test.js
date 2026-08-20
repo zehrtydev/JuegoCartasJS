@@ -136,7 +136,10 @@ test('Relevo del jugador tras KO', async () => {
 
   state.currentTurn = 'machine';
   // Force machine attack, which KOs Player A (10 HP) and triggers relevo to Player B
+  const originalRandom = Math.random;
+  Math.random = () => 0;
   const result = performMachineAction(state);
+  Math.random = originalRandom;
 
   assert.equal(result.success, true);
   assert.equal(state.playerDeck[0].defeated, true);

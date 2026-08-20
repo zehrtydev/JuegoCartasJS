@@ -91,7 +91,7 @@ class PlayerRegister extends HTMLElement {
     }
 
     container.innerHTML = `<ul class="profileList space-y-3">${this.#players.map((player) => `
-      <li><button class="profileSelectButton w-full border-2 border-[#7d6338] bg-[#e8d29d] px-4 py-3 text-left text-[#302417] shadow-[3px_3px_0_#765529] transition hover:bg-[#f4e2b5] focus:outline-none focus:ring-4 focus:ring-action" type="button" data-player-id="${player.id}"><span class="profileAlias block font-mono font-black">${player.alias}</span><span class="profilePoints font-mono text-sm font-bold text-[#456431]">${player.points} pts</span></button></li>
+      <li><button class="profileSelectButton w-full border-2 border-[#7d6338] bg-[#e8d29d] px-4 py-3 text-left text-[#302417] shadow-[3px_3px_0_#765529] transition hover:bg-[#f4e2b5] focus:outline-none focus:ring-4 focus:ring-action" type="button" data-player-id="${player.id}"><span class="profileAlias block font-mono font-black">${player.nickname || player.alias || 'ENTRENADOR'}</span><span class="profilePoints font-mono text-sm font-bold text-[#456431]">${player.points || 0} pts</span></button></li>
     `).join('')}</ul>`
 
     container.querySelectorAll('[data-player-id]').forEach((button) => {

@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "api": "node server.js",
     "start": "node server.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "generate:sounds": "node scripts/generateAudioAssets.js",
+    "test": "node --test \"src/**/*.test.js\""
   },
   "dependencies": {
     "json-server": "^0.17.4"

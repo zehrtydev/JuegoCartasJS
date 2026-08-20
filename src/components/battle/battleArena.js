@@ -1,5 +1,6 @@
 class BattleArena extends HTMLElement {
   #battle = null
+  #effect = null
 
   set battle(value) {
     this.#battle = value
@@ -8,6 +9,11 @@ class BattleArena extends HTMLElement {
 
   get battle() {
     return this.#battle
+  }
+
+  set effect(value) {
+    this.#effect = value
+    if (this.isConnected) this.#render()
   }
 
   connectedCallback() {
@@ -52,6 +58,48 @@ class BattleArena extends HTMLElement {
     `
   }
 
+  #getHealthPercent(card) {
+    return Math.max(0, Math.min(100, Math.round((Number(card?.hp || 0) / 250) * 100)))
+  }
+
+  #renderHealth(card, owner) {
+    const hp = card ? Math.max(0, card.hp) : 0
+    const percent = this.#getHealthPercent(card)
+    const stateClass = percent <= 25 ? 'healthBar--critical' : (percent <= 55 ? 'healthBar--warning' : '')
+    return `
+      <div class="healthStatus">
+        <div class="healthStatus__labels"><span>HP ${owner}</span><strong>${card ? hp : '—'} / 250</strong></div>
+        <div class="healthBar ${stateClass}" role="progressbar" aria-label="Vida de ${this.#escapeHtml(card?.name || owner)}" aria-valuemin="0" aria-valuemax="250" aria-valuenow="${hp}">
+          <span style="width: ${percent}%"></span>
+        </div>
+        ${card?.isDefending ? `<p class="defenseBadge" role="status">◆ DEFENSA ACTIVA · PRÓXIMO DAÑO -50%</p>` : ''}
+      </div>
+    `
+  }
+
+  #getSpecialState(card) {
+    const cooldown = Number(card?.specialCooldown || 0)
+    const turnCount = Number(card?.turnCount || 0)
+    const unlockTurn = Number(card?.special?.unlockTurn ?? 2)
+    if (cooldown > 0) return { locked: true, label: `COOLDOWN: ${cooldown} TURNO${cooldown === 1 ? '' : 'S'}` }
+    if (turnCount < unlockTurn) {
+      const remaining = unlockTurn - turnCount
+      return { locked: true, label: `SE HABILITA EN ${remaining} TURNO${remaining === 1 ? '' : 'S'}` }
+    }
+    return { locked: false, label: 'DISPONIBLE' }
+  }
+
+  #effectClass(owner) {
+    if (!this.#effect) return ''
+    const attacker = this.#effect.actor
+    const defender = attacker === 'player' ? 'machine' : 'player'
+    if (owner === attacker && this.#effect.action === 'defend') return 'battleCard--defending'
+    if (owner === attacker) return this.#effect.action === 'special' ? 'battleCard--special' : 'battleCard--attacking'
+    if (owner === defender && this.#effect.isKo) return 'battleCard--defeated'
+    if (owner === defender && this.#effect.action !== 'defend') return 'battleCard--damaged'
+    return ''
+  }
+
   #render() {
     if (!this.#battle) {
       this.innerHTML = `
@@ -74,6 +122,7 @@ class BattleArena extends HTMLElement {
     const machine = this.#battle.activeMachineCard
     const isPlayerTurn = this.#battle.currentTurn === 'player'
     const isFinished = this.#battle.battleFinished
+    const specialState = this.#getSpecialState(player)
 
     this.innerHTML = `
       <section class="pixelFrame arenaStage mx-auto max-w-6xl bg-surface p-2 sm:p-3" aria-labelledby="arena-title">
@@ -87,21 +136,21 @@ class BattleArena extends HTMLElement {
         <div class="grid lg:grid-cols-[1.35fr_0.65fr]">
           <div class="p-6 sm:p-8">
             <div class="grid gap-4 sm:grid-cols-2">
-              <article class="border border-danger/70 bg-arena-deep/50 p-4" aria-label="Pokémon activo del bot">
+              <article class="battleCard ${this.#effectClass('machine')} border border-danger/70 bg-arena-deep/50 p-4" aria-label="Pokémon activo del bot">
                 <div class="flex items-center justify-between gap-3 font-mono text-xs font-bold tracking-wider">
                   <span class="text-danger">BOT · ACTIVO</span>
                   <span class="text-muted">${machine ? this.#escapeHtml(machine.name) : 'SIN REVELAR'}</span>
                 </div>
                 ${this.#renderCardImage(machine)}
-                <p class="mt-3 text-center font-mono text-xs text-muted">HP: ${machine ? Math.max(0, machine.hp) : '—'} / 250</p>
+                ${this.#renderHealth(machine, 'BOT')}
               </article>
-              <article class="border border-success/70 bg-arena-deep/50 p-4" aria-label="Pokémon activo del jugador">
+              <article class="battleCard ${this.#effectClass('player')} border border-success/70 bg-arena-deep/50 p-4" aria-label="Pokémon activo del jugador">
                 <div class="flex items-center justify-between gap-3 font-mono text-xs font-bold tracking-wider">
                   <span class="text-success">TÚ · ACTIVO</span>
                   <span class="text-muted">${player ? this.#escapeHtml(player.name) : 'SIN SELECCIÓN'}</span>
                 </div>
                 ${this.#renderCardImage(player)}
-                <p class="mt-3 text-center font-mono text-xs text-muted">HP: ${player ? Math.max(0, player.hp) : '—'} / 250</p>
+                ${this.#renderHealth(player, 'JUGADOR')}
               </article>
             </div>
             <section class="mt-5 border border-brass bg-arena-deep/50 p-4" aria-labelledby="actions-title">
@@ -117,7 +166,7 @@ class BattleArena extends HTMLElement {
                   </button>
                 `).join('') : ''}
                 <button class="action-btn border border-defense bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-defense/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="defend" ${!isPlayerTurn || isFinished ? 'disabled' : ''}>DEFENSA<span class="mt-1 block font-normal text-muted">${player?.defense?.name || 'Bloqueo'}</span></button>
-                <button class="action-btn border border-action bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-action/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="special" ${!isPlayerTurn || isFinished ? 'disabled' : ''}>ESPECIAL<span class="mt-1 block font-normal text-muted">${player?.special?.name || 'Ataque Especial'}</span></button>
+                <button class="action-btn border border-action bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-action/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="special" ${!isPlayerTurn || isFinished || specialState.locked ? 'disabled' : ''}>ESPECIAL<span class="mt-1 block font-normal text-muted">${player?.special?.name || 'Ataque Especial'} · ${specialState.label}</span></button>
               </div>
             </section>
           </div>

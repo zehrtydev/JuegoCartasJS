@@ -8,6 +8,8 @@ import {
   finishGameSession
 } from '../../services/gameController.js'
 import { getPlayers } from '../../api/playersApi.js'
+import { getBattles } from '../../api/battlesApi.js'
+import { playBattleAudio } from '../../services/audioService.js'
 
 const viewLabels = {
   home: 'Inicio',
@@ -17,6 +19,7 @@ const viewLabels = {
   result: 'Resultado',
   history: 'Historial',
   leaderboard: 'Ranking',
+  admin: 'Administración',
 }
 
 class GameApp extends HTMLElement {
@@ -34,6 +37,10 @@ class GameApp extends HTMLElement {
   #noticeMessage = ''
   #noticeTimer = null
   #leaderboardState = 'empty'
+  #historyRecords = []
+  #historyState = 'empty'
+  #battleStartedAt = null
+  #battleEffect = null
 
   async connectedCallback() {
     this.addEventListener('navigate', this.#handleNavigation)
@@ -91,6 +98,11 @@ class GameApp extends HTMLElement {
       return
     }
 
+    if (this.#currentView === 'history') {
+      await this.#loadHistory()
+      return
+    }
+
     this.#render()
   }
 
@@ -104,6 +116,21 @@ class GameApp extends HTMLElement {
     } catch (error) {
       console.error('Error loading leaderboard:', error)
       this.#leaderboardState = 'error'
+    }
+
+    this.#render()
+  }
+
+  async #loadHistory() {
+    this.#historyState = 'loading'
+    this.#render()
+
+    try {
+      this.#historyRecords = this.#preview.active ? [] : (await getBattles() || [])
+      this.#historyState = this.#historyRecords.length > 0 ? 'ready' : 'empty'
+    } catch (error) {
+      console.error('Error loading match history:', error)
+      this.#historyState = 'error'
     }
 
     this.#render()
@@ -160,6 +187,8 @@ class GameApp extends HTMLElement {
       this.#battleState = combat.state
       this.#battleFinalized = false
       this.#battleResult = null
+      this.#battleStartedAt = new Date().toISOString()
+      this.#battleEffect = null
       this.#currentView = 'arena'
       this.#render()
       this.#scheduleMachineTurn()
@@ -170,9 +199,14 @@ class GameApp extends HTMLElement {
 
   #handleBattleAction = async (event) => {
     const { action, attackId } = event.detail
+    const actingCard = this.#battleState?.activePlayerCard
+    const targetCard = this.#battleState?.activeMachineCard
     const result = performPlayerAction(this.#battleState, action, attackId)
     if (result.success) {
       this.#battleState = result.state
+      this.#battleEffect = { id: Date.now(), actor: 'player', action, isKo: result.result?.isKo === true }
+      playBattleAudio(action, actingCard)
+      if (result.result?.isKo) playBattleAudio('defeated', targetCard)
       await this.#handleBattleProgress()
     } else {
       this.#showNotice(result.message)
@@ -198,7 +232,12 @@ class GameApp extends HTMLElement {
 
       const machineResult = performMachineAction(this.#battleState)
       if (machineResult.success) {
+        const machineCard = this.#battleState.activeMachineCard
+        const playerCard = this.#battleState.activePlayerCard
         this.#battleState = machineResult.state
+        this.#battleEffect = { id: Date.now(), actor: 'machine', action: machineResult.action, isKo: machineResult.result?.isKo === true }
+        playBattleAudio(machineResult.action, machineCard)
+        if (machineResult.result?.isKo) playBattleAudio('defeated', playerCard)
         void this.#handleBattleProgress()
       }
     }, 1000)
@@ -245,6 +284,7 @@ class GameApp extends HTMLElement {
         this.#battleState.machineDeck,
         {
           playerNickname: this.#currentPlayer.nickname || this.#currentPlayer.alias,
+          startedAt: this.#battleStartedAt,
           endedAt: new Date().toISOString(),
         },
       )
@@ -265,6 +305,7 @@ class GameApp extends HTMLElement {
     }
 
     this.#currentView = 'result'
+    playBattleAudio(result === 'win' ? 'victory' : 'defeat')
     this.#render()
   }
 
@@ -324,6 +365,7 @@ class GameApp extends HTMLElement {
     if (this.#currentView === 'arena') {
       const arena = document.createElement('battle-arena')
       arena.battle = this.#battleState
+      arena.effect = this.#battleEffect
       return arena
     }
 
@@ -335,7 +377,11 @@ class GameApp extends HTMLElement {
 
     if (this.#currentView === 'history') {
       const history = document.createElement('match-history')
-      history.records = []
+      history.records = this.#historyRecords
+      history.state = this.#historyState
+      history.addEventListener('retry-history-requested', () => {
+        void this.#loadHistory()
+      })
       return history
     }
 
@@ -347,6 +393,10 @@ class GameApp extends HTMLElement {
         void this.#loadLeaderboard()
       })
       return leaderboard
+    }
+
+    if (this.#currentView === 'admin') {
+      return document.createElement('admin-panel')
     }
 
     const section = document.createElement('section')

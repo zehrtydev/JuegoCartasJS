@@ -5,6 +5,7 @@ const previewViews = new Set([
   'arena',
   'history',
   'leaderboard',
+  'admin',
 ])
 
 export const previewPlayers = [

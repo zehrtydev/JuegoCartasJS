@@ -6,6 +6,7 @@ const navigationItems = [
   { id: 'result', label: 'Resultado', unlockMessage: 'Termina un combate para consultar el resultado.' },
   { id: 'history', label: 'Historial' },
   { id: 'leaderboard', label: 'Ranking' },
+  { id: 'admin', label: 'Admin' },
 ]
 
 class AppHeader extends HTMLElement {
@@ -41,7 +42,7 @@ class AppHeader extends HTMLElement {
 
   #canNavigateTo(view) {
     if (this.#preview) return true
-    if (['home', 'history', 'leaderboard'].includes(view)) return true
+    if (['home', 'history', 'leaderboard', 'admin'].includes(view)) return true
     if (view === 'pool') return this.#playerReady
     if (view === 'team') return this.#selectedCount === 5
     if (view === 'arena') return this.#hasBattle

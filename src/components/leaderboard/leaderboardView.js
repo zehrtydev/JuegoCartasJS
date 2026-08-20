@@ -56,11 +56,14 @@ class LeaderboardView extends HTMLElement {
       const wins = Number(player.wins || 0)
       const losses = Number(player.losses || 0)
       const games = Number(player.gamesPlayed || 0)
+      const podiumLabels = ['ORO · PRIMER LUGAR', 'PLATA · SEGUNDO LUGAR', 'BRONCE · TERCER LUGAR']
+      const podiumClass = index < 3 ? `leaderboardRow--top leaderboardRow--top${index + 1}` : ''
+      const medal = ['★', '◆', '●'][index] || ''
 
       return `
-        <li class="grid grid-cols-[2.5rem_1fr_auto] items-center gap-3 border border-brass/50 bg-arena-deep/50 px-4 py-3 sm:grid-cols-[3rem_1fr_5rem_9rem]">
-          <span class="font-mono text-sm font-black text-action">#${index + 1}</span>
-          <span class="min-w-0 truncate font-mono text-sm font-bold text-cream">${nickname}</span>
+        <li class="leaderboardRow ${podiumClass} grid grid-cols-[2.5rem_1fr_auto] items-center gap-3 border border-brass/50 bg-arena-deep/50 px-4 py-3 sm:grid-cols-[3rem_1fr_5rem_9rem]" ${index < 3 ? `aria-label="${podiumLabels[index]}: ${nickname}"` : ''}>
+          <span class="leaderboardPosition font-mono text-sm font-black text-action">${medal} #${index + 1}</span>
+          <span class="min-w-0 truncate font-mono text-sm font-bold text-cream">${nickname}${index < 3 ? `<small>${podiumLabels[index]}</small>` : ''}</span>
           <span class="font-mono text-sm font-black text-success">${points} PTS</span>
           <span class="hidden font-mono text-xs text-muted sm:block">${wins} V · ${losses} D · ${games} PJ</span>
         </li>

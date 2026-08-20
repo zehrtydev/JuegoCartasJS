@@ -29,6 +29,8 @@ class GameApp extends HTMLElement {
   #playerDeck = []
   #battleState = null
   #machineTurnTimer = null
+  #battleFinalized = false
+  #battleResult = null
 
   async connectedCallback() {
     this.addEventListener('navigate', this.#handleNavigation)
@@ -121,6 +123,8 @@ class GameApp extends HTMLElement {
     const combat = await createCombatSession(this.#playerDeck)
     if (combat.success) {
       this.#battleState = combat.state
+      this.#battleFinalized = false
+      this.#battleResult = null
       this.#currentView = 'arena'
       this.#render()
       this.#scheduleMachineTurn()
@@ -134,8 +138,7 @@ class GameApp extends HTMLElement {
     const result = performPlayerAction(this.#battleState, action, attackId)
     if (result.success) {
       this.#battleState = result.state
-      this.#render()
-      this.#scheduleMachineTurn()
+      await this.#handleBattleProgress()
     } else {
       alert(result.message)
     }
@@ -161,9 +164,56 @@ class GameApp extends HTMLElement {
       const machineResult = performMachineAction(this.#battleState)
       if (machineResult.success) {
         this.#battleState = machineResult.state
-        this.#render()
+        void this.#handleBattleProgress()
       }
     }, 1000)
+  }
+
+  async #handleBattleProgress() {
+    if (this.#battleState?.battleFinished) {
+      await this.#finalizeBattle()
+      return
+    }
+
+    this.#render()
+    this.#scheduleMachineTurn()
+  }
+
+  async #finalizeBattle() {
+    if (this.#battleFinalized || !this.#battleState?.battleFinished) return
+
+    this.#battleFinalized = true
+    const result = this.#battleState.winner === 'player' ? 'win' : 'loss'
+
+    try {
+      const finalized = await finishGameSession(
+        this.#currentPlayer.id,
+        result,
+        this.#battleState.playerDeck,
+        this.#battleState.machineDeck,
+        {
+          playerNickname: this.#currentPlayer.nickname || this.#currentPlayer.alias,
+          endedAt: new Date().toISOString(),
+        },
+      )
+
+      if (finalized.stats?.player) this.#currentPlayer = finalized.stats.player
+      this.#battleResult = {
+        winner: this.#battleState.winner,
+        pointsAwarded: result === 'win' ? 50 : 10,
+        persisted: finalized.stats?.success === true && finalized.battle?.success === true,
+      }
+    } catch (error) {
+      console.error('Error finalizing battle:', error)
+      this.#battleResult = {
+        winner: this.#battleState.winner,
+        pointsAwarded: result === 'win' ? 50 : 10,
+        persisted: false,
+      }
+    }
+
+    this.#currentView = 'result'
+    this.#render()
   }
 
   #render() {
@@ -206,6 +256,12 @@ class GameApp extends HTMLElement {
       const arena = document.createElement('battle-arena')
       arena.battle = this.#battleState
       return arena
+    }
+
+    if (this.#currentView === 'result') {
+      const result = document.createElement('battle-result')
+      result.result = this.#battleResult
+      return result
     }
 
     if (this.#currentView === 'history') {

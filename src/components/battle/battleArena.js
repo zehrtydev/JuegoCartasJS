@@ -40,6 +40,18 @@ class BattleArena extends HTMLElement {
     `
   }
 
+  #renderTeamCard(card) {
+    const imageUrl = card.imageUrl || card.image
+    const stateClass = card.defeated ? 'opacity-30 grayscale' : ''
+    const label = `${card.name}${card.defeated ? ' derrotado' : `, ${Math.max(0, card.hp)} PS`}`
+
+    return `
+      <li class="border border-brass/60 bg-arena-deep/50 p-1 ${stateClass}" aria-label="${this.#escapeHtml(label)}">
+        <img src="${this.#escapeHtml(imageUrl)}" alt="${this.#escapeHtml(card.name)}" class="aspect-square w-full object-contain" />
+      </li>
+    `
+  }
+
   #render() {
     if (!this.#battle) {
       this.innerHTML = `
@@ -124,13 +136,13 @@ class BattleArena extends HTMLElement {
             <div class="mt-6">
               <p class="font-mono text-xs font-bold tracking-wider text-cream">EQUIPOS RESTANTES</p>
               <p class="text-xs text-muted mt-2">Jugador:</p>
-              <div class="mt-1 grid grid-cols-5 gap-2" aria-hidden="true">
-                ${this.#battle.playerDeck.map(c => c.defeated ? '<div class="cardBack aspect-square opacity-20"><span class="captureSeal scale-[0.55]"></span></div>' : '<div class="cardBack aspect-square"><span class="captureSeal scale-[0.55]"></span></div>').join('')}
-              </div>
+              <ul class="mt-1 grid grid-cols-5 gap-2" aria-label="Cartas restantes del jugador">
+                ${this.#battle.playerDeck.map((card) => this.#renderTeamCard(card)).join('')}
+              </ul>
               <p class="text-xs text-muted mt-2">Máquina:</p>
-              <div class="mt-1 grid grid-cols-5 gap-2" aria-hidden="true">
-                ${this.#battle.machineDeck.map(c => c.defeated ? '<div class="cardBack aspect-square opacity-20"><span class="captureSeal scale-[0.55]"></span></div>' : '<div class="cardBack aspect-square"><span class="captureSeal scale-[0.55]"></span></div>').join('')}
-              </div>
+              <ul class="mt-1 grid grid-cols-5 gap-2" aria-label="Cartas restantes de la máquina">
+                ${this.#battle.machineDeck.map((card) => this.#renderTeamCard(card)).join('')}
+              </ul>
             </div>
           </aside>
         </div>

@@ -33,6 +33,7 @@ class GameApp extends HTMLElement {
   #battleResult = null
   #noticeMessage = ''
   #noticeTimer = null
+  #leaderboardState = 'empty'
 
   async connectedCallback() {
     this.addEventListener('navigate', this.#handleNavigation)
@@ -78,8 +79,29 @@ class GameApp extends HTMLElement {
     }
   }
 
-  #handleNavigation = (event) => {
+  #handleNavigation = async (event) => {
     this.#currentView = event.detail.view
+
+    if (this.#currentView === 'leaderboard') {
+      await this.#loadLeaderboard()
+      return
+    }
+
+    this.#render()
+  }
+
+  async #loadLeaderboard() {
+    this.#leaderboardState = 'loading'
+    this.#render()
+
+    try {
+      this.#playersList = this.#preview.active ? previewPlayers : (await getPlayers() || [])
+      this.#leaderboardState = this.#playersList.length > 0 ? 'ready' : 'empty'
+    } catch (error) {
+      console.error('Error loading leaderboard:', error)
+      this.#leaderboardState = 'error'
+    }
+
     this.#render()
   }
 
@@ -299,7 +321,11 @@ class GameApp extends HTMLElement {
 
     if (this.#currentView === 'leaderboard') {
       const leaderboard = document.createElement('leaderboard-view')
-      leaderboard.players = []
+      leaderboard.players = this.#playersList
+      leaderboard.state = this.#leaderboardState
+      leaderboard.addEventListener('retry-leaderboard-requested', () => {
+        void this.#loadLeaderboard()
+      })
       return leaderboard
     }
 

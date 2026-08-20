@@ -6,7 +6,17 @@
       "password": "cards2026"
     }
   ],
-  "players": [],
+  "players": [
+    {
+      "id": "player-1787188786556",
+      "nickname": "adwdawdwad",
+      "points": 0,
+      "wins": 0,
+      "losses": 0,
+      "gamesPlayed": 0,
+      "createdAt": "2026-08-20T01:19:46.556Z"
+    }
+  ],
   "cards": [
     {
       "id": "card-001",

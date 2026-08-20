@@ -1,4 +1,4 @@
-// Define una constante con la URL predeterminada para el entorno de desarrollo local (servidor JSON Server)
+// URL predeterminada del JSON Server para desarrollo local.
 const DEFAULT_DEV_URL = 'http://localhost:3000';
 
 // Obtiene de manera segura las variables de entorno, compatible tanto con Vite (import.meta.env) como con Node.js (process.env) o un objeto vacío por defecto
@@ -9,17 +9,20 @@ const env =
       ? process.env
       : {};
 
-// Objeto de configuración que mapea las URLs de la API según el modo (development o production) utilizando las variables de entorno o el valor por defecto
-const config = {
-  development: env.VITE_API_DEV_URL || DEFAULT_DEV_URL,
-  production: env.VITE_API_PROD_URL || DEFAULT_DEV_URL,
-};
+// Vite expone PROD/MODE durante el build. VITE_API_URL tiene prioridad para
+// simplificar la configuración de Vercel; se conserva VITE_API_PROD_URL por
+// compatibilidad con la configuración anterior.
+const isProduction = env.PROD === true || env.MODE === 'production';
+const configuredUrl = env.VITE_API_URL || (
+  isProduction ? env.VITE_API_PROD_URL : env.VITE_API_DEV_URL
+);
 
-// Determina el modo de ejecución actual leyendo la variable VITE_API_MODE; si no está definida, toma 'development' por defecto
-const mode = env.VITE_API_MODE || 'development';
+// En producción nunca debe apuntar al localhost del navegador del visitante.
+if (isProduction && !configuredUrl) {
+  throw new Error('Falta configurar VITE_API_URL (o VITE_API_PROD_URL) en el despliegue.');
+}
 
-// Exporta la URL base definitiva que utilizarán los servicios de la API basándose en el modo seleccionado
-export const API_URL = config[mode] || config.development;
+export const API_URL = (configuredUrl || DEFAULT_DEV_URL).replace(/\/$/, '');
 
 /**
  * Función auxiliar para construir la URL completa de un endpoint específico a partir de un recurso dado.

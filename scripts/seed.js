@@ -120,37 +120,31 @@ async function seed() {
     battles: []
   };
 
-  const paths = [
-    path.resolve('db.json'),
-    path.resolve('src/data/db.json')
-  ];
-
-  for (const dbPath of paths) {
-    let currentData = { ...defaultDb };
-    try {
-      const existingText = await fs.readFile(dbPath, 'utf8');
-      if (existingText.trim()) {
-        const parsed = JSON.parse(existingText);
-        currentData.players = parsed.players || [];
-        currentData.battles = parsed.battles || [];
-        currentData.admins = parsed.admins || [adminObject];
-        const adminIdx = currentData.admins.findIndex(a => a.username === 'admin');
-        if (adminIdx !== -1) {
-          currentData.admins[adminIdx] = adminObject;
-        } else {
-          currentData.admins.push(adminObject);
-        }
+  const dbPath = path.resolve('src/data/db.json');
+  let currentData = { ...defaultDb };
+  try {
+    const existingText = await fs.readFile(dbPath, 'utf8');
+    if (existingText.trim()) {
+      const parsed = JSON.parse(existingText);
+      currentData.players = parsed.players || [];
+      currentData.battles = parsed.battles || [];
+      currentData.admins = parsed.admins || [adminObject];
+      const adminIdx = currentData.admins.findIndex(a => a.username === 'admin');
+      if (adminIdx !== -1) {
+        currentData.admins[adminIdx] = adminObject;
+      } else {
+        currentData.admins.push(adminObject);
       }
-    } catch (e) {
-      // file doesn't exist
     }
-
-    currentData.cards = cards;
-
-    await fs.mkdir(path.dirname(dbPath), { recursive: true });
-    await fs.writeFile(dbPath, JSON.stringify(currentData, null, 2), 'utf8');
-    console.log(`Saved to ${dbPath}`);
+  } catch (error) {
+    // El archivo se crea en la ruta única si aún no existe.
   }
+
+  currentData.cards = cards;
+
+  await fs.mkdir(path.dirname(dbPath), { recursive: true });
+  await fs.writeFile(dbPath, JSON.stringify(currentData, null, 2), 'utf8');
+  console.log(`Saved to ${dbPath}`);
 }
 
 seed().catch(err => {

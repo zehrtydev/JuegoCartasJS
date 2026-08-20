@@ -93,7 +93,7 @@ public/assets/
 ├── audio/        # efectos de combate WAV
 └── images/       # recursos visuales del juego
 server.js         # JSON Server, CORS y API local/Railway
-db.json           # base de datos de ejecución
+src/data/db.json  # única base de datos de ejecución
 ```
 
 ## Contrato de API

@@ -1,7 +1,11 @@
 import jsonServer from 'json-server';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const server = jsonServer.create();
-const router = jsonServer.router('db.json');
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
+const databasePath = path.join(currentDirectory, 'src', 'data', 'db.json');
+const router = jsonServer.router(databasePath);
 const port = Number(process.env.PORT) || 3000;
 
 // Railway can override this with a comma-separated CORS_ORIGINS variable.

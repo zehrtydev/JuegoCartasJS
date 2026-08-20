@@ -6,7 +6,8 @@
       "password": "cards2026"
     }
   ],
-  "players": [],
+  "players": [
+  ],
   "cards": [
     {
       "id": "card-001",

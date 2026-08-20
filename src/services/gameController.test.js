@@ -103,7 +103,7 @@ test('checkBattleWinner devuelve null cuando aún hay cartas vivas', async () =>
 // MANDATORY NEW TESTS
 
 test('Catálogo de 151 cartas con imagen y cry', () => {
-  const dbPath = path.resolve('db.json');
+  const dbPath = path.resolve('src/data/db.json');
   const dbData = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
 
   assert.equal(dbData.cards.length, 151);

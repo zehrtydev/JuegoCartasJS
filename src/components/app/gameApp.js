@@ -39,7 +39,9 @@ class GameApp extends HTMLElement {
     this.addEventListener('navigate', this.#handleNavigation)
     this.addEventListener('register-player', this.#handleRegisterPlayer)
     this.addEventListener('select-player', this.#handleSelectPlayer)
+    this.addEventListener('pool-selection-changed', this.#handlePoolSelection)
     this.addEventListener('team-selection-confirmed', this.#handleTeamSelection)
+    this.addEventListener('team-confirmed', this.#handleTeamConfirmed)
     this.addEventListener('battle-action', this.#handleBattleAction)
     
     await this.#loadInitialData()
@@ -50,7 +52,9 @@ class GameApp extends HTMLElement {
     this.removeEventListener('navigate', this.#handleNavigation)
     this.removeEventListener('register-player', this.#handleRegisterPlayer)
     this.removeEventListener('select-player', this.#handleSelectPlayer)
+    this.removeEventListener('pool-selection-changed', this.#handlePoolSelection)
     this.removeEventListener('team-selection-confirmed', this.#handleTeamSelection)
+    this.removeEventListener('team-confirmed', this.#handleTeamConfirmed)
     this.removeEventListener('battle-action', this.#handleBattleAction)
     clearTimeout(this.#machineTurnTimer)
     clearTimeout(this.#noticeTimer)
@@ -135,15 +139,21 @@ class GameApp extends HTMLElement {
     this.#render()
   }
 
-  #handleTeamSelection = async (event) => {
+  #handlePoolSelection = (event) => {
+    this.#playerDeck = event.detail.selectedCards
+    this.#syncHeaderState()
+  }
+
+  #handleTeamSelection = (event) => {
     const { selectedCards } = event.detail
     this.#playerDeck = selectedCards
-    
-    if (this.#preview.active) {
-      this.#currentView = 'arena'
-      this.#render()
-      return
-    }
+
+    this.#currentView = 'team'
+    this.#render()
+  }
+
+  #handleTeamConfirmed = async (event) => {
+    this.#playerDeck = event.detail.cards
 
     const combat = await createCombatSession(this.#playerDeck)
     if (combat.success) {
@@ -264,6 +274,10 @@ class GameApp extends HTMLElement {
     const header = document.createElement('app-header')
     header.setAttribute('active-view', this.#currentView)
     header.setAttribute('preview', String(this.#preview.active))
+    header.setAttribute('player-ready', String(Boolean(this.#currentPlayer)))
+    header.setAttribute('selected-count', String(this.#playerDeck.length))
+    header.setAttribute('has-battle', String(Boolean(this.#battleState)))
+    header.setAttribute('has-result', String(Boolean(this.#battleResult)))
     this.append(header)
 
     const main = document.createElement('main')
@@ -282,6 +296,12 @@ class GameApp extends HTMLElement {
     this.append(document.createElement('app-footer'))
   }
 
+  #syncHeaderState() {
+    const header = this.querySelector('app-header')
+    if (!header) return
+    header.setAttribute('selected-count', String(this.#playerDeck.length))
+  }
+
   #createView() {
     if (this.#currentView === 'home') {
       const register = document.createElement('player-register')
@@ -297,7 +317,7 @@ class GameApp extends HTMLElement {
 
     if (this.#currentView === 'team') {
       const teamBuilder = document.createElement('team-builder')
-      teamBuilder.cards = []
+      teamBuilder.cards = this.#playerDeck
       return teamBuilder
     }
 

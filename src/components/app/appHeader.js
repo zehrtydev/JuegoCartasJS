@@ -11,16 +11,42 @@ const navigationItems = [
 class AppHeader extends HTMLElement {
   #activeView = 'home'
   #preview = false
+  #playerReady = false
+  #selectedCount = 0
+  #hasBattle = false
+  #hasResult = false
+
+  static get observedAttributes() {
+    return ['active-view', 'preview', 'player-ready', 'selected-count', 'has-battle', 'has-result']
+  }
 
   connectedCallback() {
+    this.#readState()
+    this.#render()
+  }
+
+  attributeChangedCallback() {
+    this.#readState()
+    if (this.isConnected) this.#render()
+  }
+
+  #readState() {
     this.#activeView = this.getAttribute('active-view') || 'home'
     this.#preview = this.getAttribute('preview') === 'true'
-    this.#render()
+    this.#playerReady = this.getAttribute('player-ready') === 'true'
+    this.#selectedCount = Number(this.getAttribute('selected-count')) || 0
+    this.#hasBattle = this.getAttribute('has-battle') === 'true'
+    this.#hasResult = this.getAttribute('has-result') === 'true'
   }
 
   #canNavigateTo(view) {
     if (this.#preview) return true
-    return ['home', 'history', 'leaderboard'].includes(view)
+    if (['home', 'history', 'leaderboard'].includes(view)) return true
+    if (view === 'pool') return this.#playerReady
+    if (view === 'team') return this.#selectedCount === 5
+    if (view === 'arena') return this.#hasBattle
+    if (view === 'result') return this.#hasResult
+    return false
   }
 
   #renderNavigationItem({ id, label, unlockMessage }) {

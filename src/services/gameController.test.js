@@ -10,6 +10,7 @@ import {
   performPlayerAction,
   performMachineAction,
   checkBattleWinner,
+  selectRandomPool,
 } from './gameController.js';
 
 globalThis.fetch = async (url) => {
@@ -41,6 +42,15 @@ test('initializeGameSession carga cartas activas', async () => {
   const result = await initializeGameSession();
   assert.equal(result.success, true);
   assert.equal(result.cards.length, 10);
+});
+
+test('selectRandomPool limita el catálogo de una sesión a 20 cartas', () => {
+  const catalog = Array.from({ length: 151 }, (_, index) => ({ id: `card-${index + 1}` }));
+  const pool = selectRandomPool(catalog);
+
+  assert.equal(pool.length, 20);
+  assert.equal(new Set(pool.map((card) => card.id)).size, 20);
+  pool.forEach((card) => assert.ok(catalog.some((catalogCard) => catalogCard.id === card.id)));
 });
 
 test('validateSelectedDeck rechaza mazos inválidos', () => {

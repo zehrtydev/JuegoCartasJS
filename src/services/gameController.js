@@ -24,8 +24,14 @@ import {
   progressCardTurn,
 } from './battleService.js';
 
+export function selectRandomPool(cards, poolSize = 20) {
+  return [...cards]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, Math.min(poolSize, cards.length));
+}
+
 export async function initializeGameSession() {
-  const cards = await loadActiveCards();
+  const cards = selectRandomPool(await loadActiveCards());
   return {
     success: true,
     cards,
@@ -41,11 +47,19 @@ export function validateSelectedDeck(selectedCards) {
   return validateDeckSelection(selectedCards);
 }
 
-export async function createCombatSession(playerDeck, machineDeck = []) {
+export async function createCombatSession(playerDeck, machineDeck = [], poolCards = []) {
   let finalMachineDeck = [...machineDeck];
   if (!finalMachineDeck || finalMachineDeck.length === 0) {
-    const allCards = await loadActiveCards();
-    finalMachineDeck = buildMachineDeck(playerDeck, allCards);
+    const availablePool = poolCards.length > 0 ? poolCards : await loadActiveCards();
+    if (availablePool.length < 10) {
+      return {
+        success: false,
+        state: null,
+        starter: null,
+        message: 'Se necesitan al menos 10 cartas activas para iniciar la partida.',
+      };
+    }
+    finalMachineDeck = buildMachineDeck(playerDeck, availablePool);
   }
 
   const { success, battle, message } = startCombat(playerDeck, finalMachineDeck);

@@ -155,7 +155,7 @@ class GameApp extends HTMLElement {
   #handleTeamConfirmed = async (event) => {
     this.#playerDeck = event.detail.cards
 
-    const combat = await createCombatSession(this.#playerDeck)
+    const combat = await createCombatSession(this.#playerDeck, [], this.#availableCards)
     if (combat.success) {
       this.#battleState = combat.state
       this.#battleFinalized = false

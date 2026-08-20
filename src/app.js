@@ -9,6 +9,7 @@ import './components/deck/teamBuilder.js'
 import './components/history/matchHistory.js'
 import './components/leaderboard/leaderboardView.js'
 import './components/ui/uiState.js'
+import './components/ui/appNotice.js'
 
 /**
  * Monta el componente raíz. La navegación y la sesión temporal viven dentro

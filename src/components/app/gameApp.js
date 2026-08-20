@@ -31,6 +31,8 @@ class GameApp extends HTMLElement {
   #machineTurnTimer = null
   #battleFinalized = false
   #battleResult = null
+  #noticeMessage = ''
+  #noticeTimer = null
 
   async connectedCallback() {
     this.addEventListener('navigate', this.#handleNavigation)
@@ -50,6 +52,7 @@ class GameApp extends HTMLElement {
     this.removeEventListener('team-selection-confirmed', this.#handleTeamSelection)
     this.removeEventListener('battle-action', this.#handleBattleAction)
     clearTimeout(this.#machineTurnTimer)
+    clearTimeout(this.#noticeTimer)
   }
 
   async #loadInitialData() {
@@ -97,7 +100,7 @@ class GameApp extends HTMLElement {
       await this.#loadCardsSession()
       this.#render()
     } else {
-      alert(result.message)
+      this.#showNotice(result.message)
     }
   }
 
@@ -129,7 +132,7 @@ class GameApp extends HTMLElement {
       this.#render()
       this.#scheduleMachineTurn()
     } else {
-      alert(combat.message || 'Error al iniciar el combate')
+      this.#showNotice(combat.message || 'Error al iniciar el combate')
     }
   }
 
@@ -140,7 +143,7 @@ class GameApp extends HTMLElement {
       this.#battleState = result.state
       await this.#handleBattleProgress()
     } else {
-      alert(result.message)
+      this.#showNotice(result.message)
     }
   }
 
@@ -177,6 +180,23 @@ class GameApp extends HTMLElement {
 
     this.#render()
     this.#scheduleMachineTurn()
+  }
+
+  #showNotice(message) {
+    this.#noticeMessage = message
+    clearTimeout(this.#noticeTimer)
+    this.#render()
+
+    this.#noticeTimer = setTimeout(() => {
+      this.#noticeMessage = ''
+      this.#render()
+    }, 4000)
+  }
+
+  #dismissNotice() {
+    this.#noticeMessage = ''
+    clearTimeout(this.#noticeTimer)
+    this.#render()
   }
 
   async #finalizeBattle() {
@@ -229,6 +249,13 @@ class GameApp extends HTMLElement {
 
     main.append(this.#createView())
     this.append(main)
+
+    if (this.#noticeMessage) {
+      const notice = document.createElement('app-notice')
+      notice.message = this.#noticeMessage
+      notice.addEventListener('notice-dismissed', () => this.#dismissNotice())
+      this.append(notice)
+    }
 
     this.append(document.createElement('app-footer'))
   }

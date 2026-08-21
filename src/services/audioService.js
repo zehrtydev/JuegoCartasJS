@@ -23,8 +23,17 @@ function playUrl(url, volume = 0.45) {
   })
 }
 
-let homeThemeAudio = null
-let isHomeThemeActive = false
+const bgmTracks = {
+  home: '/assets/audio/pokemon-theme.mp3',
+  pool: '/assets/audio/pokemon-win2.mp3',
+  team: '/assets/audio/pokemon-win2.mp3',
+  arena: '/assets/audio/pokemon-battle.mp3',
+  history: '/assets/audio/pokemon-historico.mp3',
+  leaderboard: '/assets/audio/pokemon-theme-ranking.mp3',
+}
+
+let currentBgmAudio = null
+let currentBgmView = null
 let gestureListener = null
 
 function cleanupGestureListener() {
@@ -37,35 +46,44 @@ function cleanupGestureListener() {
 }
 
 /**
- * Inicia la reproducción en bucle del tema principal (pokemon-theme.mp3)
- * para la pantalla de inicio. Si el navegador bloquea el autoplay,
- * se engancha al primer gesto del usuario (click, toque o tecla) para
- * iniciar la reproducción automáticamente sin errores.
+ * Reproduce la música de fondo correspondiente al módulo o vista dada.
+ * Si ya se encuentra reproduciendo la misma pista, se mantiene sin cortes.
+ * Si se cambia de vista, detiene la anterior e inicia la nueva en bucle.
  */
-export function playHomeThemeMusic(volume = 0.35) {
+export function playViewBgm(view, volume = 0.32) {
   if (typeof Audio === 'undefined') return
 
-  isHomeThemeActive = true
-
-  if (!homeThemeAudio) {
-    homeThemeAudio = new Audio('/assets/audio/pokemon-theme.mp3')
-    homeThemeAudio.loop = true
+  const trackUrl = bgmTracks[view]
+  if (!trackUrl) {
+    stopBgm()
+    return
   }
 
-  homeThemeAudio.volume = volume
+  // Si ya está sonando la misma vista/pista activa, continuar
+  if (currentBgmView === view && currentBgmAudio && !currentBgmAudio.paused) {
+    return
+  }
 
-  // Si ya está reproduciéndose, no reiniciar
-  if (!homeThemeAudio.paused) return
+  // Detener cualquier pista previa
+  if (currentBgmAudio) {
+    currentBgmAudio.pause()
+    currentBgmAudio.currentTime = 0
+  }
 
-  const playPromise = homeThemeAudio.play()
+  currentBgmView = view
+  currentBgmAudio = new Audio(trackUrl)
+  currentBgmAudio.loop = true
+  currentBgmAudio.volume = volume
+
+  const playPromise = currentBgmAudio.play()
   if (playPromise !== undefined) {
     playPromise.catch(() => {
-      // Autoplay bloqueado por el navegador: esperar a la primera interacción del usuario
+      // Manejo de restricción de Autoplay del navegador
       if (!gestureListener && typeof window !== 'undefined') {
         gestureListener = () => {
           cleanupGestureListener()
-          if (isHomeThemeActive && homeThemeAudio && homeThemeAudio.paused) {
-            homeThemeAudio.play().catch(() => {})
+          if (currentBgmAudio && currentBgmAudio.paused) {
+            currentBgmAudio.play().catch(() => {})
           }
         }
         window.addEventListener('pointerdown', gestureListener, { once: true })
@@ -77,16 +95,28 @@ export function playHomeThemeMusic(volume = 0.35) {
 }
 
 /**
- * Detiene la música de inicio de forma limpia y reinicia su posición.
+ * Detiene cualquier música de fondo activa de forma limpia.
  */
-export function stopHomeThemeMusic() {
-  isHomeThemeActive = false
+export function stopBgm() {
+  currentBgmView = null
   cleanupGestureListener()
 
-  if (homeThemeAudio) {
-    homeThemeAudio.pause()
-    homeThemeAudio.currentTime = 0
+  if (currentBgmAudio) {
+    currentBgmAudio.pause()
+    currentBgmAudio.currentTime = 0
+    currentBgmAudio = null
   }
+}
+
+/**
+ * Alias de compatibilidad para el tema de inicio.
+ */
+export function playHomeThemeMusic(volume = 0.35) {
+  playViewBgm('home', volume)
+}
+
+export function stopHomeThemeMusic() {
+  stopBgm()
 }
 
 /**

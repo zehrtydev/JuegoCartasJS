@@ -9,7 +9,7 @@ import {
 } from '../../services/gameController.js'
 import { getPlayers } from '../../api/playersApi.js'
 import { getBattles } from '../../api/battlesApi.js'
-import { playBattleAudio, playHomeThemeMusic, stopHomeThemeMusic } from '../../services/audioService.js'
+import { playBattleAudio, playViewBgm, stopBgm } from '../../services/audioService.js'
 
 const viewLabels = {
   home: 'Inicio',
@@ -54,9 +54,7 @@ class GameApp extends HTMLElement {
     await this.#loadInitialData()
     this.#render()
 
-    if (this.#currentView === 'home') {
-      playHomeThemeMusic()
-    }
+    playViewBgm(this.#currentView)
   }
 
   disconnectedCallback() {
@@ -69,7 +67,7 @@ class GameApp extends HTMLElement {
     this.removeEventListener('battle-action', this.#handleBattleAction)
     clearTimeout(this.#machineTurnTimer)
     clearTimeout(this.#noticeTimer)
-    stopHomeThemeMusic()
+    stopBgm()
   }
 
   async #loadInitialData() {
@@ -97,12 +95,7 @@ class GameApp extends HTMLElement {
 
   #handleNavigation = async (event) => {
     this.#currentView = event.detail.view
-
-    if (this.#currentView === 'home') {
-      playHomeThemeMusic()
-    } else {
-      stopHomeThemeMusic()
-    }
+    playViewBgm(this.#currentView)
 
     if (this.#currentView === 'leaderboard') {
       await this.#loadLeaderboard()
@@ -153,7 +146,7 @@ class GameApp extends HTMLElement {
     if (this.#preview.active) {
       this.#currentPlayer = { id: 'preview-1', alias, points: 0 }
       this.#currentView = 'pool'
-      stopHomeThemeMusic()
+      playViewBgm('pool')
       this.#render()
       return
     }
@@ -162,7 +155,7 @@ class GameApp extends HTMLElement {
     if (result.success) {
       this.#currentPlayer = result.player
       this.#currentView = 'pool'
-      stopHomeThemeMusic()
+      playViewBgm('pool')
       await this.#loadCardsSession()
       this.#render()
     } else {
@@ -173,7 +166,7 @@ class GameApp extends HTMLElement {
   #handleSelectPlayer = async (event) => {
     this.#currentPlayer = event.detail.player
     this.#currentView = 'pool'
-    stopHomeThemeMusic()
+    playViewBgm('pool')
     if (!this.#preview.active) {
       await this.#loadCardsSession()
     }
@@ -190,6 +183,7 @@ class GameApp extends HTMLElement {
     this.#playerDeck = selectedCards
 
     this.#currentView = 'team'
+    playViewBgm('team')
     this.#render()
   }
 
@@ -204,6 +198,7 @@ class GameApp extends HTMLElement {
       this.#battleStartedAt = new Date().toISOString()
       this.#battleEffect = null
       this.#currentView = 'arena'
+      playViewBgm('arena')
       this.#render()
       this.#scheduleMachineTurn()
     } else {
@@ -319,6 +314,7 @@ class GameApp extends HTMLElement {
     }
 
     this.#currentView = 'result'
+    stopBgm()
     playBattleAudio(result === 'win' ? 'victory' : 'defeat')
     this.#render()
   }
@@ -423,7 +419,7 @@ class GameApp extends HTMLElement {
     `
     section.querySelector('[data-view]').addEventListener('click', () => {
       this.#currentView = 'home'
-      playHomeThemeMusic()
+      playViewBgm('home')
       this.#render()
     })
     return section

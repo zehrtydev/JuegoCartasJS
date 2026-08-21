@@ -14,7 +14,6 @@ import { playBattleAudio, playViewBgm, stopBgm, playBattleIntro } from '../../se
 const viewLabels = {
   home: 'Inicio',
   pool: 'Elige tu equipo',
-  team: 'Construye tu equipo',
   arena: 'Arena de batalla',
   result: 'Resultado',
   history: 'Historial',
@@ -47,7 +46,6 @@ class GameApp extends HTMLElement {
     this.addEventListener('register-player', this.#handleRegisterPlayer)
     this.addEventListener('select-player', this.#handleSelectPlayer)
     this.addEventListener('pool-selection-changed', this.#handlePoolSelection)
-    this.addEventListener('team-selection-confirmed', this.#handleTeamSelection)
     this.addEventListener('team-confirmed', this.#handleTeamConfirmed)
     this.addEventListener('battle-action', this.#handleBattleAction)
     
@@ -62,7 +60,6 @@ class GameApp extends HTMLElement {
     this.removeEventListener('register-player', this.#handleRegisterPlayer)
     this.removeEventListener('select-player', this.#handleSelectPlayer)
     this.removeEventListener('pool-selection-changed', this.#handlePoolSelection)
-    this.removeEventListener('team-selection-confirmed', this.#handleTeamSelection)
     this.removeEventListener('team-confirmed', this.#handleTeamConfirmed)
     this.removeEventListener('battle-action', this.#handleBattleAction)
     clearTimeout(this.#machineTurnTimer)
@@ -176,15 +173,6 @@ class GameApp extends HTMLElement {
   #handlePoolSelection = (event) => {
     this.#playerDeck = event.detail.selectedCards
     this.#syncHeaderState()
-  }
-
-  #handleTeamSelection = (event) => {
-    const { selectedCards } = event.detail
-    this.#playerDeck = selectedCards
-
-    this.#currentView = 'team'
-    playViewBgm('team')
-    this.#render()
   }
 
   #handleTeamConfirmed = async (event) => {
@@ -366,12 +354,6 @@ class GameApp extends HTMLElement {
       const pool = document.createElement('pool-grid')
       pool.cards = this.#availableCards
       return pool
-    }
-
-    if (this.#currentView === 'team') {
-      const teamBuilder = document.createElement('team-builder')
-      teamBuilder.cards = this.#playerDeck
-      return teamBuilder
     }
 
     if (this.#currentView === 'arena') {

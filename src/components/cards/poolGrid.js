@@ -1,14 +1,13 @@
 class PoolGrid extends HTMLElement {
   #cards = []
   #currentPage = 0
-  #selectedCardIds = new Set()
+  #selectedCardIds = [] // Array instead of Set to preserve order
   #state = 'empty'
+  #dragSourceIndex = null
 
   set cards(value) {
     this.#cards = Array.isArray(value) ? value : []
-    this.#selectedCardIds = new Set(
-      [...this.#selectedCardIds].filter((cardId) => this.#cards.some(({ id }) => String(id) === cardId)),
-    )
+    this.#selectedCardIds = this.#selectedCardIds.filter((cardId) => this.#cards.some(({ id }) => String(id) === cardId))
     this.#currentPage = Math.min(this.#currentPage, Math.max(this.#getPageCount() - 1, 0))
     if (this.isConnected) this.#render()
   }
@@ -59,8 +58,6 @@ class PoolGrid extends HTMLElement {
   }
 
   #getSpriteScale(card) {
-    // Los PNG de PokeAPI no comparten el mismo encuadre visual. Compensamos
-    // el espacio transparente de los Pokémon pequeños del pool fijo.
     const scales = {
       1: 1.32, 4: 1.34, 6: 1.02, 7: 1.5, 9: 1.08,
       25: 1.2, 26: 1.16, 39: 1.34, 52: 1.35, 54: 1.42,
@@ -72,10 +69,11 @@ class PoolGrid extends HTMLElement {
   }
 
   #toggleCard(cardId) {
-    if (this.#selectedCardIds.has(cardId)) {
-      this.#selectedCardIds.delete(cardId)
-    } else if (this.#selectedCardIds.size < 5) {
-      this.#selectedCardIds.add(cardId)
+    const index = this.#selectedCardIds.indexOf(cardId)
+    if (index !== -1) {
+      this.#selectedCardIds.splice(index, 1)
+    } else if (this.#selectedCardIds.length < 5) {
+      this.#selectedCardIds.push(cardId)
     } else {
       return
     }
@@ -88,7 +86,9 @@ class PoolGrid extends HTMLElement {
   }
 
   #getSelectedCards() {
-    return this.#cards.filter(({ id }) => this.#selectedCardIds.has(String(id)))
+    return this.#selectedCardIds
+      .map((id) => this.#cards.find((card) => String(card.id) === id))
+      .filter(Boolean)
   }
 
   #getPageCount() {
@@ -102,9 +102,27 @@ class PoolGrid extends HTMLElement {
     this.#render()
   }
 
+  #moveCard(index, direction) {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= this.#selectedCardIds.length) return
+    const ids = [...this.#selectedCardIds]
+    ;[ids[index], ids[targetIndex]] = [ids[targetIndex], ids[index]]
+    this.#selectedCardIds = ids
+    this.#render()
+  }
+
+  #handleDrop(fromIndex, toIndex) {
+    if (fromIndex === toIndex) return
+    const ids = [...this.#selectedCardIds]
+    const [moved] = ids.splice(fromIndex, 1)
+    ids.splice(toIndex, 0, moved)
+    this.#selectedCardIds = ids
+    this.#render()
+  }
+
   #renderCard(card) {
     const cardId = String(card.id)
-    const isSelected = this.#selectedCardIds.has(cardId)
+    const isSelected = this.#selectedCardIds.includes(cardId)
     const name = this.#escapeHtml(card.name || 'Pokémon sin nombre')
     const imageUrl = this.#escapeHtml(card.imageUrl || card.image)
 
@@ -122,13 +140,21 @@ class PoolGrid extends HTMLElement {
       return `<li class="poolTeamSlot" aria-label="Espacio ${index + 1} vacío"><span>${index + 1}</span><i aria-hidden="true"></i></li>`
     }
 
+    const name = this.#escapeHtml(card.name)
+    const isFirst = index === 0
+    const isLast = index === this.#selectedCardIds.length - 1
+
     return `
-      <li class="poolTeamSlot poolTeamSlot--filled" aria-label="Espacio ${index + 1}: ${this.#escapeHtml(card.name)}">
-        <span>${index + 1}</span>
+      <li class="poolTeamSlot poolTeamSlot--filled" draggable="true" data-slot-index="${index}" aria-label="Espacio ${index + 1}: ${name}">
+        <span class="poolTeamSlot__position">${index + 1}</span>
         <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" style="--sprite-scale: ${this.#getSpriteScale(card)}" aria-hidden="true">
           <img src="${this.#escapeHtml(this.#getSpriteUrl(card))}" alt="" />
         </i>
-        <strong>${this.#escapeHtml(card.name)}</strong>
+        <strong class="poolTeamSlot__name">${name}</strong>
+        <span class="poolTeamSlot__arrows">
+          <button class="poolTeamSlot__arrowBtn" type="button" data-move-dir="-1" data-move-index="${index}" ${isFirst ? 'disabled' : ''} aria-label="Mover ${name} arriba" title="Subir">▲</button>
+          <button class="poolTeamSlot__arrowBtn" type="button" data-move-dir="1" data-move-index="${index}" ${isLast ? 'disabled' : ''} aria-label="Mover ${name} abajo" title="Bajar">▼</button>
+        </span>
       </li>
     `
   }
@@ -143,8 +169,8 @@ class PoolGrid extends HTMLElement {
     const visibleCards = cards.slice(firstCardIndex, firstCardIndex + 4)
 
     this.innerHTML = `
-      <section class="pixelFrame mx-auto max-w-6xl bg-surface p-4 sm:p-6" aria-labelledby="pool-title">
-        <header class="flex flex-wrap items-center justify-between gap-4 border border-brass/60 bg-arena-deep px-5 py-4 sm:px-7 mb-6">
+      <section class="pixelFrame arenaStage mx-auto max-w-6xl bg-surface p-2 sm:p-3" aria-labelledby="pool-title">
+        <header class="flex flex-wrap items-center justify-between gap-4 border border-brass/60 bg-arena-deep px-5 py-4 sm:px-7">
           <div>
             <p class="font-mono text-xs font-bold tracking-[0.2em] text-action">PREPARACIÓN DE BATALLA</p>
             <h1 class="mt-1 text-2xl font-black tracking-[0.06em] text-cream sm:text-3xl" id="pool-title">ELIGE TU EQUIPO</h1>
@@ -154,49 +180,103 @@ class PoolGrid extends HTMLElement {
           </div>
         </header>
         
-        <div class="grid lg:grid-cols-[1fr_320px] gap-6">
-          <div class="border border-brass/60 bg-arena-deep p-4 sm:p-6 relative flex flex-col justify-center min-h-[30rem]">
-            ${hasCards ? `
-              <div class="poolCarousel w-full max-w-3xl mx-auto">
-                <button class="poolCarouselButton poolCarouselButton--previous" type="button" data-page-direction="-1" ${this.#currentPage === 0 ? 'disabled' : ''} aria-label="Ver las cuatro cartas anteriores">←</button>
-                <ul class="poolCardGrid">${visibleCards.map((card) => this.#renderCard(card)).join('')}</ul>
-                <button class="poolCarouselButton poolCarouselButton--next" type="button" data-page-direction="1" ${this.#currentPage === pageCount - 1 ? 'disabled' : ''} aria-label="Ver las cuatro cartas siguientes">→</button>
-                <p class="poolCarouselStatus" aria-live="polite">${firstCardIndex + 1}–${Math.min(firstCardIndex + 4, cards.length)} / ${cards.length}</p>
-              </div>
-            ` : `
-              <ui-state state="empty" title="EL POOL AÚN NO ESTÁ DISPONIBLE" message="No hay cartas activas cargadas desde la API local. Cuando el catálogo esté disponible, aquí aparecerán las cartas para escoger cinco Pokémon diferentes."></ui-state>
-            `}
+        <div class="p-6 sm:p-10">
+          <div class="grid lg:grid-cols-[1fr_320px] gap-10">
+            <div>
+              <p class="mb-5 text-sm text-muted">Selecciona cinco Pokémon del catálogo para formar tu equipo.</p>
+              ${hasCards ? `
+                <div class="poolCarousel w-full max-w-3xl mx-auto">
+                  <button class="poolCarouselButton poolCarouselButton--previous" type="button" data-page-direction="-1" ${this.#currentPage === 0 ? 'disabled' : ''} aria-label="Ver las cuatro cartas anteriores">←</button>
+                  <ul class="poolCardGrid">${visibleCards.map((card) => this.#renderCard(card)).join('')}</ul>
+                  <button class="poolCarouselButton poolCarouselButton--next" type="button" data-page-direction="1" ${this.#currentPage === pageCount - 1 ? 'disabled' : ''} aria-label="Ver las cuatro cartas siguientes">→</button>
+                  <p class="poolCarouselStatus" aria-live="polite">${firstCardIndex + 1}–${Math.min(firstCardIndex + 4, cards.length)} / ${cards.length}</p>
+                </div>
+              ` : `
+                <ui-state state="empty" title="EL POOL AÚN NO ESTÁ DISPONIBLE" message="No hay cartas activas cargadas desde la API local. Cuando el catálogo esté disponible, aquí aparecerán las cartas para escoger cinco Pokémon diferentes."></ui-state>
+              `}
+            </div>
+            
+            <aside aria-label="Cartas seleccionadas para el equipo">
+              <p class="mb-5 text-sm text-muted">Ordena tu equipo. El Pokémon #1 será el activo inicial.</p>
+              <h2 class="hidden font-mono text-xs font-bold tracking-wider text-muted sm:block mb-2">TU EQUIPO</h2>
+              <ol class="poolTeamSlots space-y-2 mb-6">
+                ${Array.from({ length: 5 }, (_, index) => this.#renderTeamSlot(selectedCards[index], index)).join('')}
+              </ol>
+              <button class="pixelButton w-full bg-action px-5 py-3 font-mono text-sm font-black tracking-[0.12em] text-arena-deep transition hover:bg-[#ffda68] focus:outline-none focus:ring-2 focus:ring-cream focus:ring-offset-2 focus:ring-offset-surface disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-action" type="button" data-confirm ${selectionReady ? '' : 'disabled'}>CONFIRMAR EQUIPO</button>
+            </aside>
           </div>
-          
-          <aside class="border-t-2 border-brass bg-panel p-6 lg:border-t-0 lg:border-l-2 flex flex-col" aria-label="Cartas seleccionadas para el equipo">
-            <h2 class="font-mono text-sm font-bold tracking-wider text-cream mb-4">TU EQUIPO</h2>
-            <ol class="poolTeamSlots flex flex-col gap-3 mb-6 flex-grow">
-              ${Array.from({ length: 5 }, (_, index) => this.#renderTeamSlot(selectedCards[index], index)).join('')}
-            </ol>
-            <button class="poolBuildButton action-btn mt-auto w-full border border-success bg-surface px-4 py-3 font-mono text-sm font-bold text-cream transition hover:bg-success/20 focus:outline-none focus:ring-2 disabled:opacity-40 disabled:hover:bg-surface" type="button" ${selectionReady ? '' : 'disabled'}>CONSTRUIR EQUIPO</button>
-          </aside>
         </div>
       </section>
     `
+
+    // --- Event Listeners ---
 
     const state = this.querySelector('ui-state')
     state?.addEventListener('retry-requested', () => {
       this.dispatchEvent(new CustomEvent('retry-cards-requested', { bubbles: true }))
     })
 
+    // Card selection toggle
     this.querySelectorAll('[data-card-id]').forEach((button) => {
       button.addEventListener('click', () => this.#toggleCard(button.dataset.cardId))
     })
 
+    // Carousel pagination
     this.querySelectorAll('[data-page-direction]').forEach((button) => {
       button.addEventListener('click', () => this.#changePage(Number(button.dataset.pageDirection)))
     })
 
-    this.querySelector('.poolBuildButton')?.addEventListener('click', () => {
+    // Arrow reorder buttons
+    this.querySelectorAll('[data-move-dir]').forEach((button) => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation()
+        this.#moveCard(Number(button.dataset.moveIndex), Number(button.dataset.moveDir))
+      })
+    })
+
+    // Drag & Drop
+    this.querySelectorAll('[data-slot-index]').forEach((slot) => {
+      slot.addEventListener('dragstart', (e) => {
+        this.#dragSourceIndex = Number(slot.dataset.slotIndex)
+        e.dataTransfer.effectAllowed = 'move'
+        e.dataTransfer.setData('text/plain', slot.dataset.slotIndex)
+        slot.classList.add('poolTeamSlot--dragging')
+      })
+
+      slot.addEventListener('dragend', () => {
+        this.#dragSourceIndex = null
+        slot.classList.remove('poolTeamSlot--dragging')
+        this.querySelectorAll('.poolTeamSlot--dragover').forEach((el) => el.classList.remove('poolTeamSlot--dragover'))
+      })
+
+      slot.addEventListener('dragover', (e) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'move'
+        // Visual feedback
+        this.querySelectorAll('.poolTeamSlot--dragover').forEach((el) => el.classList.remove('poolTeamSlot--dragover'))
+        slot.classList.add('poolTeamSlot--dragover')
+      })
+
+      slot.addEventListener('dragleave', () => {
+        slot.classList.remove('poolTeamSlot--dragover')
+      })
+
+      slot.addEventListener('drop', (e) => {
+        e.preventDefault()
+        slot.classList.remove('poolTeamSlot--dragover')
+        const toIndex = Number(slot.dataset.slotIndex)
+        if (this.#dragSourceIndex !== null) {
+          this.#handleDrop(this.#dragSourceIndex, toIndex)
+        }
+      })
+    })
+
+    // Confirm team (goes directly to combat)
+    this.querySelector('[data-confirm]')?.addEventListener('click', () => {
       if (!selectionReady) return
-      this.dispatchEvent(new CustomEvent('team-selection-confirmed', {
+      this.dispatchEvent(new CustomEvent('team-confirmed', {
         bubbles: true,
-        detail: { selectedCards },
+        detail: { cards: selectedCards },
       }))
     })
   }

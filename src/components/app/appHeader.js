@@ -1,7 +1,6 @@
 const navigationItems = [
   { id: 'home', label: 'Inicio' },
   { id: 'pool', label: 'Pool', unlockMessage: 'Registra o elige un entrenador para desbloquear el pool.' },
-  { id: 'team', label: 'Equipo', unlockMessage: 'Selecciona cinco cartas para construir tu equipo.' },
   { id: 'arena', label: 'Arena', unlockMessage: 'Confirma tu equipo para entrar a la arena.' },
   { id: 'result', label: 'Resultado', unlockMessage: 'Termina un combate para consultar el resultado.' },
   { id: 'history', label: 'Historial' },
@@ -44,7 +43,6 @@ class AppHeader extends HTMLElement {
     if (this.#preview) return true
     if (['home', 'history', 'leaderboard', 'admin'].includes(view)) return true
     if (view === 'pool') return this.#playerReady
-    if (view === 'team') return this.#selectedCount === 5
     if (view === 'arena') return this.#hasBattle
     if (view === 'result') return this.#hasResult
     return false

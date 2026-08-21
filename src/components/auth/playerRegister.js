@@ -26,30 +26,33 @@ class PlayerRegister extends HTMLElement {
 
   #render() {
     this.innerHTML = `
-      <section class="registrationScene pixel-scene poke-scope" aria-labelledby="welcome-title">
-        <div class="registrationScene__shade" aria-hidden="true"></div>
-        <div class="registrationLayout">
-          <div class="trainerConsole pixel-panel pixel-panel--console poke-panel">
-            <div class="trainerConsole__content">
-              <figure class="trainerSpriteFrame pixel-card poke-card" aria-label="Silueta de entrenador">
-                <img class="pixel-sprite poke-sprite" src="/assets/images/ui/trainerSilhouette.png" alt="" />
+      <section class="pixelFrame mx-auto max-w-5xl bg-surface p-4 sm:p-6" aria-labelledby="welcome-title">
+        <header class="flex flex-wrap items-center justify-between gap-4 border border-brass/60 bg-arena-deep px-5 py-4 sm:px-7 mb-6">
+          <div>
+            <p class="font-mono text-xs font-bold tracking-[0.2em] text-action">BIENVENIDO AL TORNEO</p>
+            <h1 class="mt-1 text-2xl font-black tracking-[0.06em] text-cream sm:text-3xl" id="welcome-title">REGISTRO DE ENTRENADOR</h1>
+          </div>
+        </header>
+
+        <div class="grid gap-6 md:grid-cols-[1.2fr_1fr]">
+          <div class="border border-brass/60 bg-arena-deep p-6">
+            <h2 class="font-mono text-sm font-bold tracking-wider text-cream mb-4">NUEVO PERFIL</h2>
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              <figure class="flex-shrink-0 w-28 h-28 border-2 border-brass/40 bg-surface p-2 flex items-center justify-center" aria-label="Silueta de entrenador">
+                <img class="w-full h-full object-contain pixelated" src="/assets/images/ui/trainerSilhouette.png" alt="" />
               </figure>
-              <div class="trainerConsole__formColumn poke-panel poke-panel--form">
-                <h1 class="trainerConsole__title" id="welcome-title">REGISTRO DE ENTRENADOR</h1>
-                <form class="trainerForm" novalidate>
-                  <label class="trainerLabel" for="player-alias">TU ALIAS</label>
-                  <input class="trainerInput pixel-input poke-input" id="player-alias" name="alias" type="text" autocomplete="nickname" maxlength="24" placeholder="Escribe tu alias..." required aria-describedby="alias-help" />
-                  <p class="trainerHelp" id="alias-help">Alias único · máximo 24 caracteres</p>
-                  <button class="gameStartButton pixel-btn poke-button poke-button--primary" type="submit" disabled>EMPEZAR COMBATE</button>
-                </form>
-              </div>
+              <form class="flex-grow w-full" novalidate>
+                <label class="block font-mono text-xs font-bold tracking-wider text-action mb-2" for="player-alias">TU ALIAS</label>
+                <input class="w-full border border-brass bg-surface px-4 py-2 font-mono text-sm font-bold text-cream placeholder-muted focus:outline-none focus:ring-2 focus:ring-action transition" id="player-alias" name="alias" type="text" autocomplete="nickname" maxlength="24" placeholder="Escribe tu alias..." required aria-describedby="alias-help" />
+                <p class="mt-2 font-mono text-[0.65rem] text-muted" id="alias-help">Alias único · máximo 24 caracteres</p>
+                <button class="action-btn mt-4 w-full border border-success bg-surface px-4 py-3 font-mono text-xs font-bold text-cream transition hover:bg-success/20 focus:outline-none focus:ring-2 disabled:opacity-40 disabled:hover:bg-surface" type="submit" disabled>EMPEZAR COMBATE</button>
+              </form>
             </div>
           </div>
-          <aside class="profileLedger pixel-panel pixel-panel--ledger poke-panel" aria-labelledby="profiles-title">
-            <div class="profileLedger__tab poke-panel__title">
-              <h2 id="profiles-title">PERFILES EXISTENTES</h2>
-            </div>
-            <div class="profileLedger__page" data-profiles></div>
+          
+          <aside class="border border-brass/60 bg-panel p-6 flex flex-col" aria-labelledby="profiles-title">
+            <h2 class="font-mono text-sm font-bold tracking-wider text-cream mb-4" id="profiles-title">PERFILES EXISTENTES</h2>
+            <div class="flex-grow overflow-y-auto pr-2" data-profiles></div>
           </aside>
         </div>
       </section>
@@ -90,11 +93,11 @@ class PlayerRegister extends HTMLElement {
       return
     }
 
-    container.innerHTML = `<ul class="profileList space-y-3">${this.#players.map((player) => `
+    container.innerHTML = `<ul class="space-y-3">${this.#players.map((player) => `
       <li>
-        <button class="profileSelectButton pixel-card pixel-card--select poke-button poke-button--profile w-full focus:outline-none focus:ring-4 focus:ring-action" type="button" data-player-id="${player.id}">
-          <span class="profileAlias font-mono font-black">${player.nickname || player.alias || 'ENTRENADOR'}</span>
-          <span class="profilePoints font-mono text-sm font-bold text-[#456431]">${player.points || 0} pts</span>
+        <button class="w-full flex items-center justify-between border border-brass bg-surface px-4 py-3 transition hover:bg-brass/20 focus:outline-none focus:ring-2 focus:ring-action" type="button" data-player-id="${player.id}">
+          <span class="font-mono font-black text-cream">${player.nickname || player.alias || 'ENTRENADOR'}</span>
+          <span class="font-mono text-xs font-bold text-success">${player.points || 0} pts</span>
         </button>
       </li>
     `).join('')}</ul>`

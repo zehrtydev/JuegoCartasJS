@@ -143,33 +143,38 @@ class PoolGrid extends HTMLElement {
     const visibleCards = cards.slice(firstCardIndex, firstCardIndex + 4)
 
     this.innerHTML = `
-      <section class="poolScene" aria-labelledby="pool-title">
-        <div class="poolDraftConsole">
-          <div class="poolDraftConsole__content">
-            <header class="poolDraftConsole__header">
-              <div>
-                <p>PREPARACIÓN DE BATALLA</p>
-                <h1 id="pool-title">ELIGE TU EQUIPO</h1>
+      <section class="pixelFrame mx-auto max-w-6xl bg-surface p-4 sm:p-6" aria-labelledby="pool-title">
+        <header class="flex flex-wrap items-center justify-between gap-4 border border-brass/60 bg-arena-deep px-5 py-4 sm:px-7 mb-6">
+          <div>
+            <p class="font-mono text-xs font-bold tracking-[0.2em] text-action">PREPARACIÓN DE BATALLA</p>
+            <h1 class="mt-1 text-2xl font-black tracking-[0.06em] text-cream sm:text-3xl" id="pool-title">ELIGE TU EQUIPO</h1>
+          </div>
+          <div class="border border-brass bg-surface px-4 py-2 font-mono text-sm font-bold tracking-wider text-cream">
+            SELECCIONADOS: <strong class="text-action">${selectedCards.length} / 5</strong>
+          </div>
+        </header>
+        
+        <div class="grid lg:grid-cols-[1fr_320px] gap-6">
+          <div class="border border-brass/60 bg-arena-deep p-4 sm:p-6 relative flex flex-col justify-center min-h-[30rem]">
+            ${hasCards ? `
+              <div class="poolCarousel w-full max-w-3xl mx-auto">
+                <button class="poolCarouselButton poolCarouselButton--previous" type="button" data-page-direction="-1" ${this.#currentPage === 0 ? 'disabled' : ''} aria-label="Ver las cuatro cartas anteriores">←</button>
+                <ul class="poolCardGrid">${visibleCards.map((card) => this.#renderCard(card)).join('')}</ul>
+                <button class="poolCarouselButton poolCarouselButton--next" type="button" data-page-direction="1" ${this.#currentPage === pageCount - 1 ? 'disabled' : ''} aria-label="Ver las cuatro cartas siguientes">→</button>
+                <p class="poolCarouselStatus" aria-live="polite">${firstCardIndex + 1}–${Math.min(firstCardIndex + 4, cards.length)} / ${cards.length}</p>
               </div>
-              <p class="poolCounter" aria-live="polite">SELECCIONADOS: <strong>${selectedCards.length} / 5</strong></p>
-            </header>
-            <div class="poolDraftConsole__cards">
-              ${hasCards ? `
-                <div class="poolCarousel">
-                  <button class="poolCarouselButton poolCarouselButton--previous" type="button" data-page-direction="-1" ${this.#currentPage === 0 ? 'disabled' : ''} aria-label="Ver las cuatro cartas anteriores">←</button>
-                  <ul class="poolCardGrid">${visibleCards.map((card) => this.#renderCard(card)).join('')}</ul>
-                  <button class="poolCarouselButton poolCarouselButton--next" type="button" data-page-direction="1" ${this.#currentPage === pageCount - 1 ? 'disabled' : ''} aria-label="Ver las cuatro cartas siguientes">→</button>
-                  <p class="poolCarouselStatus" aria-live="polite">${firstCardIndex + 1}–${Math.min(firstCardIndex + 4, cards.length)} / ${cards.length}</p>
-                </div>
-              ` : `
-                <ui-state state="empty" title="EL POOL AÚN NO ESTÁ DISPONIBLE" message="No hay cartas activas cargadas desde la API local. Cuando el catálogo esté disponible, aquí aparecerán las cartas para escoger cinco Pokémon diferentes."></ui-state>
-              `}
-            </div>
-            <ol class="poolTeamSlots" aria-label="Cartas seleccionadas para el equipo">
+            ` : `
+              <ui-state state="empty" title="EL POOL AÚN NO ESTÁ DISPONIBLE" message="No hay cartas activas cargadas desde la API local. Cuando el catálogo esté disponible, aquí aparecerán las cartas para escoger cinco Pokémon diferentes."></ui-state>
+            `}
+          </div>
+          
+          <aside class="border-t-2 border-brass bg-panel p-6 lg:border-t-0 lg:border-l-2 flex flex-col" aria-label="Cartas seleccionadas para el equipo">
+            <h2 class="font-mono text-sm font-bold tracking-wider text-cream mb-4">TU EQUIPO</h2>
+            <ol class="poolTeamSlots flex flex-col gap-3 mb-6 flex-grow">
               ${Array.from({ length: 5 }, (_, index) => this.#renderTeamSlot(selectedCards[index], index)).join('')}
             </ol>
-            <button class="poolBuildButton" type="button" ${selectionReady ? '' : 'disabled'}>CONSTRUIR EQUIPO</button>
-          </div>
+            <button class="poolBuildButton action-btn mt-auto w-full border border-success bg-surface px-4 py-3 font-mono text-sm font-bold text-cream transition hover:bg-success/20 focus:outline-none focus:ring-2 disabled:opacity-40 disabled:hover:bg-surface" type="button" ${selectionReady ? '' : 'disabled'}>CONSTRUIR EQUIPO</button>
+          </aside>
         </div>
       </section>
     `

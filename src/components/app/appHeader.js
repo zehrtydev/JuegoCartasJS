@@ -69,7 +69,7 @@ class AppHeader extends HTMLElement {
           <a class="gameMarquee poke-marquee flex items-center gap-3 px-5 py-3 focus:outline-none focus:ring-4 focus:ring-action" href="#home" data-view="home" aria-label="Ir al inicio de Card Battle Arena">
             <span class="gameMarquee__seal captureSeal hidden sm:block" aria-hidden="true"></span>
             <span>
-              <span class="gameMarquee__title block text-2xl font-black tracking-[0.08em] text-action sm:text-4xl">CARD BATTLE ARENA</span>
+              <span class="gameMarquee__title block text-xl font-black tracking-[0.05em] text-action sm:text-3xl">PROYECTO INTEGRADOR JS — CARD BATTLE ARENA</span>
               <span class="block text-center font-mono text-[0.62rem] font-black tracking-[0.28em] text-cream">TORNEO KANTO · GEN 1</span>
             </span>
             <span class="gameMarquee__seal captureSeal hidden sm:block" aria-hidden="true"></span>

@@ -139,15 +139,15 @@ export function applyAttack(attacker, defender, attack) {
   const multiplier = getTypeMultiplier(attackType, defenderType);
 
   const rawDamage = normalizeDamage(attack.baseDamage);
-  const typeDamage = Math.round(rawDamage * multiplier);
+  const typeDamage = multiplier === 0 ? Math.floor(Math.random() * 10) + 1 : Math.round(rawDamage * multiplier);
   const reduced = defender.isDefending ? applyDefenseReduction(typeDamage, true) : typeDamage;
   const nextHp = Math.max(0, (defender.hp || 250) - reduced);
   const finished = nextHp <= 0;
 
   const effectMsg = getTypeEffectivenessMessage(multiplier);
   let message = finished ? `${defender.name} fue derrotado.` : `${defender.name} recibió ${reduced} de daño.`;
-  if (multiplier === 0) {
-    message = `¡No tuvo efecto contra ${defender.name}! (0 daño)`;
+  if (multiplier === 0 && !finished) {
+    message = `¡Casi no tuvo efecto contra ${defender.name}! (${reduced} daño)`;
   } else if (effectMsg && !finished) {
     message = `${effectMsg} ${defender.name} recibió ${reduced} de daño.`;
   }
@@ -194,16 +194,16 @@ export function useSpecial(attacker, defender) {
   const multiplier = getTypeMultiplier(attackType, defenderType);
 
   const rawDamage = normalizeDamage(special.baseDamage);
-  const typeDamage = Math.round(rawDamage * multiplier);
+  const typeDamage = multiplier === 0 ? Math.floor(Math.random() * 10) + 1 : Math.round(rawDamage * multiplier);
   const reduced = defender.isDefending ? applyDefenseReduction(typeDamage, true) : typeDamage;
   const nextHp = Math.max(0, (defender.hp || 250) - reduced);
   const finished = nextHp <= 0;
 
   const effectMsg = getTypeEffectivenessMessage(multiplier);
   let message = `Poder especial usado: ${special.name}.`;
-  if (multiplier === 0) {
-    message = `¡${special.name} no tuvo efecto contra ${defender.name}! (0 daño)`;
-  } else if (effectMsg) {
+  if (multiplier === 0 && !finished) {
+    message = `¡${special.name} casi no tuvo efecto contra ${defender.name}! (${reduced} daño)`;
+  } else if (effectMsg && !finished) {
     message = `${special.name}: ${effectMsg} ${defender.name} recibió ${reduced} de daño.`;
   }
   if (finished) {

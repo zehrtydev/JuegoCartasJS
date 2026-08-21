@@ -48,14 +48,21 @@ class BattleArena extends HTMLElement {
     `
   }
 
-  #renderTeamCard(card) {
+  #renderTeamCard(card, isPlayerTeam, isActiveCard, isPlayerTurn, isFinished) {
     const imageUrl = card.imageUrl || card.image
-    const stateClass = card.defeated ? 'opacity-30 grayscale' : ''
+    const stateClass = card.defeated ? 'opacity-30 grayscale' : (isActiveCard ? 'ring-2 ring-action/80 bg-action/10' : '')
     const label = `${card.name}${card.defeated ? ' derrotado' : `, ${Math.max(0, card.hp)} PS`}`
 
+    const canSwitch = isPlayerTeam && !card.defeated && !isActiveCard && isPlayerTurn && !isFinished
+    const tag = canSwitch ? 'button' : 'div'
+    const buttonProps = canSwitch ? `type="button" class="action-btn w-full block transition hover:bg-brass/20 cursor-pointer" data-action="switch" data-attack-id="${card.id}"` : 'class="w-full h-full block"'
+    const hoverTitle = canSwitch ? `title="Cambiar a ${this.#escapeHtml(card.name)}"` : ''
+
     return `
-      <li class="border border-brass/60 bg-arena-deep/50 p-1 ${stateClass}" aria-label="${this.#escapeHtml(label)}">
-        <img src="${this.#escapeHtml(imageUrl)}" alt="${this.#escapeHtml(card.name)}" class="aspect-square w-full object-contain" />
+      <li class="border border-brass/60 bg-arena-deep/50 p-1 ${stateClass} ${canSwitch ? 'hover:border-brass' : ''}" aria-label="${this.#escapeHtml(label)}" ${hoverTitle}>
+        <${tag} ${buttonProps}>
+          <img src="${this.#escapeHtml(imageUrl)}" alt="${this.#escapeHtml(card.name)}" class="aspect-square w-full object-contain ${canSwitch ? 'hover:scale-105 transition-transform' : ''}" />
+        </${tag}>
       </li>
     `
   }
@@ -226,11 +233,11 @@ class BattleArena extends HTMLElement {
               <p class="font-mono text-xs font-bold tracking-wider text-cream">EQUIPOS RESTANTES</p>
               <p class="text-xs text-muted mt-2">Jugador:</p>
               <ul class="mt-1 grid grid-cols-5 gap-2" aria-label="Cartas restantes del jugador">
-                ${this.#battle.playerDeck.map((card) => this.#renderTeamCard(card)).join('')}
+                ${this.#battle.playerDeck.map((card) => this.#renderTeamCard(card, true, card.id === player?.id, isPlayerTurn, isFinished)).join('')}
               </ul>
               <p class="text-xs text-muted mt-2">Máquina:</p>
               <ul class="mt-1 grid grid-cols-5 gap-2" aria-label="Cartas restantes de la máquina">
-                ${this.#battle.machineDeck.map((card) => this.#renderTeamCard(card)).join('')}
+                ${this.#battle.machineDeck.map((card) => this.#renderTeamCard(card, false, card.id === machine?.id, isPlayerTurn, isFinished)).join('')}
               </ul>
             </div>
           </aside>

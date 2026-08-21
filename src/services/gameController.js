@@ -203,6 +203,47 @@ export function performPlayerAction(state, action, attackId = null) {
     return { success: false, message: 'Es el turno de la máquina.' };
   }
 
+  if (action === 'switch') {
+    const newCardId = attackId;
+    const newCard = state.playerDeck.find(c => c.id === newCardId);
+    if (!newCard || newCard.defeated || newCard.id === activePlayer.id || (newCard.hp || 0) <= 0) {
+      return { success: false, message: 'Carta inválida para cambio.' };
+    }
+
+    activePlayer.isDefending = false;
+    const oldIdx = state.playerDeck.findIndex(c => c.id === activePlayer.id);
+    if (oldIdx !== -1) {
+      state.playerDeck[oldIdx] = { ...activePlayer };
+    }
+
+    newCard.isDefending = false;
+    state.activePlayerCard = { ...newCard };
+    
+    state.log.push(`Jugador retira a ${activePlayer.name} y envía a ${newCard.name}.`);
+
+    state.currentTurn = 'machine';
+    if (state.activeMachineCard) {
+      const updatedNext = progressCardTurn(state.activeMachineCard);
+      state.activeMachineCard = updatedNext;
+      const mIdx = state.machineDeck.findIndex(c => c.id === updatedNext.id);
+      if (mIdx !== -1) {
+        state.machineDeck[mIdx] = { ...updatedNext };
+      }
+    }
+
+    return {
+      success: true,
+      result: {
+        damage: 0,
+        message: `Jugador retira a ${activePlayer.name} y envía a ${newCard.name}.`,
+        isKo: false,
+        relevo: true,
+        newActiveCard: newCard
+      },
+      state
+    };
+  }
+
   if (action === 'attack') {
     const attack = activePlayer.attacks?.[attackId] || activePlayer.attacks?.[0];
     if (!attack) {

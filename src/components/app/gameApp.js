@@ -9,7 +9,7 @@ import {
 } from '../../services/gameController.js'
 import { getPlayers } from '../../api/playersApi.js'
 import { getBattles } from '../../api/battlesApi.js'
-import { playBattleAudio, playViewBgm, stopBgm } from '../../services/audioService.js'
+import { playBattleAudio, playViewBgm, stopBgm, playBattleIntro } from '../../services/audioService.js'
 
 const viewLabels = {
   home: 'Inicio',
@@ -199,6 +199,7 @@ class GameApp extends HTMLElement {
       this.#battleEffect = null
       this.#currentView = 'arena'
       playViewBgm('arena')
+      playBattleIntro()
       this.#render()
       this.#scheduleMachineTurn()
     } else {
@@ -316,6 +317,7 @@ class GameApp extends HTMLElement {
     this.#currentView = 'result'
     stopBgm()
     playBattleAudio(result === 'win' ? 'victory' : 'defeat')
+    playViewBgm(result === 'win' ? 'result-win' : 'result-loss')
     this.#render()
   }
 

@@ -28,8 +28,18 @@ const bgmTracks = {
   pool: '/assets/audio/pokemon-win2.mp3',
   team: '/assets/audio/pokemon-win2.mp3',
   arena: '/assets/audio/pokemon-battle.mp3',
+  'result-win': '/assets/audio/pokemon-win.mp3',
+  'result-loss': '/assets/audio/pokemon-low-health.mp3',
   history: '/assets/audio/pokemon-historico.mp3',
   leaderboard: '/assets/audio/pokemon-theme-ranking.mp3',
+}
+
+/**
+ * Reproduce el efecto de inicio de batalla (one-shot, no loop)
+ * al mismo tiempo que el BGM de arena.
+ */
+export function playBattleIntro(volume = 0.45) {
+  playUrl('/assets/audio/pokemon-start-battle.mp3', volume)
 }
 
 let currentBgmAudio = null

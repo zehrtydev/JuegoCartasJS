@@ -2044,7 +2044,7 @@ body {
 }
 
 /* Módulos de juego: variante carbón/acero/rojo del sistema 16-bit. */
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .arenaStage {
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .arenaStage {
   overflow: hidden;
   border: 4px solid #111316;
   color: #e8eaed;
@@ -2055,7 +2055,7 @@ body {
   clip-path: var(--poke-pixel-cut);
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .arenaStage > header {
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .arenaStage > header {
   border: 0;
   border-bottom: 3px solid #111316;
   color: #eef0f2;
@@ -2065,20 +2065,20 @@ body {
   box-shadow: inset 2px 2px 0 #7b828c, inset -2px -2px 0 #0a0b0c;
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) h1,
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) h2 {
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) h1,
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) h2 {
   text-shadow: 2px 2px 0 #0a0b0c;
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-action { color: #f6c945 !important; }
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-success { color: #48bb78 !important; }
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-danger { color: #f06461 !important; }
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-warning { color: #ecc94b !important; }
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-action { color: #f6c945 !important; }
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-success { color: #48bb78 !important; }
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-danger { color: #f06461 !important; }
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-warning { color: #ecc94b !important; }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-cream { color: #eef0f2 !important; }
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-muted { color: #a8afb8 !important; }
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-cream { color: #eef0f2 !important; }
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-muted { color: #a8afb8 !important; }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button,
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button,
 .poolCarouselButton,
 .poolBuildButton {
   border: 2px solid #111316 !important;
@@ -2089,7 +2089,7 @@ body {
   transition: transform 120ms steps(2, end), filter 120ms steps(2, end), box-shadow 120ms steps(2, end);
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:hover:not(:disabled),
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:hover:not(:disabled),
 .poolCarouselButton:hover:not(:disabled),
 .poolBuildButton:hover:not(:disabled) {
   transform: translate(-1px, -1px);
@@ -2097,15 +2097,16 @@ body {
   box-shadow: inset 1px 1px 0 #969da6, inset -1px -1px 0 #090a0b, 5px 5px 0 #08090a;
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:active:not(:disabled),
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:active:not(:disabled),
 .poolCarouselButton:active:not(:disabled),
 .poolBuildButton:active:not(:disabled) {
   transform: translate(2px, 2px);
   box-shadow: inset 1px 1px 0 #111316, inset -1px -1px 0 #808790, 1px 1px 0 #08090a;
 }
 
-:is(team-builder, battle-result, match-history, leaderboard-view, admin-panel) .pixelButton,
+:is(player-register, pool-grid, team-builder, battle-result, match-history, leaderboard-view, admin-panel) .pixelButton,
 team-builder [data-confirm],
+pool-grid [data-confirm],
 admin-panel [data-confirm-delete],
 .poolBuildButton {
   color: #fff !important;
@@ -2119,7 +2120,7 @@ battle-arena [data-action="special"] {
   background: linear-gradient(180deg, #d95656 0 18%, #9e3035 18% 82%, #581a20 82%) !important;
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:disabled,
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:disabled,
 .poolCarouselButton:disabled,
 .poolBuildButton:disabled {
   color: #848a92 !important;
@@ -2127,8 +2128,8 @@ battle-arena [data-action="special"] {
   box-shadow: inset 1px 1px 0 #464a50, 2px 2px 0 #08090a;
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) input,
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) textarea {
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) input,
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) textarea {
   border: 2px solid #111316 !important;
   color: #17191d !important;
   background: linear-gradient(180deg, #f2f3f4 0 72%, #9aa1aa 72%) !important;
@@ -2136,8 +2137,8 @@ battle-arena [data-action="special"] {
   clip-path: var(--poke-pixel-cut);
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) input:focus,
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) textarea:focus {
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) input:focus,
+:is(player-register, pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) textarea:focus {
   outline: 3px solid #ef625d;
   outline-offset: 3px;
 }
@@ -2148,6 +2149,9 @@ battle-arena [aria-labelledby="actions-title"],
 battle-arena aside,
 .historyRecord,
 .leaderboardRow,
+player-register [data-player-id],
+player-register .trainerSpriteFrame,
+pool-grid .poolTeamSlot,
 admin-panel .adminCardForm,
 admin-panel .adminCatalog,
 admin-panel .adminCardRow,

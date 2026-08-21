@@ -175,8 +175,11 @@ class PoolGrid extends HTMLElement {
             <p class="font-mono text-xs font-bold tracking-[0.2em] text-action">PREPARACIÓN DE BATALLA</p>
             <h1 class="mt-1 text-2xl font-black tracking-[0.06em] text-cream sm:text-3xl" id="pool-title">ELIGE TU EQUIPO</h1>
           </div>
-          <div class="border border-brass bg-surface px-4 py-2 font-mono text-sm font-bold tracking-wider text-cream">
-            SELECCIONADOS: <strong class="text-action">${selectedCards.length} / 5</strong>
+          <div class="flex items-center gap-4">
+            <span class="border border-brass/60 bg-arena-deep/60 px-3 py-1.5 font-mono text-xs font-bold tracking-wider text-cream">
+              SELECCIONADOS: <strong class="text-action">${selectedCards.length} / 5</strong>
+            </span>
+            <span class="captureSeal" aria-hidden="true"></span>
           </div>
         </header>
         

@@ -60,10 +60,9 @@ class AppHeader extends HTMLElement {
   }
 
   #render() {
-    const isHome = this.#activeView === 'home'
     this.innerHTML = `
-      <header class="gameHeader ${isHome ? 'gameHeader--home' : ''}">
-        <div class="gameTopBar ${isHome ? 'gameHeader__homeInner' : ''}">
+      <header class="gameHeader">
+        <div class="gameTopBar">
           <a class="gameMarquee poke-marquee flex items-center gap-3 px-5 py-3 focus:outline-none focus:ring-4 focus:ring-action" href="#home" data-view="home" aria-label="Ir al inicio de Card Battle Arena">
             <span class="gameMarquee__seal captureSeal hidden sm:block" aria-hidden="true"></span>
             <span>

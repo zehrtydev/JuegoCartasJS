@@ -86,14 +86,19 @@ class BattleArena extends HTMLElement {
 
     const canSwitch = isPlayerTeam && !card.defeated && !isActiveCard && isPlayerTurn && !isFinished
     const tag = canSwitch ? 'button' : 'div'
-    const buttonProps = canSwitch ? `type="button" class="action-btn w-full block transition hover:bg-brass/20 cursor-pointer" data-action="switch" data-attack-id="${card.id}"` : 'class="w-full h-full block flex flex-col items-center justify-center"'
+    const buttonProps = canSwitch 
+      ? `type="button" class="action-btn w-full h-full flex flex-col items-center justify-between transition hover:bg-brass/20 cursor-pointer" data-action="switch" data-attack-id="${card.id}"` 
+      : 'class="w-full h-full flex flex-col items-center justify-between"'
     const hoverTitle = canSwitch ? `title="Cambiar a ${this.#escapeHtml(card.name)}"` : ''
+
+    const actionText = canSwitch ? 'Cambiar' : '&nbsp;'
+    const actionClass = canSwitch ? 'bg-brass text-cream shadow' : 'opacity-0'
 
     return `
       <li class="border border-brass/60 bg-arena-deep/50 p-1 flex flex-col ${stateClass} ${canSwitch ? 'hover:border-brass' : ''}" aria-label="${this.#escapeHtml(label)}" ${hoverTitle}>
         <${tag} ${buttonProps}>
           <img src="${this.#escapeHtml(spriteUrl)}" alt="${this.#escapeHtml(card.name)}" class="aspect-square w-full object-contain pixel-sprite ${canSwitch ? 'hover:scale-105 transition-transform' : ''}" style="transform: scale(${scale})" />
-          ${canSwitch ? `<span class="block mt-1 bg-brass text-cream font-mono text-[0.6rem] font-bold py-0.5 rounded text-center w-full uppercase shadow">Cambiar</span>` : ''}
+          <span class="block mt-1 font-mono text-[0.6rem] font-bold py-0.5 rounded text-center w-full uppercase ${actionClass}">${actionText}</span>
         </${tag}>
       </li>
     `

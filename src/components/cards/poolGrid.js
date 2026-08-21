@@ -147,7 +147,7 @@ class PoolGrid extends HTMLElement {
     return `
       <li class="poolTeamSlot poolTeamSlot--filled" draggable="true" data-slot-index="${index}" aria-label="Espacio ${index + 1}: ${name}">
         <span class="poolTeamSlot__position">${index + 1}</span>
-        <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" style="--sprite-scale: ${this.#getSpriteScale(card) * 1.3}" aria-hidden="true">
+        <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" style="--sprite-scale: ${this.#getSpriteScale(card) * 1.65}" aria-hidden="true">
           <img src="${this.#escapeHtml(this.#getSpriteUrl(card))}" alt="" />
         </i>
         <strong class="poolTeamSlot__name">${name}</strong>

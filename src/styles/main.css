@@ -1578,40 +1578,25 @@
   }
 
   @media (max-width: 1100px) {
-    .gameTopBar {
-      flex-direction: column;
-      justify-content: center;
-      gap: 0.65rem;
-      padding: 0.75rem 0;
-    }
-
-    .gameTopBar__navigation {
-      justify-items: center;
-    }
-
-    .gameHeader--home .gameMarquee {
-      width: min(78vw, 48rem);
-    }
-
     .registrationScene {
       background-position: 50% top;
-      background-size: auto 100%;
+      background-size: cover;
     }
 
     .registrationLayout {
       grid-template-columns: 1fr;
-      gap: 0.75rem;
-      padding-top: clamp(12rem, 24vh, 15rem);
+      gap: 1.25rem;
+      padding: 1rem 0;
     }
 
     .trainerConsole {
-      width: min(100%, 54rem);
+      width: min(100%, 42rem);
       justify-self: center;
       transform: none;
     }
 
     .profileLedger {
-      width: min(100%, 30rem);
+      width: min(100%, 26rem);
       justify-self: center;
       margin-top: 0;
       transform: none;
@@ -1619,56 +1604,16 @@
   }
 
   @media (max-width: 600px) {
-    .gameTopBar {
-      width: min(calc(100% - 1rem), 38rem);
-      min-height: auto;
-    }
-
-    .gameTopBar .gameMarquee {
-      width: 100%;
-      justify-content: center;
-      padding: 0.8rem 0.65rem;
-    }
-
-    .gameTopBar .gameMarquee__title {
-      font-size: clamp(1.15rem, 7vw, 1.65rem);
-      letter-spacing: 0.04em;
-      text-align: center;
-      text-shadow: 2px 2px 0 #6f4e12;
-    }
-
-    .gameTopBar__navigation nav {
-      width: 100%;
-    }
-
-    .gameHeader__homeInner {
-      padding: 0.75rem 0.5rem 0;
-    }
-
-    .gameHeader--home .gameMarquee {
-      width: 100%;
-      padding: 0.8rem 0.65rem;
-    }
-
-    .gameHeader--home .gameMarquee__title {
-      font-size: clamp(1.15rem, 7vw, 1.65rem);
-      letter-spacing: 0.04em;
-      text-align: center;
-      text-shadow: 2px 2px 0 #6f4e12;
-    }
-
     .registrationScene {
       background-position: 50% top;
-      background-size: auto 100%;
+      background-size: cover;
     }
 
     .registrationLayout {
-      gap: 0.5rem;
-      padding: 11rem 0.35rem 1.5rem;
+      gap: 1rem;
+      padding: 0.5rem 0 1rem;
     }
 
-    /* Los paneles usan marcos rasterizados; se declaran de forma explícita
-       en móvil para mantenerlos al combinar los modificadores pixel-panel. */
     .trainerConsole.pixel-panel--console {
       background: url('/assets/images/ui/trainerConsoleFrame.png') center / 100% 100% no-repeat;
     }
@@ -1738,7 +1683,7 @@
     .profileLedger__tab {
       width: auto;
       margin: 11% 16% 0;
-      padding: 0.5rem;
+      padding: 0.4rem;
     }
 
     .profileLedger__tab h2 {
@@ -2250,62 +2195,160 @@ pool-grid .poolTeamSlot {
   box-shadow: inset 1px 1px 0 #757c85, inset -1px -1px 0 #090a0b, 3px 3px 0 #08090a;
 }
 
-/* La cabecera es un overlay único: Inicio y los módulos no usan barras distintas. */
-.gameHeader {
-  position: absolute;
+/* ==========================================================================
+   SISTEMA DE LAYOUT RESPONSIVE Y CABECERA FLUIDA
+   ========================================================================== */
+
+/* Cabecera integrada en el flujo: nunca colisiona ni se solapa con el contenido */
+app-header {
+  display: block;
   width: 100%;
-  border-bottom: 0;
-  background: transparent;
-  box-shadow: none;
+  position: relative;
+  z-index: 30;
+  flex: 0 0 auto;
 }
 
-.gameHeader::before { display: none; }
+.gameHeader {
+  width: 100%;
+  position: relative;
+  border-bottom: 0;
+  background: linear-gradient(180deg, rgba(16, 18, 22, 0.96) 0%, rgba(16, 18, 22, 0.8) 75%, transparent 100%);
+  box-shadow: none;
+  padding: 0.65rem 0 0.4rem;
+}
+
+.gameHeader::before {
+  display: none;
+}
 
 .gameHeader .gameTopBar {
-  width: min(calc(100% - 2rem), 104rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(calc(100% - 2rem), 96rem);
   max-width: none;
-  padding-top: clamp(1.5rem, 3vh, 2.25rem);
+  margin: 0 auto;
+  min-height: auto;
+  padding: 0;
 }
 
 .gameHeader .gameMarquee {
-  width: min(62vw, 62rem);
-  justify-content: center;
-  padding-block: clamp(1.1rem, 2.4vh, 1.6rem);
+  flex: 0 0 auto;
+  max-width: max-content;
+  width: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1.15rem;
+  border: 4px solid #111316;
+  color: #eef0f2;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #51565e 0 10%, #292c31 10% 84%, #121417 84%);
+  box-shadow: inset 3px 3px 0 #858b94, inset -3px -3px 0 #050607, 4px 4px 0 #050607;
+  clip-path: var(--poke-pixel-cut);
+  text-decoration: none;
+  transition: filter 120ms ease;
 }
 
-.gameMain {
-  min-height: 100svh;
-  background-color: #08090a;
-  background-image:
-    linear-gradient(rgba(5, 6, 8, 0.28), rgba(5, 6, 8, 0.58)),
-    url('/assets/images/ui/kantoLeagueHall.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
+.gameHeader .gameMarquee:hover {
+  filter: brightness(1.08);
 }
 
-/* El salón se pinta una sola vez en gameMain; las escenas internas no lo repiten. */
-.registrationScene,
-.poolScene {
-  background-color: transparent;
-  background-image: none;
+.gameHeader .gameMarquee__seal {
+  flex: 0 0 auto;
+  width: 1.9rem;
+  height: 1.9rem;
 }
 
-/* El perfil es un libro ilustrado, no una card CSS: muestra su frame recoloreado. */
-.poke-scope .profileLedger.poke-panel {
+.gameHeader .gameMarquee__title {
+  color: #ec5755 !important;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: clamp(1.2rem, 1.8vw, 1.85rem) !important;
+  letter-spacing: 0.06em;
+  text-shadow: 2px 2px 0 #0c0d0f;
+  line-height: 1;
+}
+
+.gameTopBar__navigation {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.gameTopBar__preview {
+  margin: 0;
+  color: var(--color-action);
+  font-family: ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.gameHeader .poke-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  margin: 0;
   padding: 0;
-  border: 0;
-  background-color: transparent;
-  background-image: url('/assets/images/ui/profileLedgerFrame.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  box-shadow: none;
-  clip-path: none;
+  list-style: none;
 }
 
-/* La página y el footer comparten el mismo remate oscuro, sin corte de degradado. */
+.gameHeader .poke-nav .gameNavLink,
+.gameHeader .poke-nav .poke-nav__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  padding: 0.32rem 0.55rem;
+  border: 2px solid #0b0c0e;
+  color: #f3eee5;
+  font-family: ui-monospace, monospace;
+  font-size: clamp(0.62rem, 0.72vw, 0.72rem);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  background: linear-gradient(180deg, #4b5058 0 14%, #24272c 14% 82%, #111316 82%);
+  box-shadow: inset 1px 1px 0 #838991, inset -1px -1px 0 #050607, 3px 3px 0 #050607;
+  clip-path: var(--poke-pixel-cut);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 120ms steps(2, end), box-shadow 120ms steps(2, end), filter 120ms steps(2, end);
+}
+
+.gameHeader .poke-nav .gameNavLink::after { display: none; }
+
+.gameHeader .poke-nav .gameNavLink:hover,
+.gameHeader .poke-nav .gameNavLink--active {
+  border-color: #4c171c;
+  color: #fff;
+  background: linear-gradient(180deg, #ee716a 0 18%, #c64043 18% 82%, #6f2026 82%);
+  box-shadow: inset 1px 1px 0 #ffb2a9, inset -1px -1px 0 #4f161b, 3px 3px 0 #08090a;
+}
+
+.gameHeader .poke-nav a.gameNavLink:hover {
+  transform: translate(-1px, -1px);
+  filter: brightness(1.08);
+  box-shadow: inset 1px 1px 0 #ffb2a9, inset -1px -1px 0 #4f161b, 4px 4px 0 #08090a;
+}
+
+.gameHeader .poke-nav a.gameNavLink:active {
+  transform: translate(2px, 2px);
+  filter: brightness(0.96);
+  box-shadow: inset 1px 1px 0 #4f161b, inset -1px -1px 0 #ffb2a9, 1px 1px 0 #08090a;
+}
+
+.gameHeader .poke-nav .gameNavLink--locked {
+  color: #7f858d;
+  background: linear-gradient(180deg, #33363b 0 18%, #202226 18% 82%, #111214 82%);
+  box-shadow: inset 1px 1px 0 #555a62, inset -1px -1px 0 #08090a, 2px 2px 0 #08090a;
+}
+
+/* Escenario principal y envoltorio raíz */
 :root,
 body {
   min-height: 100%;
@@ -2314,42 +2357,294 @@ body {
   background-attachment: fixed;
 }
 
+#app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 game-app {
   display: flex;
-  min-height: 100svh;
+  min-height: 100vh;
+  min-height: 100dvh;
   flex-direction: column;
-  background: linear-gradient(180deg, #25292f 0%, #101216 38%, #090a0c 78%, #171a1f 100%);
+  width: 100%;
+  background-color: #08090a;
+  background-image:
+    linear-gradient(rgba(5, 6, 8, 0.32), rgba(5, 6, 8, 0.62)),
+    url('/assets/images/ui/kantoLeagueHall.png');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
-/* El footer acompaña al contenido: no se reserva un viewport entero de piso vacío. */
-game-app .gameMain {
+.gameMain {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
   min-height: 0;
+}
+
+.registrationScene,
+.poolScene {
+  background-color: transparent;
+  background-image: none;
+}
+
+/* Escena de Registro y Cuaderno */
+.registrationScene {
+  position: relative;
+  width: 100%;
+  padding: clamp(0.5rem, 1.5vh, 1.5rem) 0 clamp(1rem, 2vh, 2rem);
+}
+
+.registrationLayout {
+  position: relative;
+  display: grid;
+  width: min(calc(100% - 2rem), 76rem);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.trainerConsole {
+  position: relative;
+  width: 100%;
+  max-width: 44rem;
+  justify-self: center;
+  aspect-ratio: 3 / 2;
+  background-image: url('/assets/images/ui/trainerConsoleFrame.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(8px 8px 0 rgba(5, 4, 3, 0.75));
+  image-rendering: pixelated;
+  transform: none;
+}
+
+.trainerConsole__content {
+  display: flex;
+  gap: clamp(0.75rem, 1.8vw, 1.5rem);
+  align-items: center;
+  height: 100%;
+  padding: 19% 13% 25%;
+  box-sizing: border-box;
+}
+
+.trainerSpriteFrame {
+  flex: 0 0 clamp(6.5rem, 24%, 9.5rem);
+  border: 3px solid #111316;
+  background: #e6e9ed;
+  box-shadow: inset 0 0 0 2px #6e747c, 3px 3px 0 #08090a;
+}
+
+.trainerSpriteFrame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.trainerConsole__formColumn {
+  min-width: 0;
+  flex: 1;
+}
+
+.trainerConsole__title {
+  color: #fff6d8;
+  font-family: ui-monospace, monospace;
+  font-size: clamp(0.75rem, 1.15vw, 1rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.trainerForm {
+  margin-top: 0.65rem;
+}
+
+.trainerLabel {
+  display: block;
+  color: #f6c945;
+  font-family: ui-monospace, monospace;
+  font-size: clamp(0.62rem, 0.8vw, 0.72rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.trainerInput {
+  width: 100%;
+  min-height: 2.5rem;
+  margin-top: 0.35rem;
+  border: 3px solid var(--poke-ink);
+  color: var(--poke-ink);
+  background: linear-gradient(180deg, #f4f5f6 0 72%, #9aa1aa 72%);
+  box-shadow: inset 2px 2px 0 #737982, inset -2px -2px 0 #fff, 3px 3px 0 var(--poke-ink);
+  padding: 0.5rem 0.75rem;
+  font-family: ui-monospace, monospace;
+  font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+  box-sizing: border-box;
+}
+
+.trainerHelp {
+  margin-top: 0.25rem;
+  color: #a8afb8;
+  font-size: 0.62rem;
+  line-height: 1.2;
+}
+
+.gameStartButton {
+  width: 100%;
+  min-height: 2.6rem;
+  margin-top: 0.65rem;
+  border: 3px solid var(--poke-ink);
+  background: linear-gradient(180deg, #ef7672 0 18%, #c64043 18% 82%, #6f2026 82%);
+  padding: 0.5rem 1rem;
+  color: #fff;
+  font-family: ui-monospace, monospace;
+  font-size: clamp(0.68rem, 0.85vw, 0.78rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: inset 2px 2px 0 #ffaaa1, inset -2px -2px 0 #4f161b, 4px 4px 0 var(--poke-ink);
+  cursor: pointer;
+  transition: filter 120ms ease, transform 120ms steps(2, end);
+}
+
+.poke-scope .profileLedger.poke-panel,
+.profileLedger {
+  position: relative;
+  width: 100%;
+  max-width: 25rem;
+  justify-self: center;
+  aspect-ratio: 2 / 3;
+  border: 0;
+  padding: 0;
+  background-color: transparent;
+  background-image: url('/assets/images/ui/profileLedgerFrame.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #2f2519;
+  filter: drop-shadow(8px 8px 0 rgba(5, 4, 3, 0.75));
+  image-rendering: pixelated;
+  box-shadow: none;
+  clip-path: none;
+  margin-top: 0;
+  transform: none;
+}
+
+.profileLedger__tab {
+  width: auto;
+  max-width: 84%;
+  min-width: 11.5rem;
+  margin: calc(7% + 16px) auto 0;
+  border: 3px solid #17191d;
+  color: #fff;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #5c6169 0 16%, #35393f 16% 82%, #1d2024 82%);
+  box-shadow: inset 2px 2px 0 #949aa3, inset -2px -2px 0 #111214, 3px 3px 0 #111214;
+  clip-path: var(--poke-pixel-cut);
+  padding: 0.42rem 0.65rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.profileLedger__tab h2 {
+  color: #ef5b58;
+  font-family: ui-monospace, monospace;
+  font-size: clamp(0.65rem, 0.85vw, 0.76rem);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.profileLedger__page {
+  height: 65%;
+  margin: 0 25% 0 14%;
+  padding: 0.85rem 0.4rem 8% 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #8c5f1d rgba(111, 78, 18, 0.2);
+  scrollbar-width: thin;
+}
+
+.profileSelectButton {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  min-height: 2.6rem;
+  padding: 0.5rem 0.75rem !important;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.profileAlias {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(0.72rem, 0.85vw, 0.82rem);
+  color: #17191d;
+}
+
+.profilePoints {
   flex: 0 0 auto;
+  font-size: clamp(0.68rem, 0.8vw, 0.78rem);
+  font-weight: 900;
+  white-space: nowrap;
+  color: #2b611e !important;
 }
 
-game-app .registrationScene {
-  min-height: 0;
-}
-
+/* Pie de página */
 app-footer {
   display: block;
-  margin-top: 0;
+  flex: 0 0 auto;
+  margin-top: auto;
 }
 
 .gameFooter {
-  min-height: 3.75rem;
+  min-height: 3.25rem;
   border-top: 3px solid #6f2026;
   color: #c8cdd3;
   background:
     repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 4px),
     linear-gradient(180deg, #292d33 0 10%, #15171a 10% 82%, #08090a 82%);
   box-shadow: inset 0 2px 0 #555b64, 0 -3px 0 #08090a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+}
+
+.gameFooter p {
+  margin: 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
 }
 
 .gameFooter span,
-.gameFooter strong { color: #ef625d; }
+.gameFooter strong {
+  color: #ef625d;
+}
 
-/* Historial: tarjetas claras para separar visualmente partidas sin perder el acento rojo. */
+/* Historial: tarjetas de registro de batalla */
 match-history .historyRecord,
 match-history .historyRecord--win,
 match-history .historyRecord--loss {
@@ -2385,267 +2680,94 @@ match-history .historyDeck li {
   box-shadow: 2px 2px 0 #696f78;
 }
 
+/* Contenedor general para módulos de juego */
 .gameMain > :is(pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) {
   display: block;
-  min-height: 100svh;
-  padding: clamp(8.5rem, 13vw, 12rem) 1rem 2rem;
+  width: min(calc(100% - 2rem), 84rem);
+  margin: 0 auto;
+  padding: clamp(0.75rem, 2vh, 2rem) 0 clamp(1.25rem, 3vh, 2.5rem);
+  box-sizing: border-box;
 }
 
-@media (max-width: 1100px) {
-  .gameHeader .gameMarquee { width: min(78vw, 48rem); }
+/* Media Queries Responsivas */
+@media (max-width: 1040px) {
+  .gameHeader .gameTopBar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .gameTopBar__navigation {
+    align-items: center;
+    width: 100%;
+  }
+
+  .gameHeader .poke-nav {
+    justify-content: center;
+  }
+
+  .registrationLayout {
+    grid-template-columns: 1fr;
+    max-width: 34rem;
+    gap: 1.25rem;
+  }
+
+  .trainerConsole {
+    max-width: 34rem;
+  }
+
+  .profileLedger {
+    max-width: 25rem;
+  }
 }
 
 @media (max-width: 600px) {
-  .gameHeader .gameTopBar {
-    width: min(calc(100% - 1rem), 38rem);
-    padding: 0.75rem 0.5rem 0;
+  .gameHeader {
+    padding: 0.45rem 0.25rem;
   }
 
-  .gameHeader .gameMarquee { width: 100%; }
-
-  .gameMain > :is(pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) {
-    padding: 10.5rem 0.5rem 1.5rem;
-  }
-}
-
-#app {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-}
-
-.game-shell {
-  width: min(1000px, 92vw);
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 22px;
-  padding: 2rem;
-  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.7);
-}
-
-.status-panel {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.eyebrow {
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #facc15;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.status-panel h1 {
-  margin: 0.5rem 0 0;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-}
-
-.subtitle {
-  color: #cbd5e1;
-  margin-top: 0.5rem;
-}
-
-.game-summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.summary-card,
-.fighter,
-.rules-panel {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 16px;
-  padding: 1rem;
-}
-
-.summary-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.label {
-  color: #94a3b8;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.summary-card strong {
-  font-size: 1.25rem;
-}
-
-.battle-preview {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.fighter {
-  min-height: 150px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.fighter h2 {
-  margin: 0 0 0.6rem;
-}
-
-.fighter p {
-  margin: 0;
-  font-weight: 700;
-  color: #f8fafc;
-}
-
-.fighter small {
-  color: #94a3b8;
-  margin-top: 0.5rem;
-}
-
-.rules-panel h3 {
-  margin-top: 0;
-}
-
-.rules-panel ul {
-  margin: 0.75rem 0 0;
-  padding-left: 1.2rem;
-  color: #cbd5e1;
-}
-
-.rules-panel li + li {
-  margin-top: 0.45rem;
-}
-
-@media (max-width: 700px) {
-  .game-summary,
-  .battle-preview {
-    grid-template-columns: 1fr;
+  .gameHeader .gameMarquee {
+    padding: 0.45rem 0.75rem;
+    gap: 0.5rem;
   }
 
-  .game-shell {
-    padding: 1.25rem;
-  }
-}
-
-/* Escritorio: una sola escena completa. El scroll se reserva para móviles. */
-@media (min-width: 601px) {
-  html,
-  body,
-  #app {
-    width: 100%;
-    height: 100svh;
-    min-height: 0;
-    overflow: hidden;
+  .gameHeader .gameMarquee__seal {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
-  #app {
-    display: block;
+  .gameHeader .gameMarquee__title {
+    font-size: 1.2rem !important;
   }
 
-  game-app {
-    height: 100%;
-    min-height: 100%;
+  .gameHeader .poke-nav .gameNavLink {
+    min-height: 1.9rem;
+    padding: 0.28rem 0.45rem;
+    font-size: 0.62rem;
   }
 
-  game-app .gameMain {
-    min-height: 0;
-    flex: 1 1 auto;
-    overflow: hidden;
+  .registrationLayout {
+    gap: 1rem;
+    padding: 0.5rem 0;
   }
 
-  game-app .registrationScene,
-  game-app .registrationLayout {
-    height: 100%;
-    min-height: 0;
+  .trainerConsole__content {
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 20% 9% 27%;
   }
 
-  game-app .registrationLayout {
-    padding-block: clamp(0.5rem, 1.5vh, 1rem);
+  .trainerSpriteFrame {
+    flex: 0 0 clamp(4rem, 24%, 5.25rem);
   }
 
-  /* El libro y la consola se reducen con la altura disponible, no fuerzan scroll. */
-  game-app .profileLedger {
-    width: auto;
-    height: min(68svh, 42rem);
-    max-width: 100%;
+  .profileLedger__tab {
+    min-width: 9rem;
+    padding: 0.35rem 0.5rem;
   }
 
-  game-app .trainerConsole {
-    width: min(100%, clamp(29rem, 45vw, 48rem));
-  }
-
-  game-app .gameMain > :is(pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) {
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  app-footer,
-  .gameFooter {
-    flex: 0 0 auto;
-  }
-}
-
-/* En portátiles bajos compactamos los módulos densos para conservar todos sus controles visibles. */
-@media (min-width: 601px) and (max-height: 800px) {
-  game-app .gameMain > :is(pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) {
-    zoom: 0.78;
-    width: 128.205%;
-    padding-top: 8.5rem;
-    padding-bottom: 0.75rem;
-  }
-}
-
-/* Composición de escritorio alto: cada pantalla ocupa su zona de arena. */
-@media (min-width: 601px) and (min-height: 801px) {
-  game-app .gameMain > player-register {
-    display: block;
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  game-app .registrationLayout {
-    transform: translateY(1rem);
-  }
-
-  game-app .trainerConsole {
-    transform: translateY(1rem);
-  }
-
-  game-app .profileLedger {
-    height: min(66svh, 39rem);
-  }
-
-  /* Consolas de juego: suben bajo el encabezado y dejan un margen claro al footer. */
-  game-app .gameMain > pool-grid {
-    padding: 7rem 1rem 6.5rem;
-  }
-
-  game-app .gameMain > :is(team-builder, battle-arena, match-history) {
-    padding: 9rem 1rem 6.5rem;
-  }
-
-  /* Resultado y ranking conservan su cabecera y amplían el cuerpo para llenar el centro. */
-  game-app .gameMain > battle-result .arenaStage {
-    display: flex;
-    min-height: 32rem;
-    flex-direction: column;
-  }
-
-  game-app .gameMain > leaderboard-view .arenaStage {
-    display: flex;
-    min-height: 34.25rem;
-    flex-direction: column;
-  }
-
-  game-app .gameMain > :is(battle-result, leaderboard-view) .arenaStage > div:last-child {
-    flex: 1 1 auto;
+  .profileLedger__tab h2 {
+    font-size: 0.62rem;
   }
 }

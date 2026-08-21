@@ -74,6 +74,68 @@ test('evaluateBattleEnd detecta al ganador cuando un mazo queda sin cartas vivas
   assert.equal(evaluateBattleEnd(playerDeck, machineDeck), 'machine');
 });
 
+test('applyAttack decrementa los usos del ataque y falla cuando llega a cero', () => {
+  const attacker = {
+    id: 'p1',
+    name: 'Pikachu',
+    type: 'Eléctrico',
+    attacks: [{ id: 'atk-1', name: 'Impactrueno', baseDamage: 20, currentUses: 1, maxUses: 5 }],
+  };
+  const defender = { id: 'm1', name: 'Squirtle', type: 'Agua', hp: 200, isDefending: false };
+
+  const firstUse = applyAttack(attacker, defender, attacker.attacks[0]);
+  assert.equal(firstUse.success, true);
+  assert.equal(firstUse.attacker.attacks[0].currentUses, 0);
+
+  const secondUse = applyAttack(firstUse.attacker, firstUse.defender, firstUse.attacker.attacks[0]);
+  assert.equal(secondUse.success, false);
+  assert.equal(secondUse.damage, 0);
+  assert.ok(secondUse.message.includes('sin usos'));
+});
+
+test('useSpecial decrementa los usos del especial y falla cuando llega a cero', () => {
+  const attacker = {
+    id: 'p1',
+    name: 'Charmander',
+    type: 'Fuego',
+    hp: 250,
+    turnCount: 2,
+    special: { name: 'Llamarada', baseDamage: 65, unlockTurn: 2, cooldown: 3, currentUses: 1, maxUses: 2 },
+    specialCooldown: 0,
+  };
+  const defender = { id: 'm1', name: 'Bulbasaur', type: 'Planta', hp: 250, isDefending: false };
+
+  const firstUse = useSpecial(attacker, defender);
+  assert.equal(firstUse.success, true);
+  assert.equal(firstUse.attacker.special.currentUses, 0);
+
+  const secondUse = useSpecial(firstUse.attacker, firstUse.defender);
+  assert.equal(secondUse.success, false);
+  assert.equal(secondUse.damage, 0);
+  assert.ok(secondUse.message.includes('sin usos'));
+});
+
+test('applyAttack aplica multiplicador x2 para debilidad (Fuego contra Planta)', () => {
+  const attacker = { id: 'p1', name: 'Charmander', type: 'Fuego', attacks: [{ name: 'Ascuas', baseDamage: 20 }] };
+  const defender = { id: 'm1', name: 'Bulbasaur', type: 'Planta', hp: 250, isDefending: false };
+
+  const result = applyAttack(attacker, defender, attacker.attacks[0]);
+  assert.equal(result.multiplier, 2);
+  assert.equal(result.effectMessage, '¡Es muy eficaz!');
+  // 20 * ~1 * 2 = 34 - 46
+  assert.ok(result.damage >= 34 && result.damage <= 46);
+});
+
+test('applyAttack aplica multiplicador x0 para inmunidad (Normal contra Fantasma)', () => {
+  const attacker = { id: 'p1', name: 'Meowth', type: 'Normal', attacks: [{ name: 'Golpe', baseDamage: 20 }] };
+  const defender = { id: 'm1', name: 'Gengar', type: 'Fantasma', hp: 250, isDefending: false };
+
+  const result = applyAttack(attacker, defender, attacker.attacks[0]);
+  assert.equal(result.multiplier, 0);
+  assert.equal(result.damage, 0);
+  assert.equal(result.defender.hp, 250);
+});
+
 test('replaceDefeatedCard devuelve la siguiente carta activa si existe', () => {
   const deck = [
     { id: 'p1', name: 'A', hp: 0, defeated: true },
@@ -84,3 +146,4 @@ test('replaceDefeatedCard devuelve la siguiente carta activa si existe', () => {
   const { nextCard } = replaceDefeatedCard(deck, deck[0]);
   assert.equal(nextCard.name, 'B');
 });
+

@@ -1,23 +1,70 @@
 import { normalizeDamage, getNextTurn, applyDefenseReduction } from '../utils/battleEngine.js';
+import { getTypeMultiplier, getTypeEffectivenessMessage } from '../utils/typeEffectiveness.js';
+
+export const MAX_ATTACK_USES = 5;
+export const MAX_SPECIAL_USES = 2;
+
+function initializeCardForBattle(card) {
+  if (!card) return null;
+
+  const attacks = Array.isArray(card.attacks) && card.attacks.length > 0
+    ? card.attacks.map((atk, idx) => ({
+        ...atk,
+        id: atk.id || `attack-0${idx + 1}`,
+        name: atk.name || `Ataque ${idx + 1}`,
+        baseDamage: atk.baseDamage ?? 25,
+        type: atk.type || card.type || 'Normal',
+        maxUses: atk.maxUses ?? MAX_ATTACK_USES,
+        currentUses: atk.currentUses ?? atk.maxUses ?? MAX_ATTACK_USES,
+      }))
+    : [
+        {
+          id: 'attack-01',
+          name: 'Ataque básico',
+          baseDamage: 25,
+          type: card.type || 'Normal',
+          maxUses: MAX_ATTACK_USES,
+          currentUses: MAX_ATTACK_USES,
+        },
+      ];
+
+  const special = card.special
+    ? {
+        ...card.special,
+        name: card.special.name || 'Poder Especial',
+        baseDamage: card.special.baseDamage ?? 65,
+        type: card.special.type || card.type || 'Normal',
+        unlockTurn: card.special.unlockTurn ?? 2,
+        cooldown: card.special.cooldown ?? 3,
+        maxUses: card.special.maxUses ?? MAX_SPECIAL_USES,
+        currentUses: card.special.currentUses ?? card.special.maxUses ?? MAX_SPECIAL_USES,
+      }
+    : {
+        name: 'Poder Especial',
+        baseDamage: 65,
+        type: card.type || 'Normal',
+        unlockTurn: 2,
+        cooldown: 3,
+        maxUses: MAX_SPECIAL_USES,
+        currentUses: MAX_SPECIAL_USES,
+      };
+
+  return {
+    ...card,
+    type: card.type || 'Normal',
+    hp: card.hp ?? 250,
+    defeated: false,
+    isDefending: false,
+    specialCooldown: 0,
+    turnCount: 0,
+    attacks,
+    special,
+  };
+}
 
 export function createBattleState(playerDeck = [], machineDeck = [], starter = 'player') {
-  const finalPlayerDeck = playerDeck.map((card) => ({
-    ...card,
-    hp: card.hp ?? 250,
-    defeated: false,
-    isDefending: false,
-    specialCooldown: 0,
-    turnCount: 0
-  }));
-
-  const finalMachineDeck = machineDeck.map((card) => ({
-    ...card,
-    hp: card.hp ?? 250,
-    defeated: false,
-    isDefending: false,
-    specialCooldown: 0,
-    turnCount: 0
-  }));
+  const finalPlayerDeck = playerDeck.map(initializeCardForBattle);
+  const finalMachineDeck = machineDeck.map(initializeCardForBattle);
 
   const state = {
     playerDeck: finalPlayerDeck,
@@ -27,7 +74,7 @@ export function createBattleState(playerDeck = [], machineDeck = [], starter = '
     activeMachineCard: finalMachineDeck[0] ? { ...finalMachineDeck[0] } : null,
     winner: null,
     log: [],
-    battleFinished: false
+    battleFinished: false,
   };
 
   // The starting card begins its first active turn (turnCount = 1)
@@ -64,20 +111,56 @@ export function prepareCardForTurn(card) {
 
 export function applyAttack(attacker, defender, attack) {
   if (!attacker || !defender || !attack) {
-    return { damage: 0, defender, attacker, finished: false, message: 'Acción inválida.' };
+    return { damage: 0, defender, attacker, finished: false, message: 'Acción inválida.', success: false };
   }
 
-  const damage = normalizeDamage(attack.baseDamage);
-  const reduced = defender.isDefending ? applyDefenseReduction(damage, true) : damage;
+  const currentUses = attack.currentUses ?? MAX_ATTACK_USES;
+  if (currentUses <= 0) {
+    return {
+      damage: 0,
+      defender,
+      attacker,
+      finished: false,
+      message: `¡${attack.name} se ha quedado sin usos!`,
+      success: false,
+    };
+  }
+
+  // Decrementar usos del ataque en el atacante
+  const updatedAttacks = (attacker.attacks || []).map((a) => {
+    if (a.name === attack.name || a.id === attack.id) {
+      return { ...a, currentUses: Math.max(0, currentUses - 1) };
+    }
+    return { ...a };
+  });
+
+  const attackType = attack.type || attacker.type || 'Normal';
+  const defenderType = defender.type || 'Normal';
+  const multiplier = getTypeMultiplier(attackType, defenderType);
+
+  const rawDamage = normalizeDamage(attack.baseDamage);
+  const typeDamage = Math.round(rawDamage * multiplier);
+  const reduced = defender.isDefending ? applyDefenseReduction(typeDamage, true) : typeDamage;
   const nextHp = Math.max(0, (defender.hp || 250) - reduced);
   const finished = nextHp <= 0;
 
+  const effectMsg = getTypeEffectivenessMessage(multiplier);
+  let message = finished ? `${defender.name} fue derrotado.` : `${defender.name} recibió ${reduced} de daño.`;
+  if (multiplier === 0) {
+    message = `¡No tuvo efecto contra ${defender.name}! (0 daño)`;
+  } else if (effectMsg && !finished) {
+    message = `${effectMsg} ${defender.name} recibió ${reduced} de daño.`;
+  }
+
   return {
     damage: reduced,
+    multiplier,
+    effectMessage: effectMsg,
     defender: { ...defender, hp: nextHp, defeated: finished, isDefending: false },
-    attacker: { ...attacker },
+    attacker: { ...attacker, attacks: updatedAttacks },
     finished,
-    message: finished ? `${defender.name} fue derrotada.` : `${defender.name} recibió ${reduced} de daño.`,
+    message,
+    success: true,
   };
 }
 
@@ -89,40 +172,69 @@ export function defend(card) {
 
 export function useSpecial(attacker, defender) {
   if (!attacker || !defender || !attacker.special) {
-    return { damage: 0, defender, attacker, finished: false, message: 'No se puede usar el poder.' };
+    return { damage: 0, defender, attacker, finished: false, message: 'No se puede usar el poder.', success: false };
   }
 
-  if ((attacker.turnCount ?? 0) < (attacker.special.unlockTurn ?? 2)) {
-    return { damage: 0, defender, attacker, finished: false, message: 'El poder aún no está desbloqueado.' };
+  const special = attacker.special;
+  const currentUses = special.currentUses ?? MAX_SPECIAL_USES;
+  if (currentUses <= 0) {
+    return { damage: 0, defender, attacker, finished: false, message: 'El poder especial se ha quedado sin usos.', success: false };
+  }
+
+  if ((attacker.turnCount ?? 0) < (special.unlockTurn ?? 2)) {
+    return { damage: 0, defender, attacker, finished: false, message: 'El poder aún no está desbloqueado.', success: false };
   }
 
   if ((attacker.specialCooldown ?? 0) > 0) {
-    return { damage: 0, defender, attacker, finished: false, message: 'El poder está en cooldown.' };
+    return { damage: 0, defender, attacker, finished: false, message: 'El poder está en cooldown.', success: false };
   }
 
-  const damage = normalizeDamage(attacker.special.baseDamage);
-  const reduced = defender.isDefending ? applyDefenseReduction(damage, true) : damage;
+  const attackType = special.type || attacker.type || 'Normal';
+  const defenderType = defender.type || 'Normal';
+  const multiplier = getTypeMultiplier(attackType, defenderType);
+
+  const rawDamage = normalizeDamage(special.baseDamage);
+  const typeDamage = Math.round(rawDamage * multiplier);
+  const reduced = defender.isDefending ? applyDefenseReduction(typeDamage, true) : typeDamage;
   const nextHp = Math.max(0, (defender.hp || 250) - reduced);
   const finished = nextHp <= 0;
 
+  const effectMsg = getTypeEffectivenessMessage(multiplier);
+  let message = `Poder especial usado: ${special.name}.`;
+  if (multiplier === 0) {
+    message = `¡${special.name} no tuvo efecto contra ${defender.name}! (0 daño)`;
+  } else if (effectMsg) {
+    message = `${special.name}: ${effectMsg} ${defender.name} recibió ${reduced} de daño.`;
+  }
+  if (finished) {
+    message = `¡${special.name}! ${defender.name} fue derrotado.`;
+  }
+
   const updatedAttacker = {
     ...attacker,
-    specialCooldown: attacker.special.cooldown ?? 3
+    specialCooldown: special.cooldown ?? 3,
+    special: {
+      ...special,
+      currentUses: Math.max(0, currentUses - 1),
+    },
   };
 
   const updatedDefender = {
     ...defender,
     hp: nextHp,
     defeated: finished,
-    isDefending: false
+    isDefending: false,
   };
 
   return {
     damage: reduced,
+    multiplier,
+    effectMessage: effectMsg,
     defender: updatedDefender,
     attacker: updatedAttacker,
     finished,
-    message: `Poder especial usado: ${attacker.special.name}.`,
+    message,
+    success: true,
   };
 }
 
@@ -131,7 +243,7 @@ export function progressCardTurn(card) {
   return {
     ...card,
     turnCount: (card.turnCount ?? 0) + 1,
-    specialCooldown: Math.max(0, (card.specialCooldown ?? 0) - 1)
+    specialCooldown: Math.max(0, (card.specialCooldown ?? 0) - 1),
   };
 }
 
@@ -152,11 +264,27 @@ export function chooseMachineAction(machineCard) {
 
   const available = [];
 
-  if ((machineCard.specialCooldown ?? 0) <= 0 && (machineCard.turnCount ?? 0) >= (machineCard.special?.unlockTurn ?? 2)) {
+  // Especial solo si tiene usos > 0, no está en cooldown y cumple turnCount
+  const specialUses = machineCard.special?.currentUses ?? MAX_SPECIAL_USES;
+  if (
+    specialUses > 0 &&
+    (machineCard.specialCooldown ?? 0) <= 0 &&
+    (machineCard.turnCount ?? 0) >= (machineCard.special?.unlockTurn ?? 2)
+  ) {
     available.push('special');
   }
 
-  available.push('attack-1', 'attack-2', 'attack-3', 'attack-4', 'defend');
+  // Ataques con usos > 0
+  const attacks = machineCard.attacks || [];
+  attacks.forEach((attack, index) => {
+    const uses = attack.currentUses ?? MAX_ATTACK_USES;
+    if (uses > 0) {
+      available.push(`attack-${index + 1}`);
+    }
+  });
+
+  // Defensa siempre disponible
+  available.push('defend');
 
   return available[Math.floor(Math.random() * available.length)];
 }
@@ -184,4 +312,5 @@ export function replaceDefeatedCard(deck, currentCard) {
     nextCard: nextCard ? { ...nextCard } : null,
   };
 }
+
 

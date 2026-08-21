@@ -1,3 +1,5 @@
+import { getTypeBadgeInfo } from '../../utils/typeEffectiveness.js';
+
 class BattleArena extends HTMLElement {
   #battle = null
   #effect = null
@@ -78,6 +80,8 @@ class BattleArena extends HTMLElement {
   }
 
   #getSpecialState(card) {
+    const specialUses = Number(card?.special?.currentUses ?? 2)
+    if (specialUses <= 0) return { locked: true, label: 'SIN USOS' }
     const cooldown = Number(card?.specialCooldown || 0)
     const turnCount = Number(card?.turnCount || 0)
     const unlockTurn = Number(card?.special?.unlockTurn ?? 2)
@@ -123,6 +127,15 @@ class BattleArena extends HTMLElement {
     const isPlayerTurn = this.#battle.currentTurn === 'player'
     const isFinished = this.#battle.battleFinished
     const specialState = this.#getSpecialState(player)
+    const specialUses = player?.special?.currentUses ?? 2
+    const hasSpecialUses = specialUses > 0
+
+    const specialBadge = machine && player?.special
+      ? getTypeBadgeInfo(player.special.type || player.type || 'Normal', machine.type || 'Normal')
+      : null
+    const specialEffectivenessTag = specialBadge && specialBadge.multiplier !== 1
+      ? `<span class="${specialBadge.cssClass}"> · ${specialBadge.label}</span>`
+      : ''
 
     this.innerHTML = `
       <section class="pixelFrame arenaStage mx-auto max-w-6xl bg-surface p-2 sm:p-3" aria-labelledby="arena-title">
@@ -139,7 +152,7 @@ class BattleArena extends HTMLElement {
               <article class="battleCard ${this.#effectClass('machine')} border border-danger/70 bg-arena-deep/50 p-4" aria-label="Pokémon activo del bot">
                 <div class="flex items-center justify-between gap-3 font-mono text-xs font-bold tracking-wider">
                   <span class="text-danger">BOT · ACTIVO</span>
-                  <span class="text-muted">${machine ? this.#escapeHtml(machine.name) : 'SIN REVELAR'}</span>
+                  <span class="text-muted">${machine ? this.#escapeHtml(machine.name) : 'SIN REVELAR'} ${machine?.type ? `<span class="text-action text-[0.7rem] uppercase">[${this.#escapeHtml(machine.type)}]</span>` : ''}</span>
                 </div>
                 ${this.#renderCardImage(machine)}
                 ${this.#renderHealth(machine, 'BOT')}
@@ -147,7 +160,7 @@ class BattleArena extends HTMLElement {
               <article class="battleCard ${this.#effectClass('player')} border border-success/70 bg-arena-deep/50 p-4" aria-label="Pokémon activo del jugador">
                 <div class="flex items-center justify-between gap-3 font-mono text-xs font-bold tracking-wider">
                   <span class="text-success">TÚ · ACTIVO</span>
-                  <span class="text-muted">${player ? this.#escapeHtml(player.name) : 'SIN SELECCIÓN'}</span>
+                  <span class="text-muted">${player ? this.#escapeHtml(player.name) : 'SIN SELECCIÓN'} ${player?.type ? `<span class="text-action text-[0.7rem] uppercase">[${this.#escapeHtml(player.type)}]</span>` : ''}</span>
                 </div>
                 ${this.#renderCardImage(player)}
                 ${this.#renderHealth(player, 'JUGADOR')}
@@ -159,14 +172,41 @@ class BattleArena extends HTMLElement {
                 <span class="font-mono text-xs text-muted">${isFinished ? 'PARTIDA TERMINADA' : (isPlayerTurn ? 'TU TURNO' : 'ESPERANDO AL BOT...')}</span>
               </div>
               <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                ${player ? player.attacks.slice(0, 4).map((attack, index) => `
-                  <button class="action-btn border border-brass bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-brass/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="attack" data-attack-id="${index}" ${!isPlayerTurn || isFinished ? 'disabled' : ''}>
-                    ${this.#escapeHtml(attack.name)}
-                    <span class="mt-1 block font-normal text-muted">Daño: ${attack.baseDamage}</span>
-                  </button>
-                `).join('') : ''}
-                <button class="action-btn border border-defense bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-defense/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="defend" ${!isPlayerTurn || isFinished ? 'disabled' : ''}>DEFENSA<span class="mt-1 block font-normal text-muted">${player?.defense?.name || 'Bloqueo'}</span></button>
-                <button class="action-btn border border-action bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-action/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="special" ${!isPlayerTurn || isFinished || specialState.locked ? 'disabled' : ''}>ESPECIAL<span class="mt-1 block font-normal text-muted">${player?.special?.name || 'Ataque Especial'} · ${specialState.label}</span></button>
+                ${player ? player.attacks.slice(0, 4).map((attack, index) => {
+                  const uses = attack.currentUses ?? 5
+                  const hasUses = uses > 0
+                  const badge = machine ? getTypeBadgeInfo(attack.type || player.type || 'Normal', machine.type || 'Normal') : null
+                  const effectivenessTag = badge && badge.multiplier !== 1 ? `<span class="${badge.cssClass}"> · ${badge.label}</span>` : ''
+                  return `
+                    <button class="action-btn border border-brass bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-brass/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="attack" data-attack-id="${index}" ${!isPlayerTurn || isFinished || !hasUses ? 'disabled' : ''}>
+                      <div class="flex items-center justify-between gap-2">
+                        <span>${this.#escapeHtml(attack.name)}</span>
+                        <span class="text-[0.68rem] px-1.5 py-0.5 rounded border ${hasUses ? 'border-brass/60 text-action' : 'border-danger/60 text-danger'}">${hasUses ? `USOS: ${uses}/5` : 'SIN USOS'}</span>
+                      </div>
+                      <div class="mt-1 flex flex-wrap items-center gap-1.5 font-normal text-muted">
+                        <span>Daño: ${attack.baseDamage}</span>
+                        ${effectivenessTag}
+                      </div>
+                    </button>
+                  `
+                }).join('') : ''}
+                <button class="action-btn border border-defense bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-defense/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="defend" ${!isPlayerTurn || isFinished ? 'disabled' : ''}>
+                  <div class="flex items-center justify-between gap-2">
+                    <span>DEFENSA</span>
+                    <span class="text-[0.68rem] px-1.5 py-0.5 rounded border border-defense/60 text-[#68d391]">ILIMITADA</span>
+                  </div>
+                  <span class="mt-1 block font-normal text-muted">${player?.defense?.name || 'Bloqueo'} (-50% daño)</span>
+                </button>
+                <button class="action-btn border border-action bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-action/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="special" ${!isPlayerTurn || isFinished || specialState.locked || !hasSpecialUses ? 'disabled' : ''}>
+                  <div class="flex items-center justify-between gap-2">
+                    <span>ESPECIAL: ${this.#escapeHtml(player?.special?.name || 'Ataque Especial')}</span>
+                    <span class="text-[0.68rem] px-1.5 py-0.5 rounded border ${hasSpecialUses ? 'border-action/60 text-action' : 'border-danger/60 text-danger'}">${hasSpecialUses ? `USOS: ${specialUses}/2` : 'SIN USOS'}</span>
+                  </div>
+                  <div class="mt-1 flex flex-wrap items-center gap-1.5 font-normal text-muted">
+                    <span>${!hasSpecialUses ? 'SIN USOS' : specialState.label}</span>
+                    ${specialEffectivenessTag}
+                  </div>
+                </button>
               </div>
             </section>
           </div>
@@ -209,3 +249,4 @@ class BattleArena extends HTMLElement {
 }
 
 customElements.define('battle-arena', BattleArena)
+

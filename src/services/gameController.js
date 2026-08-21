@@ -209,16 +209,24 @@ export function performPlayerAction(state, action, attackId = null) {
       return { success: false, message: 'No hay ataques disponibles.' };
     }
     const result = applyAttack(activePlayer, activeMachine, attack);
+    if (!result.success && result.damage === 0) {
+      return { success: false, message: result.message };
+    }
     
     const outcome = processActionOutcome(state, activePlayer, activeMachine, result, true);
 
-    state.log.push(`Jugador usa ${attack.name} y hace ${result.damage} daño.`);
+    const logEntry = result.effectMessage
+      ? `Jugador usa ${attack.name} (${result.effectMessage}) e inflige ${result.damage} daño.`
+      : `Jugador usa ${attack.name} e inflige ${result.damage} daño.`;
+    state.log.push(logEntry);
 
     return {
       success: true,
       result: {
         damage: result.damage,
-        message: `Jugador usa ${attack.name} y hace ${result.damage} daño.`,
+        multiplier: result.multiplier,
+        effectMessage: result.effectMessage,
+        message: logEntry,
         isKo: outcome.isKo,
         relevo: outcome.relevo,
         newActiveCard: outcome.newActiveCard
@@ -263,19 +271,24 @@ export function performPlayerAction(state, action, attackId = null) {
 
   if (action === 'special') {
     const result = useSpecial(activePlayer, activeMachine);
-    if (result.damage === 0 && (result.message.includes('No se puede') || result.message.includes('cooldown') || result.message.includes('desbloqueado'))) {
+    if (!result.success && result.damage === 0) {
       return { success: false, message: result.message };
     }
 
     const outcome = processActionOutcome(state, result.attacker, result.defender, result, true);
 
-    state.log.push(`Jugador usa ${activePlayer.special?.name || 'Poder Especial'} y hace ${result.damage} daño.`);
+    const logEntry = result.effectMessage
+      ? `Jugador usa ${activePlayer.special?.name || 'Poder Especial'} (${result.effectMessage}) e inflige ${result.damage} daño.`
+      : `Jugador usa ${activePlayer.special?.name || 'Poder Especial'} e inflige ${result.damage} daño.`;
+    state.log.push(logEntry);
 
     return {
       success: true,
       result: {
         damage: result.damage,
-        message: `Jugador usa ${activePlayer.special?.name || 'Poder Especial'} y hace ${result.damage} daño.`,
+        multiplier: result.multiplier,
+        effectMessage: result.effectMessage,
+        message: logEntry,
         isKo: outcome.isKo,
         relevo: outcome.relevo,
         newActiveCard: outcome.newActiveCard
@@ -340,14 +353,19 @@ export function performMachineAction(state) {
     const result = useSpecial(activeMachine, activePlayer);
     const outcome = processActionOutcome(state, result.attacker, result.defender, result, false);
 
-    state.log.push(`Máquina usa ${activeMachine.special?.name || 'poder especial'}.`);
+    const logEntry = result.effectMessage
+      ? `Máquina usa ${activeMachine.special?.name || 'poder especial'} (${result.effectMessage}) e inflige ${result.damage} daño.`
+      : `Máquina usa ${activeMachine.special?.name || 'poder especial'} e inflige ${result.damage} daño.`;
+    state.log.push(logEntry);
 
     return {
       success: true,
       action,
       result: {
         damage: result.damage,
-        message: `Máquina usa ${activeMachine.special?.name || 'poder especial'} y hace ${result.damage} daño.`,
+        multiplier: result.multiplier,
+        effectMessage: result.effectMessage,
+        message: logEntry,
         isKo: outcome.isKo,
         relevo: outcome.relevo,
         newActiveCard: outcome.newActiveCard
@@ -362,14 +380,19 @@ export function performMachineAction(state) {
 
   const outcome = processActionOutcome(state, activeMachine, activePlayer, result, false);
 
-  state.log.push(`Máquina usa ${attack.name} y hace ${result.damage} daño.`);
+  const logEntry = result.effectMessage
+    ? `Máquina usa ${attack.name} (${result.effectMessage}) e inflige ${result.damage} daño.`
+    : `Máquina usa ${attack.name} e inflige ${result.damage} daño.`;
+  state.log.push(logEntry);
 
   return {
     success: true,
     action,
     result: {
       damage: result.damage,
-      message: `Máquina usa ${attack.name} y hace ${result.damage} daño.`,
+      multiplier: result.multiplier,
+      effectMessage: result.effectMessage,
+      message: logEntry,
       isKo: outcome.isKo,
       relevo: outcome.relevo,
       newActiveCard: outcome.newActiveCard

@@ -2038,11 +2038,10 @@ body {
   text-shadow: 2px 2px 0 #0a0b0c;
 }
 
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-action,
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-success,
-:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-danger {
-  color: #f06461 !important;
-}
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-action { color: #f6c945 !important; }
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-success { color: #48bb78 !important; }
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-danger { color: #f06461 !important; }
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-warning { color: #ecc94b !important; }
 
 :is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-cream { color: #eef0f2 !important; }
 :is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-muted { color: #a8afb8 !important; }

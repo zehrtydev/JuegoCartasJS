@@ -92,7 +92,7 @@ class PoolGrid extends HTMLElement {
   }
 
   #getPageCount() {
-    return Math.ceil(Math.min(this.#cards.length, 20) / 4)
+    return Math.ceil(Math.min(this.#cards.length, 20) / 3)
   }
 
   #changePage(direction) {
@@ -147,7 +147,7 @@ class PoolGrid extends HTMLElement {
     return `
       <li class="poolTeamSlot poolTeamSlot--filled" draggable="true" data-slot-index="${index}" aria-label="Espacio ${index + 1}: ${name}">
         <span class="poolTeamSlot__position">${index + 1}</span>
-        <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" style="--sprite-scale: ${this.#getSpriteScale(card)}" aria-hidden="true">
+        <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" style="--sprite-scale: ${this.#getSpriteScale(card) * 1.3}" aria-hidden="true">
           <img src="${this.#escapeHtml(this.#getSpriteUrl(card))}" alt="" />
         </i>
         <strong class="poolTeamSlot__name">${name}</strong>
@@ -165,8 +165,8 @@ class PoolGrid extends HTMLElement {
     const hasCards = cards.length > 0
     const selectionReady = selectedCards.length === 5
     const pageCount = this.#getPageCount()
-    const firstCardIndex = this.#currentPage * 4
-    const visibleCards = cards.slice(firstCardIndex, firstCardIndex + 4)
+    const firstCardIndex = this.#currentPage * 3
+    const visibleCards = cards.slice(firstCardIndex, firstCardIndex + 3)
 
     this.innerHTML = `
       <section class="pixelFrame arenaStage mx-auto max-w-6xl bg-surface p-2 sm:p-3" aria-labelledby="pool-title">
@@ -189,10 +189,10 @@ class PoolGrid extends HTMLElement {
               <p class="mb-5 text-sm text-muted">Selecciona cinco Pokémon del catálogo para formar tu equipo.</p>
               ${hasCards ? `
                 <div class="poolCarousel w-full max-w-3xl mx-auto">
-                  <button class="poolCarouselButton poolCarouselButton--previous" type="button" data-page-direction="-1" ${this.#currentPage === 0 ? 'disabled' : ''} aria-label="Ver las cuatro cartas anteriores">←</button>
+                  <button class="poolCarouselButton poolCarouselButton--previous" type="button" data-page-direction="-1" ${this.#currentPage === 0 ? 'disabled' : ''} aria-label="Ver las tres cartas anteriores">←</button>
                   <ul class="poolCardGrid">${visibleCards.map((card) => this.#renderCard(card)).join('')}</ul>
-                  <button class="poolCarouselButton poolCarouselButton--next" type="button" data-page-direction="1" ${this.#currentPage === pageCount - 1 ? 'disabled' : ''} aria-label="Ver las cuatro cartas siguientes">→</button>
-                  <p class="poolCarouselStatus" aria-live="polite">${firstCardIndex + 1}–${Math.min(firstCardIndex + 4, cards.length)} / ${cards.length}</p>
+                  <button class="poolCarouselButton poolCarouselButton--next" type="button" data-page-direction="1" ${this.#currentPage === pageCount - 1 ? 'disabled' : ''} aria-label="Ver las tres cartas siguientes">→</button>
+                  <p class="poolCarouselStatus" aria-live="polite">${firstCardIndex + 1}–${Math.min(firstCardIndex + 3, cards.length)} / ${cards.length}</p>
                 </div>
               ` : `
                 <ui-state state="empty" title="EL POOL AÚN NO ESTÁ DISPONIBLE" message="No hay cartas activas cargadas desde la API local. Cuando el catálogo esté disponible, aquí aparecerán las cartas para escoger cinco Pokémon diferentes."></ui-state>

@@ -1002,7 +1002,7 @@
     display: grid;
     width: 100%;
     height: auto;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: minmax(0, 1fr);
     place-items: center;
     gap: clamp(0.4rem, 1vw, 0.9rem);

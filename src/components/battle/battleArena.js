@@ -70,9 +70,9 @@ class BattleArena extends HTMLElement {
   }
 
   #renderCardImage(card) {
-    if (!card) return '<div class="cardBack mx-auto mt-4 max-w-[12rem]" aria-hidden="true"><span class="captureSeal scale-90"></span></div>'
+    if (!card) return '<div class="cardBack mx-auto mt-4 max-w-[15rem]" aria-hidden="true"><span class="captureSeal scale-90"></span></div>'
     return `
-      <div class="mx-auto mt-4 max-w-[12rem] aspect-square flex items-center justify-center">
+      <div class="mx-auto mt-4 max-w-[15rem] aspect-square flex items-center justify-center">
         <img src="${this.#escapeHtml(card.imageUrl || card.image)}" alt="${this.#escapeHtml(card.name)}" class="w-full h-full object-contain drop-shadow-lg" />
       </div>
     `
@@ -80,7 +80,7 @@ class BattleArena extends HTMLElement {
 
   #renderTeamCard(card, isPlayerTeam, isActiveCard, isPlayerTurn, isFinished) {
     const spriteUrl = this.#getSpriteUrl(card)
-    const scale = this.#getSpriteScale(card)
+    const scale = this.#getSpriteScale(card) * 1.3
     const stateClass = card.defeated ? 'opacity-30 grayscale' : (isActiveCard ? 'ring-2 ring-action/80 bg-action/10' : '')
     const label = `${card.name}${card.defeated ? ' derrotado' : `, ${Math.max(0, card.hp)} PS`}`
 

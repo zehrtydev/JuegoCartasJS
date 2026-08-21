@@ -59,9 +59,10 @@ class BattleArena extends HTMLElement {
     const hoverTitle = canSwitch ? `title="Cambiar a ${this.#escapeHtml(card.name)}"` : ''
 
     return `
-      <li class="border border-brass/60 bg-arena-deep/50 p-1 ${stateClass} ${canSwitch ? 'hover:border-brass' : ''}" aria-label="${this.#escapeHtml(label)}" ${hoverTitle}>
+      <li class="border border-brass/60 bg-arena-deep/50 p-1 flex flex-col ${stateClass} ${canSwitch ? 'hover:border-brass' : ''}" aria-label="${this.#escapeHtml(label)}" ${hoverTitle}>
         <${tag} ${buttonProps}>
           <img src="${this.#escapeHtml(imageUrl)}" alt="${this.#escapeHtml(card.name)}" class="aspect-square w-full object-contain ${canSwitch ? 'hover:scale-105 transition-transform' : ''}" />
+          ${canSwitch ? `<span class="block mt-1 bg-brass text-cream font-mono text-[0.6rem] font-bold py-0.5 rounded text-center w-full uppercase shadow">Cambiar</span>` : ''}
         </${tag}>
       </li>
     `

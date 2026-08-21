@@ -3,6 +3,7 @@ import { getTypeBadgeInfo } from '../../utils/typeEffectiveness.js';
 class BattleArena extends HTMLElement {
   #battle = null
   #effect = null
+  #effectTimer = null
 
   set battle(value) {
     this.#battle = value
@@ -15,11 +16,22 @@ class BattleArena extends HTMLElement {
 
   set effect(value) {
     this.#effect = value
+    clearTimeout(this.#effectTimer)
+    if (value) {
+      this.#effectTimer = setTimeout(() => {
+        this.#effect = null
+        if (this.isConnected) this.#render()
+      }, 700)
+    }
     if (this.isConnected) this.#render()
   }
 
   connectedCallback() {
     this.#render()
+  }
+
+  disconnectedCallback() {
+    clearTimeout(this.#effectTimer)
   }
 
   #escapeHtml(value) {
@@ -105,9 +117,11 @@ class BattleArena extends HTMLElement {
     if (!this.#effect) return ''
     const attacker = this.#effect.actor
     const defender = attacker === 'player' ? 'machine' : 'player'
+    const card = owner === 'player' ? this.#battle?.activePlayerCard : this.#battle?.activeMachineCard
+
     if (owner === attacker && this.#effect.action === 'defend') return 'battleCard--defending'
     if (owner === attacker) return this.#effect.action === 'special' ? 'battleCard--special' : 'battleCard--attacking'
-    if (owner === defender && this.#effect.isKo) return 'battleCard--defeated'
+    if (owner === defender && this.#effect.isKo && card?.defeated) return 'battleCard--defeated'
     if (owner === defender && this.#effect.action !== 'defend') return 'battleCard--damaged'
     return ''
   }

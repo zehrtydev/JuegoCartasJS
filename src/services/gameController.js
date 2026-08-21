@@ -24,14 +24,49 @@ import {
   progressCardTurn,
 } from './battleService.js';
 
-export function selectRandomPool(cards, poolSize = 20) {
-  return [...cards]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, Math.min(poolSize, cards.length));
+/**
+ * Catálogo fijo de la experiencia de juego. Cada carta tiene un recurso visual
+ * local en public/assets/images/cards, para no depender de una selección al azar.
+ */
+export const FIXED_POOL_CARDS = [
+  ['card-001', 'bulbasaur.png'],
+  ['card-004', 'charmander.png'],
+  ['card-006', 'charizard.png'],
+  ['card-007', 'squirtle.png'],
+  ['card-009', 'blastoise.png'],
+  ['card-025', 'pikachu.png'],
+  ['card-026', 'raichu.png'],
+  ['card-039', 'jigglypuff.png'],
+  ['card-052', 'meowth.png'],
+  ['card-054', 'psyduck.png'],
+  ['card-059', 'arcanine.png'],
+  ['card-094', 'gengar.png'],
+  ['card-104', 'cubone.png'],
+  ['card-130', 'gyarados.png'],
+  ['card-131', 'lapras.png'],
+  ['card-136', 'flareon.png'],
+  ['card-143', 'snorlax.png'],
+  ['card-149', 'dragonite.png'],
+  ['card-150', 'mewtwo.png'],
+  ['card-151', 'mew.png'],
+];
+
+export function selectFixedPool(cards) {
+  const cardsById = new Map(cards.map((card) => [card.id, card]));
+
+  return FIXED_POOL_CARDS
+    .map(([id, imageFile]) => {
+      const card = cardsById.get(id);
+      if (!card) return null;
+
+      const localImageUrl = `/assets/images/cards/${imageFile}`;
+      return { ...card, image: localImageUrl, imageUrl: localImageUrl };
+    })
+    .filter(Boolean);
 }
 
 export async function initializeGameSession() {
-  const cards = selectRandomPool(await loadActiveCards());
+  const cards = selectFixedPool(await loadActiveCards());
   return {
     success: true,
     cards,

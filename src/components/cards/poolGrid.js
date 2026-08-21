@@ -83,21 +83,13 @@ class PoolGrid extends HTMLElement {
   #renderCard(card) {
     const cardId = String(card.id)
     const isSelected = this.#selectedCardIds.has(cardId)
-    const type = this.#getType(card)
-    const typeClass = this.#getTypeClass(card)
     const name = this.#escapeHtml(card.name || 'Pokémon sin nombre')
-    const number = this.#escapeHtml(card.number || card.pokedexNumber || '---')
-    const hp = this.#escapeHtml(card.hp ?? card.health ?? 250)
+    const imageUrl = this.#escapeHtml(card.imageUrl || card.image)
 
     return `
       <li>
-        <button class="poolCard ${isSelected ? 'poolCard--selected' : ''}" type="button" data-card-id="${this.#escapeHtml(cardId)}" aria-pressed="${isSelected}" aria-label="${isSelected ? 'Quitar' : 'Seleccionar'} a ${name}">
-          <span class="poolCard__topline"><span>#${number}</span><span class="poolCard__selectMark">${isSelected ? '✓' : '+'}</span></span>
-          <span class="poolCard__sprite poolCard__sprite--${typeClass}" aria-hidden="true">
-            <img src="${this.#escapeHtml(card.imageUrl || card.image)}" alt="${name}" class="w-full h-full object-contain" />
-          </span>
-          <span class="poolCard__name">${name}</span>
-          <span class="poolCard__details"><span class="poolCard__type poolCard__type--${typeClass}">${this.#escapeHtml(type)}</span><span>HP ${hp}</span></span>
+        <button class="poolCard poolCard--fullArt ${isSelected ? 'poolCard--selected' : ''}" type="button" data-card-id="${this.#escapeHtml(cardId)}" aria-pressed="${isSelected}" aria-label="${isSelected ? 'Quitar' : 'Seleccionar'} a ${name}">
+          <img src="${imageUrl}" alt="${name}" class="poolCard__image" />
         </button>
       </li>
     `

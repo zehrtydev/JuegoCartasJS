@@ -1,6 +1,6 @@
 # Card Battle Arena
 
-Juego web de combate por turnos con cartas Pokémon de la primera generación. Cada partida usa un pool aleatorio de 20 cartas activas; el jugador elige 5 y la máquina recibe otras 5 distintas del mismo pool.
+Juego web de combate por turnos con cartas Pokémon de la primera generación. Cada partida usa el mismo pool fijo de 20 cartas con recursos visuales locales; el jugador elige 5 y la máquina recibe otras 5 distintas del mismo pool.
 
 ## Integrantes
 
@@ -25,7 +25,7 @@ El acceso está disponible desde el módulo **Admin**. Las credenciales se inclu
 
 - Registro y selección de perfil de jugador.
 - Catálogo completo de 151 Pokémon de Kanto con imagen y grito.
-- Pool aleatorio de 20 cartas activas por partida; validación de al menos 10 activas para poder formar ambos equipos.
+- Pool fijo de 20 cartas activas con imágenes locales; validación de al menos 10 activas para poder formar ambos equipos.
 - Selección y orden de 5 cartas, rival automático sin repetir cartas del jugador y combate por turnos 5v5.
 - Ataques, defensa que reduce el siguiente daño, especial habilitado desde el segundo turno y cooldown de 3 turnos.
 - Relevo automático hasta que los cinco Pokémon de un equipo sean derrotados.

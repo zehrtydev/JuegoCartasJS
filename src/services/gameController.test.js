@@ -10,7 +10,8 @@ import {
   performPlayerAction,
   performMachineAction,
   checkBattleWinner,
-  selectRandomPool,
+  FIXED_POOL_CARDS,
+  selectFixedPool,
 } from './gameController.js';
 
 globalThis.fetch = async (url) => {
@@ -38,19 +39,33 @@ globalThis.fetch = async (url) => {
   };
 };
 
-test('initializeGameSession carga cartas activas', async () => {
+test('initializeGameSession filtra las cartas activas según el pool fijo', async () => {
   const result = await initializeGameSession();
   assert.equal(result.success, true);
-  assert.equal(result.cards.length, 10);
+  assert.deepEqual(result.cards.map((card) => card.id), [
+    'card-001',
+    'card-004',
+    'card-006',
+    'card-007',
+    'card-009',
+  ]);
 });
 
-test('selectRandomPool limita el catálogo de una sesión a 20 cartas', () => {
+test('selectFixedPool carga las 20 cartas fijas con sus imágenes locales', () => {
   const catalog = Array.from({ length: 151 }, (_, index) => ({ id: `card-${index + 1}` }));
-  const pool = selectRandomPool(catalog);
+  const normalizedCatalog = catalog.map((card, index) => ({
+    ...card,
+    id: `card-${String(index + 1).padStart(3, '0')}`,
+  }));
+  const pool = selectFixedPool(normalizedCatalog);
 
   assert.equal(pool.length, 20);
+  assert.equal(FIXED_POOL_CARDS.length, 20);
   assert.equal(new Set(pool.map((card) => card.id)).size, 20);
-  pool.forEach((card) => assert.ok(catalog.some((catalogCard) => catalogCard.id === card.id)));
+  pool.forEach((card) => {
+    assert.ok(normalizedCatalog.some((catalogCard) => catalogCard.id === card.id));
+    assert.match(card.imageUrl, /^\/assets\/images\/cards\/.+\.png$/);
+  });
 });
 
 test('validateSelectedDeck rechaza mazos inválidos', () => {

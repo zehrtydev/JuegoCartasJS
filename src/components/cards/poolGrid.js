@@ -49,6 +49,28 @@ class PoolGrid extends HTMLElement {
     return this.#getType(card).toLocaleLowerCase('es-CO').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '') || 'normal'
   }
 
+  #getSpriteUrl(card) {
+    const number = Number(card.number)
+    if (Number.isInteger(number) && number > 0) {
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png`
+    }
+
+    return card.imageUrl || card.image || ''
+  }
+
+  #getSpriteScale(card) {
+    // Los PNG de PokeAPI no comparten el mismo encuadre visual. Compensamos
+    // el espacio transparente de los Pokémon pequeños del pool fijo.
+    const scales = {
+      1: 1.32, 4: 1.34, 6: 1.02, 7: 1.5, 9: 1.08,
+      25: 1.2, 26: 1.16, 39: 1.34, 52: 1.35, 54: 1.42,
+      59: 1.05, 94: 1.14, 104: 1.22, 130: 1.02, 131: 1.08,
+      136: 1.2, 143: 1.02, 149: 1.02, 150: 1.08, 151: 1.3,
+    }
+
+    return scales[Number(card.number)] || 1.15
+  }
+
   #toggleCard(cardId) {
     if (this.#selectedCardIds.has(cardId)) {
       this.#selectedCardIds.delete(cardId)
@@ -103,8 +125,8 @@ class PoolGrid extends HTMLElement {
     return `
       <li class="poolTeamSlot poolTeamSlot--filled" aria-label="Espacio ${index + 1}: ${this.#escapeHtml(card.name)}">
         <span>${index + 1}</span>
-        <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" aria-hidden="true">
-          <img src="${this.#escapeHtml(card.imageUrl || card.image)}" class="w-full h-full object-contain" />
+        <i class="poolTeamSlot__sprite poolCard__sprite poolCard__sprite--${this.#getTypeClass(card)}" style="--sprite-scale: ${this.#getSpriteScale(card)}" aria-hidden="true">
+          <img src="${this.#escapeHtml(this.#getSpriteUrl(card))}" alt="" />
         </i>
         <strong>${this.#escapeHtml(card.name)}</strong>
       </li>

@@ -10,11 +10,20 @@
     {
       "id": "player-1787280895204",
       "nickname": "Zehrty",
-      "points": 0,
-      "wins": 0,
+      "points": 100,
+      "wins": 2,
       "losses": 0,
-      "gamesPlayed": 0,
+      "gamesPlayed": 2,
       "createdAt": "2026-08-21T02:54:55.204Z"
+    },
+    {
+      "id": "player-1787299083375",
+      "nickname": "Manuel",
+      "points": 100,
+      "wins": 2,
+      "losses": 0,
+      "gamesPlayed": 2,
+      "createdAt": "2026-08-21T07:58:03.375Z"
     }
   ],
   "cards": [
@@ -8391,5 +8400,98 @@
       "createdAt": "2026-08-19T01:51:48.837Z"
     }
   ],
-  "battles": []
+  "battles": [
+    {
+      "id": "battle-1787294403673",
+      "playerId": "player-1787280895204",
+      "playerNickname": "Zehrty",
+      "result": "win",
+      "pointsAwarded": 50,
+      "playerDeck": [
+        "card-001",
+        "card-006",
+        "card-025",
+        "card-039",
+        "card-059"
+      ],
+      "machineDeck": [
+        "card-104",
+        "card-054",
+        "card-130",
+        "card-150",
+        "card-131"
+      ],
+      "startedAt": "2026-08-21T06:39:09.149Z",
+      "endedAt": "2026-08-21T06:40:03.296Z"
+    },
+    {
+      "id": "battle-1787299133472",
+      "playerId": "player-1787299083375",
+      "playerNickname": "Manuel",
+      "result": "win",
+      "pointsAwarded": 50,
+      "playerDeck": [
+        "card-094",
+        "card-026",
+        "card-059",
+        "card-104",
+        "card-131"
+      ],
+      "machineDeck": [
+        "card-004",
+        "card-025",
+        "card-001",
+        "card-151",
+        "card-006"
+      ],
+      "startedAt": "2026-08-21T07:58:17.477Z",
+      "endedAt": "2026-08-21T07:58:53.100Z"
+    },
+    {
+      "id": "battle-1787300907722",
+      "playerId": "player-1787299083375",
+      "playerNickname": "Manuel",
+      "result": "win",
+      "pointsAwarded": 50,
+      "playerDeck": [
+        "card-001",
+        "card-004",
+        "card-007",
+        "card-026",
+        "card-039"
+      ],
+      "machineDeck": [
+        "card-006",
+        "card-150",
+        "card-151",
+        "card-054",
+        "card-104"
+      ],
+      "startedAt": "2026-08-21T08:26:50.111Z",
+      "endedAt": "2026-08-21T08:28:27.346Z"
+    },
+    {
+      "id": "battle-1787304422334",
+      "playerId": "player-1787280895204",
+      "playerNickname": "Zehrty",
+      "result": "win",
+      "pointsAwarded": 50,
+      "playerDeck": [
+        "card-104",
+        "card-130",
+        "card-149",
+        "card-150",
+        "card-151"
+      ],
+      "machineDeck": [
+        "card-025",
+        "card-131",
+        "card-026",
+        "card-006",
+        "card-004"
+      ],
+      "startedAt": "2026-08-21T09:26:20.303Z",
+      "endedAt": "2026-08-21T09:27:01.980Z"
+    }
+  ]
 }

@@ -26,27 +26,27 @@ class PlayerRegister extends HTMLElement {
 
   #render() {
     this.innerHTML = `
-      <section class="registrationScene" aria-labelledby="welcome-title">
+      <section class="registrationScene pixel-scene poke-scope" aria-labelledby="welcome-title">
         <div class="registrationScene__shade" aria-hidden="true"></div>
         <div class="registrationLayout">
-          <div class="trainerConsole">
+          <div class="trainerConsole pixel-panel pixel-panel--console poke-panel">
             <div class="trainerConsole__content">
-              <figure class="trainerSpriteFrame" aria-label="Silueta de entrenador">
-                <img src="/assets/images/ui/trainerSilhouette.png" alt="" />
+              <figure class="trainerSpriteFrame pixel-card poke-card" aria-label="Silueta de entrenador">
+                <img class="pixel-sprite poke-sprite" src="/assets/images/ui/trainerSilhouette.png" alt="" />
               </figure>
-              <div class="trainerConsole__formColumn">
+              <div class="trainerConsole__formColumn poke-panel poke-panel--form">
                 <h1 class="trainerConsole__title" id="welcome-title">REGISTRO DE ENTRENADOR</h1>
                 <form class="trainerForm" novalidate>
                   <label class="trainerLabel" for="player-alias">TU ALIAS</label>
-                  <input class="trainerInput" id="player-alias" name="alias" type="text" autocomplete="nickname" maxlength="24" placeholder="Escribe tu alias..." required aria-describedby="alias-help" />
+                  <input class="trainerInput pixel-input poke-input" id="player-alias" name="alias" type="text" autocomplete="nickname" maxlength="24" placeholder="Escribe tu alias..." required aria-describedby="alias-help" />
                   <p class="trainerHelp" id="alias-help">Alias único · máximo 24 caracteres</p>
-                  <button class="gameStartButton" type="submit" disabled>EMPEZAR COMBATE</button>
+                  <button class="gameStartButton pixel-btn poke-button poke-button--primary" type="submit" disabled>EMPEZAR COMBATE</button>
                 </form>
               </div>
             </div>
           </div>
-          <aside class="profileLedger" aria-labelledby="profiles-title">
-            <div class="profileLedger__tab">
+          <aside class="profileLedger pixel-panel pixel-panel--ledger poke-panel" aria-labelledby="profiles-title">
+            <div class="profileLedger__tab poke-panel__title">
               <h2 id="profiles-title">PERFILES EXISTENTES</h2>
             </div>
             <div class="profileLedger__page" data-profiles></div>
@@ -91,7 +91,7 @@ class PlayerRegister extends HTMLElement {
     }
 
     container.innerHTML = `<ul class="profileList space-y-3">${this.#players.map((player) => `
-      <li><button class="profileSelectButton w-full border-2 border-[#7d6338] bg-[#e8d29d] px-4 py-3 text-left text-[#302417] shadow-[3px_3px_0_#765529] transition hover:bg-[#f4e2b5] focus:outline-none focus:ring-4 focus:ring-action" type="button" data-player-id="${player.id}"><span class="profileAlias block font-mono font-black">${player.nickname || player.alias || 'ENTRENADOR'}</span><span class="profilePoints font-mono text-sm font-bold text-[#456431]">${player.points || 0} pts</span></button></li>
+      <li><button class="profileSelectButton pixel-card pixel-card--select poke-button poke-button--profile w-full focus:outline-none focus:ring-4 focus:ring-action" type="button" data-player-id="${player.id}"><span class="profileAlias block font-mono font-black">${player.nickname || player.alias || 'ENTRENADOR'}</span><span class="profilePoints font-mono text-sm font-bold text-[#456431]">${player.points || 0} pts</span></button></li>
     `).join('')}</ul>`
 
     container.querySelectorAll('[data-player-id]').forEach((button) => {

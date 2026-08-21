@@ -1,17 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  --color-arena: #14130f;
-  --color-arena-deep: #0b0a08;
-  --color-surface: #24221c;
-  --color-panel: #302d24;
-  --color-brass: #9b7a32;
-  --color-action: #f6c945;
-  --color-cream: #fff6d8;
-  --color-muted: #c7bfa8;
-  --color-success: #78a65a;
-  --color-danger: #c94a3e;
-  --color-defense: #718092;
+  --color-arena: #15171a;
+  --color-arena-deep: #08090a;
+  --color-surface: #25282d;
+  --color-panel: #34383f;
+  --color-brass: #727780;
+  --color-action: #d84b4b;
+  --color-cream: #eef0f2;
+  --color-muted: #a6abb3;
+  --color-wood: #453236;
+  --color-wood-dark: #211719;
+  --color-iron: #151619;
+  --color-gold-light: #ff7770;
+  --color-success: #aa3e44;
+  --color-danger: #c73838;
+  --color-defense: #707780;
+}
+
+/* Primitivas pixel-art locales: reutilizables sin introducir un framework CSS global. */
+:root {
+  --pixel-bg: var(--color-arena-deep);
+  --pixel-surface: var(--color-surface);
+  --pixel-panel: var(--color-panel);
+  --pixel-text: var(--color-cream);
+  --pixel-muted: var(--color-muted);
+  --pixel-red: var(--color-danger);
+  --pixel-yellow: var(--color-action);
+  --pixel-green: var(--color-success);
+  --pixel-blue: var(--color-defense);
+  --pixel-border: var(--color-brass);
+  --pixel-shadow: #070809;
+  --pixel-focus: rgba(216, 75, 75, 0.42);
+  --poke-ink: #17191d;
+  --poke-paper: #d7dbe0;
+  --poke-paper-deep: #8b939d;
+  --poke-sky: #c64043;
+  --poke-sky-shadow: #6f2026;
+  --poke-leaf: #8f3238;
+  --poke-leaf-shadow: #551d22;
+  --poke-pixel-cut: polygon(0.5rem 0, calc(100% - 0.5rem) 0, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0 calc(100% - 0.5rem), 0 0.5rem);
 }
 
 @layer base {
@@ -21,15 +49,90 @@
     overflow-x: clip;
     background-color: var(--color-arena-deep);
     background-image:
-      linear-gradient(rgba(246, 201, 69, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(246, 201, 69, 0.035) 1px, transparent 1px),
-      radial-gradient(circle at 50% -20%, rgba(201, 74, 62, 0.16), transparent 42%);
-    background-size: 18px 18px, 18px 18px, auto;
+      radial-gradient(circle at 50% -20%, rgba(218, 151, 48, 0.15), transparent 40%),
+      linear-gradient(90deg, rgba(93, 50, 24, 0.12) 1px, transparent 1px),
+      linear-gradient(rgba(93, 50, 24, 0.1) 1px, transparent 1px);
+    background-size: auto, 24px 24px, 24px 24px;
     color: var(--color-cream);
   }
 }
 
 @layer components {
+  .pixel-btn,
+  .pixel-input,
+  .pixel-card,
+  .pixel-panel,
+  .pixel-modal,
+  .pixel-nav { border-radius: 0; }
+
+  .pixel-btn {
+    border: 3px solid var(--pixel-border);
+    background: var(--pixel-yellow);
+    color: var(--pixel-bg);
+    box-shadow: inset 0 0 0 2px #ffe373, 4px 4px 0 var(--pixel-shadow);
+    font-family: ui-monospace, monospace;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    transition: transform 120ms steps(2, end), background-color 120ms steps(2, end), box-shadow 120ms steps(2, end);
+  }
+
+  .pixel-btn:enabled:hover { background: #ffda45; }
+  .pixel-btn:enabled:active { box-shadow: inset 0 0 0 2px #ffe373, 1px 1px 0 var(--pixel-shadow); transform: translate(3px, 3px); }
+
+  .pixel-input {
+    border: 3px solid #8c5f1d;
+    background: #f1e4bf;
+    color: var(--pixel-bg);
+    box-shadow: inset 3px 3px 0 rgba(78, 49, 16, 0.25), 3px 3px 0 var(--pixel-shadow);
+    font-family: ui-monospace, monospace;
+    outline: none;
+  }
+
+  .pixel-input:focus,
+  .pixel-btn:focus-visible,
+  .pixel-nav:focus-visible { box-shadow: 0 0 0 4px var(--pixel-focus), 3px 3px 0 var(--pixel-shadow); outline: none; }
+
+  .pixel-card,
+  .pixel-panel,
+  .pixel-modal {
+    border: 3px solid var(--pixel-border);
+    background: var(--pixel-surface);
+    box-shadow: inset 0 0 0 2px rgba(255, 232, 172, 0.16), 4px 4px 0 var(--pixel-shadow);
+  }
+
+  .pixel-card--select {
+    min-height: 44px;
+    border-color: #7d6338;
+    background: #e8d29d;
+    padding: 0.75rem 1rem;
+    color: #302417;
+    text-align: left;
+    transition: background-color 120ms steps(2, end), transform 120ms steps(2, end);
+  }
+
+  .pixel-card--select:hover { background: #f4e2b5; }
+  .pixel-card--select:active { transform: translate(2px, 2px); }
+  .pixel-card--select:focus-visible { outline: 4px solid var(--pixel-focus); outline-offset: 2px; }
+  .pixel-panel--console,
+  .pixel-panel--ledger { border: 0; background-color: transparent; box-shadow: none; }
+
+  .pixel-badge { display: inline-block; border: 2px solid currentColor; padding: 0.25rem 0.5rem; font-family: ui-monospace, monospace; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.08em; }
+  .pixel-progress { height: 0.8rem; border: 2px solid var(--pixel-border); background: var(--pixel-bg); padding: 2px; }
+  .pixel-progress > span { display: block; height: 100%; background: var(--pixel-green); }
+  .pixel-modal { width: min(100% - 2rem, 32rem); color: var(--pixel-text); padding: 1.25rem; }
+  .pixel-tooltip { border: 2px solid var(--pixel-border); background: var(--pixel-bg); color: var(--pixel-text); padding: 0.4rem 0.55rem; font-family: ui-monospace, monospace; font-size: 0.7rem; box-shadow: 2px 2px 0 var(--pixel-shadow); }
+  .pixel-sprite { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+  /* Foco compartido, independiente de la librería visual. */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid var(--pixel-yellow) !important;
+    outline-offset: 3px;
+  }
+
   game-app,
   app-footer,
   player-register,
@@ -54,9 +157,11 @@
     display: grid;
     min-height: 3.25rem;
     place-items: center;
-    border-top: 3px solid #6f4e12;
-    background: #080807;
-    box-shadow: 0 -3px 0 #1b1308;
+    border-top: 3px solid #80511e;
+    background:
+      linear-gradient(180deg, rgba(137, 82, 27, 0.2), transparent 45%),
+      linear-gradient(90deg, #120e09, #21150c 50%, #120e09);
+    box-shadow: 0 -3px 0 #0a0806, inset 0 1px 0 rgba(255, 216, 101, 0.22);
     color: var(--color-muted);
     font-family: ui-monospace, monospace;
     font-size: 0.62rem;
@@ -77,9 +182,22 @@
   .gameHeader {
     position: relative;
     z-index: 10;
-    border-bottom: 4px solid #6f4e12;
-    background: #080807;
-    box-shadow: 0 5px 0 #1b1308;
+    isolation: isolate;
+    border-bottom: 4px solid #7c4b1a;
+    background: linear-gradient(180deg, #17120c, #0d0b08 68%);
+    box-shadow: 0 5px 0 #170d07, inset 0 -1px 0 rgba(255, 216, 101, 0.22);
+  }
+
+  .gameHeader::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    content: '';
+    opacity: 0.48;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 52px, rgba(148, 82, 29, 0.11) 53px 55px, transparent 56px 104px),
+      linear-gradient(90deg, rgba(91, 48, 21, 0.42), transparent 18%, transparent 82%, rgba(91, 48, 21, 0.42));
+    pointer-events: none;
   }
 
   .gameTopBar {
@@ -133,9 +251,11 @@
   }
 
   .gameMarquee {
-    border: 4px solid var(--color-brass);
-    background: linear-gradient(#1b1a17, #080807);
-    box-shadow: inset 0 0 0 3px #e7b82c, 5px 5px 0 #291b09;
+    border: 4px solid #be862d;
+    background:
+      linear-gradient(90deg, rgba(94, 47, 17, 0.28), transparent 18%, transparent 82%, rgba(94, 47, 17, 0.28)),
+      linear-gradient(#272117, #110e0a);
+    box-shadow: inset 0 0 0 2px #f5c94d, inset 0 0 0 5px #4b2a12, 5px 5px 0 #1b1008;
     clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
   }
 
@@ -147,20 +267,38 @@
   }
 
   .gameNavLink {
+    position: relative;
     display: block;
-    border: 2px solid #5f4b27;
-    background: #181611;
+    border: 2px solid #60441f;
+    background: linear-gradient(180deg, #292117, #16120d);
     color: var(--color-muted);
-    box-shadow: 2px 2px 0 #080807;
+    box-shadow: inset 0 1px 0 rgba(255, 220, 130, 0.13), 2px 2px 0 #090705;
     transition-property: color, background-color, border-color, transform;
     transition-duration: 120ms;
   }
 
+  .gameNavLink::after {
+    position: absolute;
+    right: 0.35rem;
+    bottom: 0.18rem;
+    left: 0.35rem;
+    height: 2px;
+    content: '';
+    background: #80511e;
+    opacity: 0.38;
+  }
+
   .gameNavLink:hover,
   .gameNavLink--active {
-    border-color: var(--color-action);
-    background: #2b2416;
-    color: var(--color-action);
+    border-color: #d5a23b;
+    background: linear-gradient(180deg, #4c3519, #25180d);
+    color: var(--color-cream);
+    box-shadow: inset 0 0 0 1px rgba(255, 218, 101, 0.22), 2px 2px 0 #090705;
+  }
+
+  .gameNavLink--active::after {
+    background: var(--color-gold-light);
+    opacity: 1;
   }
 
   .gameNavLink:active {
@@ -168,9 +306,9 @@
   }
 
   .gameNavLink--locked {
-    border-color: #332d20;
-    background: #0f0e0c;
-    color: #6c6250;
+    border-color: #3c2e1b;
+    background: #100d09;
+    color: #6e6048;
     box-shadow: none;
     cursor: not-allowed;
   }
@@ -428,13 +566,14 @@
   }
 
   .pixelFrame {
-    border: 2px solid var(--color-brass);
-    box-shadow: 4px 4px 0 var(--color-arena-deep), inset 0 0 0 1px rgba(255, 246, 216, 0.1);
+    border: 2px solid #a7772c;
+    background-color: #211a11;
+    box-shadow: 4px 4px 0 #0b0806, inset 0 0 0 1px rgba(255, 232, 172, 0.15), inset 0 4px 0 rgba(87, 43, 16, 0.28);
   }
 
   .pixelButton {
-    border: 2px solid #d6a924;
-    box-shadow: 3px 3px 0 #6f4e12, inset 0 1px 0 rgba(255, 246, 216, 0.55);
+    border: 2px solid #d8a735;
+    box-shadow: 3px 3px 0 #643811, inset 0 2px 0 rgba(255, 248, 207, 0.58), inset 0 -2px 0 rgba(132, 76, 18, 0.25);
   }
 
   .pixelButton:enabled:active {
@@ -446,10 +585,10 @@
     position: relative;
     overflow: hidden;
     background-image:
-      radial-gradient(ellipse at 50% 0%, rgba(246, 201, 69, 0.13), transparent 42%),
-      linear-gradient(135deg, transparent 48%, rgba(155, 122, 50, 0.1) 49%, transparent 50%),
-      linear-gradient(45deg, transparent 48%, rgba(155, 122, 50, 0.08) 49%, transparent 50%);
-    background-size: auto, 22px 22px, 22px 22px;
+      radial-gradient(ellipse at 50% 0%, rgba(226, 167, 55, 0.12), transparent 42%),
+      linear-gradient(135deg, transparent 48%, rgba(132, 77, 27, 0.14) 49%, transparent 50%),
+      linear-gradient(45deg, transparent 48%, rgba(132, 77, 27, 0.1) 49%, transparent 50%);
+    background-size: auto, 24px 24px, 24px 24px;
   }
 
   .adminInput {
@@ -1143,10 +1282,30 @@
     box-shadow: inset 0 0 0 2px #79551e;
   }
 
-  .poolTeamSlot__sprite {
-    width: clamp(0.85rem, 2vw, 1.8rem);
+  .poolTeamSlot .poolTeamSlot__sprite {
+    display: block;
+    width: clamp(3.8rem, 7.2vw, 6.4rem);
     grid-row: auto;
-    margin-top: 0.4rem;
+    margin-top: 0.8rem;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent;
+    filter: drop-shadow(2px 2px 0 #080807);
+    transform: scale(var(--sprite-scale, 1.15));
+    transform-origin: center;
+  }
+
+  .poolTeamSlot__sprite::before,
+  .poolTeamSlot__sprite::after {
+    content: none;
+  }
+
+  .poolTeamSlot__sprite img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
   }
 
   .poolTeamSlot strong {
@@ -1505,7 +1664,17 @@
 
     .registrationLayout {
       gap: 0.5rem;
-      padding: 8.75rem 0.35rem 1.5rem;
+      padding: 11rem 0.35rem 1.5rem;
+    }
+
+    /* Los paneles usan marcos rasterizados; se declaran de forma explícita
+       en móvil para mantenerlos al combinar los modificadores pixel-panel. */
+    .trainerConsole.pixel-panel--console {
+      background: url('/assets/images/ui/trainerConsoleFrame.png') center / 100% 100% no-repeat;
+    }
+
+    .profileLedger.pixel-panel--ledger {
+      background: url('/assets/images/ui/profileLedgerFrame.png') center / 100% 100% no-repeat;
     }
 
     .trainerConsole__content {
@@ -1595,7 +1764,648 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #0f172a, #020617 70%);
+  background-color: var(--pixel-bg);
+  background-image: radial-gradient(circle at 50% -20%, rgba(218, 151, 48, 0.15), transparent 40%);
+}
+
+/* Sistema visual propio: 16-bit/GBA, sin librerías de componentes. */
+.poke-button,
+.poke-card,
+.poke-panel,
+.poke-input,
+.poke-dialog,
+.poke-progress,
+.poke-nav {
+  font-family: ui-monospace, "Courier New", monospace;
+}
+
+.poke-button,
+.poke-card,
+.poke-panel,
+.poke-input,
+.poke-dialog {
+  clip-path: var(--poke-pixel-cut);
+}
+
+.poke-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.85rem;
+  border: 3px solid var(--poke-ink);
+  color: var(--poke-ink);
+  background:
+    linear-gradient(180deg, #f4f5f6 0 18%, var(--poke-paper) 18% 82%, var(--poke-paper-deep) 82%);
+  box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #656b73, 4px 4px 0 var(--poke-ink);
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: transform 120ms steps(2, end), box-shadow 120ms steps(2, end), filter 120ms steps(2, end);
+}
+
+.poke-button:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  filter: brightness(1.08);
+  box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #656b73, 6px 6px 0 var(--poke-ink);
+}
+
+.poke-button:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: inset 2px 2px 0 #656b73, inset -2px -2px 0 #fff, 1px 1px 0 var(--poke-ink);
+}
+
+.poke-button:focus-visible,
+.poke-input:focus-visible,
+.poke-nav a:focus-visible {
+  outline: 3px solid var(--pixel-yellow);
+  outline-offset: 4px;
+}
+
+.poke-button--primary {
+  color: #fff;
+  background: linear-gradient(180deg, #ef7672 0 18%, var(--poke-sky) 18% 82%, var(--poke-sky-shadow) 82%);
+  box-shadow: inset 2px 2px 0 #ffaaa1, inset -2px -2px 0 #4f161b, 4px 4px 0 var(--poke-ink);
+}
+
+.poke-button--primary:hover:not(:disabled) {
+  box-shadow: inset 2px 2px 0 #ffd0c9, inset -2px -2px 0 #4f161b, 6px 6px 0 var(--poke-ink);
+}
+
+.poke-button--profile {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 44px;
+  text-align: left;
+}
+
+.poke-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.75);
+  opacity: 0.62;
+}
+
+.poke-card,
+.poke-panel,
+.poke-dialog {
+  border: 3px solid var(--poke-ink);
+  color: var(--poke-ink);
+  background-color: var(--poke-paper);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(23, 25, 29, 0.1) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #f2f3f4 0 12%, var(--poke-paper) 12% 86%, var(--poke-paper-deep) 86%);
+  box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #656b73, 5px 5px 0 var(--poke-ink);
+}
+
+.poke-card { padding: 0.75rem; }
+.poke-panel { padding: 1rem; }
+
+.poke-panel--form {
+  color: var(--pixel-text);
+  background-color: #2a2d32;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.055) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #4b5058 0 12%, #2a2d32 12% 88%, #17191d 88%);
+  box-shadow: inset 2px 2px 0 #747b85, inset -2px -2px 0 #111316, 5px 5px 0 #080807;
+}
+
+.poke-scope .trainerConsole.poke-panel {
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  background-image: url('/assets/images/ui/trainerConsoleFrame.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  box-shadow: none;
+  clip-path: none;
+}
+
+/* Ventana oscura semitransparente: conserva profundidad sin repetir la arena dentro del marco. */
+.poke-scope .trainerConsole__content {
+  position: relative;
+  isolation: isolate;
+}
+
+.poke-scope .trainerConsole__content::before {
+  position: absolute;
+  z-index: 0;
+  inset: 22% 13% 26%;
+  content: '';
+  background: rgba(13, 15, 18, 0.78);
+}
+
+.poke-scope .trainerConsole__content > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* El frame ya contiene el panel negro: el formulario queda integrado, sin caja superpuesta. */
+.poke-scope .trainerConsole__formColumn.poke-panel--form {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.poke-scope .trainerSpriteFrame.poke-card {
+  border: 3px solid #111316;
+  background: #e6e9ed;
+  box-shadow: inset 0 0 0 2px #6e747c, 3px 3px 0 #08090a;
+}
+
+.poke-input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 3px solid var(--poke-ink);
+  color: var(--poke-ink);
+  background: linear-gradient(180deg, #f4f5f6 0 72%, #9aa1aa 72%);
+  box-shadow: inset 2px 2px 0 #737982, inset -2px -2px 0 #fff, 3px 3px 0 var(--poke-ink);
+}
+
+.poke-dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  padding: 1.25rem;
+}
+
+.poke-progress {
+  display: block;
+  height: 1.25rem;
+  overflow: hidden;
+  border: 3px solid var(--poke-ink);
+  background: #2a2d32;
+  box-shadow: inset 2px 2px 0 #111316, 2px 2px 0 var(--poke-ink);
+}
+
+.poke-progress > span {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, #ef6d67 0 8px, #b83a40 8px 16px);
+  box-shadow: inset 0 2px 0 #ffb2a9, inset 0 -2px 0 #6f2026;
+}
+
+.poke-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.15rem 0.45rem;
+  border: 2px solid var(--poke-ink);
+  color: #fff;
+  background: var(--poke-leaf);
+  box-shadow: 2px 2px 0 var(--poke-ink);
+  clip-path: var(--poke-pixel-cut);
+  font: 700 0.7rem/1 ui-monospace, "Courier New", monospace;
+  letter-spacing: 0.05em;
+}
+
+.poke-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.poke-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.65rem;
+  border: 2px solid var(--poke-ink);
+  color: var(--poke-ink);
+  background: var(--poke-paper);
+  box-shadow: 2px 2px 0 var(--poke-ink);
+  clip-path: var(--poke-pixel-cut);
+  text-decoration: none;
+}
+
+.poke-nav a:hover,
+.poke-nav a[aria-current="page"] { color: #fff; background: var(--poke-sky); }
+
+/* Cabecera del piloto: mismos controles, con lectura de menú RPG. */
+.gameHeader .poke-marquee {
+  border: 4px solid #111316;
+  color: #eef0f2;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #51565e 0 10%, #292c31 10% 84%, #121417 84%);
+  box-shadow: inset 3px 3px 0 #858b94, inset -3px -3px 0 #050607, 6px 6px 0 #050607;
+  clip-path: var(--poke-pixel-cut);
+}
+
+.gameHeader .poke-marquee:hover {
+  filter: brightness(1.08);
+}
+
+.gameHeader .gameMarquee__title {
+  color: #ec5755 !important;
+  text-shadow: 2px 2px 0 #0c0d0f;
+}
+
+.gameHeader .poke-nav {
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.gameHeader .poke-nav .gameNavLink,
+.gameHeader .poke-nav .poke-nav__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.65rem;
+  border: 2px solid #0b0c0e;
+  color: #f3eee5;
+  background: linear-gradient(180deg, #4b5058 0 14%, #24272c 14% 82%, #111316 82%);
+  box-shadow: inset 1px 1px 0 #838991, inset -1px -1px 0 #050607, 3px 3px 0 #050607;
+  clip-path: var(--poke-pixel-cut);
+  text-decoration: none;
+  transition: transform 120ms steps(2, end), box-shadow 120ms steps(2, end), filter 120ms steps(2, end);
+}
+
+.gameHeader .poke-nav .gameNavLink::after { display: none; }
+
+.gameHeader .poke-nav .gameNavLink:hover,
+.gameHeader .poke-nav .gameNavLink--active {
+  border-color: #4c171c;
+  color: #fff;
+  background: linear-gradient(180deg, #ee716a 0 18%, #c64043 18% 82%, #6f2026 82%);
+  box-shadow: inset 1px 1px 0 #ffb2a9, inset -1px -1px 0 #4f161b, 3px 3px 0 #08090a;
+}
+
+/* La navegación responde como los botones de perfiles: levanta, ilumina y presiona a pasos. */
+.gameHeader .poke-nav a.gameNavLink:hover {
+  transform: translate(-1px, -1px);
+  filter: brightness(1.08);
+  box-shadow: inset 1px 1px 0 #ffb2a9, inset -1px -1px 0 #4f161b, 5px 5px 0 #08090a;
+}
+
+.gameHeader .poke-nav a.gameNavLink:active {
+  transform: translate(2px, 2px);
+  filter: brightness(0.96);
+  box-shadow: inset 1px 1px 0 #4f161b, inset -1px -1px 0 #ffb2a9, 1px 1px 0 #08090a;
+}
+
+.gameHeader .poke-nav .gameNavLink--locked {
+  color: #7f858d;
+  background: linear-gradient(180deg, #33363b 0 18%, #202226 18% 82%, #111214 82%);
+  box-shadow: inset 1px 1px 0 #555a62, inset -1px -1px 0 #08090a, 3px 3px 0 #08090a;
+}
+
+.poke-panel__title {
+  border: 3px solid #17191d;
+  color: #fff;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #5c6169 0 16%, #35393f 16% 82%, #1d2024 82%);
+  box-shadow: inset 2px 2px 0 #949aa3, inset -2px -2px 0 #111214, 3px 3px 0 #111214;
+  clip-path: var(--poke-pixel-cut);
+}
+
+.poke-panel__title h2 { color: #ef5b58; }
+
+.poke-sprite {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Módulos de juego: variante carbón/acero/rojo del sistema 16-bit. */
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .arenaStage {
+  overflow: hidden;
+  border: 4px solid #111316;
+  color: #e8eaed;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #464b53 0 2rem, #282b30 2rem 100%);
+  box-shadow: inset 3px 3px 0 #777e88, inset -3px -3px 0 #070809, 7px 7px 0 #070809;
+  clip-path: var(--poke-pixel-cut);
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .arenaStage > header {
+  border: 0;
+  border-bottom: 3px solid #111316;
+  color: #eef0f2;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #50555d 0 16%, #2a2d32 16% 84%, #17191d 84%);
+  box-shadow: inset 2px 2px 0 #7b828c, inset -2px -2px 0 #0a0b0c;
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) h1,
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) h2 {
+  text-shadow: 2px 2px 0 #0a0b0c;
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-action,
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-success,
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-danger {
+  color: #f06461 !important;
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-cream { color: #eef0f2 !important; }
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) .text-muted { color: #a8afb8 !important; }
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button,
+.poolCarouselButton,
+.poolBuildButton {
+  border: 2px solid #111316 !important;
+  color: #e9ebee !important;
+  background: linear-gradient(180deg, #4a4f57 0 18%, #2b2e33 18% 82%, #15171a 82%) !important;
+  box-shadow: inset 1px 1px 0 #7d848d, inset -1px -1px 0 #090a0b, 3px 3px 0 #08090a;
+  clip-path: var(--poke-pixel-cut);
+  transition: transform 120ms steps(2, end), filter 120ms steps(2, end), box-shadow 120ms steps(2, end);
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:hover:not(:disabled),
+.poolCarouselButton:hover:not(:disabled),
+.poolBuildButton:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  filter: brightness(1.12);
+  box-shadow: inset 1px 1px 0 #969da6, inset -1px -1px 0 #090a0b, 5px 5px 0 #08090a;
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:active:not(:disabled),
+.poolCarouselButton:active:not(:disabled),
+.poolBuildButton:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: inset 1px 1px 0 #111316, inset -1px -1px 0 #808790, 1px 1px 0 #08090a;
+}
+
+:is(team-builder, battle-result, match-history, leaderboard-view, admin-panel) .pixelButton,
+team-builder [data-confirm],
+admin-panel [data-confirm-delete],
+.poolBuildButton {
+  color: #fff !important;
+  background: linear-gradient(180deg, #ef7069 0 18%, #c64043 18% 82%, #6f2026 82%) !important;
+  box-shadow: inset 1px 1px 0 #ffb0a8, inset -1px -1px 0 #50171c, 3px 3px 0 #08090a;
+}
+
+admin-panel .adminDangerButton,
+battle-arena [data-action="special"] {
+  color: #fff !important;
+  background: linear-gradient(180deg, #d95656 0 18%, #9e3035 18% 82%, #581a20 82%) !important;
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) button:disabled,
+.poolCarouselButton:disabled,
+.poolBuildButton:disabled {
+  color: #848a92 !important;
+  background: #292c30 !important;
+  box-shadow: inset 1px 1px 0 #464a50, 2px 2px 0 #08090a;
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) input,
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) textarea {
+  border: 2px solid #111316 !important;
+  color: #17191d !important;
+  background: linear-gradient(180deg, #f2f3f4 0 72%, #9aa1aa 72%) !important;
+  box-shadow: inset 2px 2px 0 #707780, inset -2px -2px 0 #fff, 3px 3px 0 #08090a;
+  clip-path: var(--poke-pixel-cut);
+}
+
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) input:focus,
+:is(team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) textarea:focus {
+  outline: 3px solid #ef625d;
+  outline-offset: 3px;
+}
+
+team-builder li,
+battle-arena .battleCard,
+battle-arena [aria-labelledby="actions-title"],
+battle-arena aside,
+.historyRecord,
+.leaderboardRow,
+admin-panel .adminCardForm,
+admin-panel .adminCatalog,
+admin-panel .adminCardRow,
+admin-panel .adminDialog {
+  border-color: #111316 !important;
+  background-color: #292c31 !important;
+  background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 4px) !important;
+  box-shadow: inset 2px 2px 0 #535963, inset -2px -2px 0 #111316, 4px 4px 0 #08090a;
+  clip-path: var(--poke-pixel-cut);
+}
+
+.historyRecord--win,
+.historyRecord--loss,
+.leaderboardRow--top1,
+.leaderboardRow--top2,
+.leaderboardRow--top3 {
+  border-color: #963139 !important;
+  background: linear-gradient(90deg, rgba(198, 64, 67, 0.35), rgba(34, 37, 42, 0.95)) !important;
+  box-shadow: inset 3px 0 0 #ef625d, 4px 4px 0 #08090a;
+}
+
+.historyDeck li,
+battle-arena .cardBack,
+battle-arena [role="status"],
+team-builder [role="status"] {
+  border-color: #111316 !important;
+  background-color: #1d2024 !important;
+}
+
+battle-arena .healthBar {
+  border-color: #111316;
+  background: #17191d;
+  box-shadow: inset 2px 2px 0 #08090a, 2px 2px 0 #08090a;
+}
+
+battle-arena .healthBar span {
+  background: repeating-linear-gradient(90deg, #ef6a64 0 8px, #bb373e 8px 16px);
+  box-shadow: inset 0 2px 0 #ffb2aa, inset 0 -2px 0 #6f2026;
+}
+
+battle-arena .defenseBadge,
+.leaderboardRow .text-success { color: #f06461 !important; }
+
+/* Pool conserva su marco ilustrado, pero recibe los controles y contraste del sistema. */
+pool-grid .poolDraftConsole {
+  background-color: #24272c;
+  background-blend-mode: luminosity;
+  filter: saturate(0.35) contrast(1.08);
+}
+
+pool-grid .poolDraftConsole__header,
+pool-grid .poolCounter,
+pool-grid .poolCarouselStatus {
+  color: #eef0f2 !important;
+}
+
+pool-grid .poolDraftConsole__header h1,
+pool-grid .poolCounter strong { color: #ef625d !important; }
+
+pool-grid .poolCard--fullArt {
+  border-color: #111316 !important;
+  box-shadow: 4px 4px 0 #08090a;
+  clip-path: var(--poke-pixel-cut);
+}
+
+pool-grid .poolCard--fullArt:hover,
+pool-grid .poolCard--fullArt:focus-visible,
+pool-grid .poolCard--fullArt.poolCard--selected {
+  border-color: #ef625d !important;
+  box-shadow: 0 0 0 2px #6f2026, 5px 5px 0 #08090a;
+}
+
+pool-grid .poolTeamSlot {
+  border-color: #111316;
+  background: linear-gradient(180deg, #454a52 0 18%, #292c31 18% 82%, #17191d 82%);
+  box-shadow: inset 1px 1px 0 #757c85, inset -1px -1px 0 #090a0b, 3px 3px 0 #08090a;
+}
+
+/* La cabecera es un overlay único: Inicio y los módulos no usan barras distintas. */
+.gameHeader {
+  position: absolute;
+  width: 100%;
+  border-bottom: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.gameHeader::before { display: none; }
+
+.gameHeader .gameTopBar {
+  width: min(calc(100% - 2rem), 104rem);
+  max-width: none;
+  padding-top: clamp(1.5rem, 3vh, 2.25rem);
+}
+
+.gameHeader .gameMarquee {
+  width: min(62vw, 62rem);
+  justify-content: center;
+  padding-block: clamp(1.1rem, 2.4vh, 1.6rem);
+}
+
+.gameMain {
+  min-height: 100svh;
+  background-color: #08090a;
+  background-image:
+    linear-gradient(rgba(5, 6, 8, 0.28), rgba(5, 6, 8, 0.58)),
+    url('/assets/images/ui/kantoLeagueHall.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* El salón se pinta una sola vez en gameMain; las escenas internas no lo repiten. */
+.registrationScene,
+.poolScene {
+  background-color: transparent;
+  background-image: none;
+}
+
+/* El perfil es un libro ilustrado, no una card CSS: muestra su frame recoloreado. */
+.poke-scope .profileLedger.poke-panel {
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  background-image: url('/assets/images/ui/profileLedgerFrame.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  box-shadow: none;
+  clip-path: none;
+}
+
+/* La página y el footer comparten el mismo remate oscuro, sin corte de degradado. */
+:root,
+body {
+  min-height: 100%;
+  background-color: #171a1f;
+  background-image: linear-gradient(180deg, #25292f 0%, #101216 38%, #090a0c 78%, #171a1f 100%);
+  background-attachment: fixed;
+}
+
+game-app {
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+  background: linear-gradient(180deg, #25292f 0%, #101216 38%, #090a0c 78%, #171a1f 100%);
+}
+
+/* El footer acompaña al contenido: no se reserva un viewport entero de piso vacío. */
+game-app .gameMain {
+  min-height: 0;
+  flex: 0 0 auto;
+}
+
+game-app .registrationScene {
+  min-height: 0;
+}
+
+app-footer {
+  display: block;
+  margin-top: 0;
+}
+
+.gameFooter {
+  min-height: 3.75rem;
+  border-top: 3px solid #6f2026;
+  color: #c8cdd3;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #292d33 0 10%, #15171a 10% 82%, #08090a 82%);
+  box-shadow: inset 0 2px 0 #555b64, 0 -3px 0 #08090a;
+}
+
+.gameFooter span,
+.gameFooter strong { color: #ef625d; }
+
+/* Historial: tarjetas claras para separar visualmente partidas sin perder el acento rojo. */
+match-history .historyRecord,
+match-history .historyRecord--win,
+match-history .historyRecord--loss {
+  color: #202329;
+  border-color: #7c3238 !important;
+  background:
+    repeating-linear-gradient(45deg, rgba(32, 35, 41, 0.055) 0 1px, transparent 1px 4px),
+    linear-gradient(110deg, #f1eadb 0%, #d5d9de 58%, #aeb5bf 100%) !important;
+  box-shadow: inset 4px 0 0 #d34b4c, inset 2px 2px 0 #fffdf6, inset -2px -2px 0 #777f89, 4px 4px 0 #08090a;
+}
+
+match-history .historyRecord > header p,
+match-history .historyRecord > header h2,
+match-history .historyRecord > header strong,
+match-history .historyMeta dd {
+  color: #202329 !important;
+  text-shadow: none;
+}
+
+match-history .historyRecord > header h2,
+match-history .historyRecord > header strong,
+match-history .historyMeta dt,
+match-history .historyTeams h3 {
+  color: #a52f36 !important;
+}
+
+match-history .historyMeta div { border-color: rgba(111, 32, 38, 0.45); }
+
+match-history .historyDeck li {
+  border-color: #23262b;
+  color: #f5f1e8;
+  background: linear-gradient(180deg, #4b5159 0 20%, #24272c 20% 100%);
+  box-shadow: 2px 2px 0 #696f78;
+}
+
+.gameMain > :is(pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) {
+  display: block;
+  min-height: 100svh;
+  padding: clamp(8.5rem, 13vw, 12rem) 1rem 2rem;
+}
+
+@media (max-width: 1100px) {
+  .gameHeader .gameMarquee { width: min(78vw, 48rem); }
+}
+
+@media (max-width: 600px) {
+  .gameHeader .gameTopBar {
+    width: min(calc(100% - 1rem), 38rem);
+    padding: 0.75rem 0.5rem 0;
+  }
+
+  .gameHeader .gameMarquee { width: 100%; }
+
+  .gameMain > :is(pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) {
+    padding: 10.5rem 0.5rem 1.5rem;
+  }
 }
 
 #app {
@@ -1720,5 +2530,122 @@ body {
 
   .game-shell {
     padding: 1.25rem;
+  }
+}
+
+/* Escritorio: una sola escena completa. El scroll se reserva para móviles. */
+@media (min-width: 601px) {
+  html,
+  body,
+  #app {
+    width: 100%;
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #app {
+    display: block;
+  }
+
+  game-app {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  game-app .gameMain {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  game-app .registrationScene,
+  game-app .registrationLayout {
+    height: 100%;
+    min-height: 0;
+  }
+
+  game-app .registrationLayout {
+    padding-block: clamp(0.5rem, 1.5vh, 1rem);
+  }
+
+  /* El libro y la consola se reducen con la altura disponible, no fuerzan scroll. */
+  game-app .profileLedger {
+    width: auto;
+    height: min(68svh, 42rem);
+    max-width: 100%;
+  }
+
+  game-app .trainerConsole {
+    width: min(100%, clamp(29rem, 45vw, 48rem));
+  }
+
+  game-app .gameMain > :is(pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  app-footer,
+  .gameFooter {
+    flex: 0 0 auto;
+  }
+}
+
+/* En portátiles bajos compactamos los módulos densos para conservar todos sus controles visibles. */
+@media (min-width: 601px) and (max-height: 800px) {
+  game-app .gameMain > :is(pool-grid, team-builder, battle-arena, battle-result, match-history, leaderboard-view, admin-panel) {
+    zoom: 0.78;
+    width: 128.205%;
+    padding-top: 8.5rem;
+    padding-bottom: 0.75rem;
+  }
+}
+
+/* Composición de escritorio alto: cada pantalla ocupa su zona de arena. */
+@media (min-width: 601px) and (min-height: 801px) {
+  game-app .gameMain > player-register {
+    display: block;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  game-app .registrationLayout {
+    transform: translateY(1rem);
+  }
+
+  game-app .trainerConsole {
+    transform: translateY(1rem);
+  }
+
+  game-app .profileLedger {
+    height: min(66svh, 39rem);
+  }
+
+  /* Consolas de juego: suben bajo el encabezado y dejan un margen claro al footer. */
+  game-app .gameMain > pool-grid {
+    padding: 7rem 1rem 6.5rem;
+  }
+
+  game-app .gameMain > :is(team-builder, battle-arena, match-history) {
+    padding: 9rem 1rem 6.5rem;
+  }
+
+  /* Resultado y ranking conservan su cabecera y amplían el cuerpo para llenar el centro. */
+  game-app .gameMain > battle-result .arenaStage {
+    display: flex;
+    min-height: 32rem;
+    flex-direction: column;
+  }
+
+  game-app .gameMain > leaderboard-view .arenaStage {
+    display: flex;
+    min-height: 34.25rem;
+    flex-direction: column;
+  }
+
+  game-app .gameMain > :is(battle-result, leaderboard-view) .arenaStage > div:last-child {
+    flex: 1 1 auto;
   }
 }

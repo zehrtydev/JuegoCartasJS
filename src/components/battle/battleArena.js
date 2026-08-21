@@ -71,29 +71,28 @@ class BattleArena extends HTMLElement {
 
   #renderCardImage(card) {
     if (!card) return '<div class="cardBack mx-auto mt-4 max-w-[12rem]" aria-hidden="true"><span class="captureSeal scale-90"></span></div>'
-    const spriteUrl = this.#getSpriteUrl(card)
-    const scale = this.#getSpriteScale(card) * 1.5
     return `
       <div class="mx-auto mt-4 max-w-[12rem] aspect-square flex items-center justify-center">
-        <img src="${this.#escapeHtml(spriteUrl)}" alt="${this.#escapeHtml(card.name)}" class="w-full h-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] pixel-sprite" style="transform: scale(${scale})" />
+        <img src="${this.#escapeHtml(card.imageUrl || card.image)}" alt="${this.#escapeHtml(card.name)}" class="w-full h-full object-contain drop-shadow-lg" />
       </div>
     `
   }
 
   #renderTeamCard(card, isPlayerTeam, isActiveCard, isPlayerTurn, isFinished) {
-    const imageUrl = card.imageUrl || card.image
+    const spriteUrl = this.#getSpriteUrl(card)
+    const scale = this.#getSpriteScale(card)
     const stateClass = card.defeated ? 'opacity-30 grayscale' : (isActiveCard ? 'ring-2 ring-action/80 bg-action/10' : '')
     const label = `${card.name}${card.defeated ? ' derrotado' : `, ${Math.max(0, card.hp)} PS`}`
 
     const canSwitch = isPlayerTeam && !card.defeated && !isActiveCard && isPlayerTurn && !isFinished
     const tag = canSwitch ? 'button' : 'div'
-    const buttonProps = canSwitch ? `type="button" class="action-btn w-full block transition hover:bg-brass/20 cursor-pointer" data-action="switch" data-attack-id="${card.id}"` : 'class="w-full h-full block"'
+    const buttonProps = canSwitch ? `type="button" class="action-btn w-full block transition hover:bg-brass/20 cursor-pointer" data-action="switch" data-attack-id="${card.id}"` : 'class="w-full h-full block flex flex-col items-center justify-center"'
     const hoverTitle = canSwitch ? `title="Cambiar a ${this.#escapeHtml(card.name)}"` : ''
 
     return `
       <li class="border border-brass/60 bg-arena-deep/50 p-1 flex flex-col ${stateClass} ${canSwitch ? 'hover:border-brass' : ''}" aria-label="${this.#escapeHtml(label)}" ${hoverTitle}>
         <${tag} ${buttonProps}>
-          <img src="${this.#escapeHtml(imageUrl)}" alt="${this.#escapeHtml(card.name)}" class="aspect-square w-full object-contain ${canSwitch ? 'hover:scale-105 transition-transform' : ''}" />
+          <img src="${this.#escapeHtml(spriteUrl)}" alt="${this.#escapeHtml(card.name)}" class="aspect-square w-full object-contain pixel-sprite ${canSwitch ? 'hover:scale-105 transition-transform' : ''}" style="transform: scale(${scale})" />
           ${canSwitch ? `<span class="block mt-1 bg-brass text-cream font-mono text-[0.6rem] font-bold py-0.5 rounded text-center w-full uppercase shadow">Cambiar</span>` : ''}
         </${tag}>
       </li>

@@ -51,11 +51,31 @@ class BattleArena extends HTMLElement {
     }))
   }
 
+  #getSpriteUrl(card) {
+    const number = Number(card.number)
+    if (Number.isInteger(number) && number > 0) {
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png`
+    }
+    return card.imageUrl || card.image || ''
+  }
+
+  #getSpriteScale(card) {
+    const scales = {
+      1: 1.32, 4: 1.34, 6: 1.02, 7: 1.5, 9: 1.08,
+      25: 1.2, 26: 1.16, 39: 1.34, 52: 1.35, 54: 1.42,
+      59: 1.05, 94: 1.14, 104: 1.22, 130: 1.02, 131: 1.08,
+      136: 1.2, 143: 1.02, 149: 1.02, 150: 1.08, 151: 1.3,
+    }
+    return scales[Number(card.number)] || 1.15
+  }
+
   #renderCardImage(card) {
     if (!card) return '<div class="cardBack mx-auto mt-4 max-w-[12rem]" aria-hidden="true"><span class="captureSeal scale-90"></span></div>'
+    const spriteUrl = this.#getSpriteUrl(card)
+    const scale = this.#getSpriteScale(card) * 1.5
     return `
       <div class="mx-auto mt-4 max-w-[12rem] aspect-square flex items-center justify-center">
-        <img src="${this.#escapeHtml(card.imageUrl || card.image)}" alt="${this.#escapeHtml(card.name)}" class="w-full h-full object-contain drop-shadow-lg" />
+        <img src="${this.#escapeHtml(spriteUrl)}" alt="${this.#escapeHtml(card.name)}" class="w-full h-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] pixel-sprite" style="transform: scale(${scale})" />
       </div>
     `
   }

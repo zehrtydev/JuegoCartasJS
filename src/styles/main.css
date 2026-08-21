@@ -1399,17 +1399,20 @@
     .poolCardGrid {
       position: static;
       inset: auto;
-      width: 67%;
+      width: 100%;
       height: auto;
-      grid-template-columns: 1fr;
-      grid-template-rows: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: auto;
+      grid-column: 2;
       gap: 0.55rem;
+      margin: 0 auto;
     }
 
     .poolCarousel {
       display: grid;
       grid-template-columns: 2.4rem minmax(0, 1fr) 2.4rem;
       align-items: center;
+      gap: 0.5rem;
     }
 
     .poolCarouselButton {
@@ -1442,7 +1445,8 @@
 
     .poolCarousel .poolCard--fullArt {
       min-height: 0;
-      height: min(60vh, 31rem);
+      height: auto;
+      aspect-ratio: 9 / 16;
       max-width: 100%;
       padding: 0;
     }
@@ -2754,11 +2758,34 @@ match-history .historyDeck li {
     flex-direction: row;
     gap: 0.5rem;
     align-items: center;
-    padding: 20% 9% 27%;
+    padding: 20% 7% 27%;
+  }
+
+  .trainerConsole__title {
+    font-size: 0.7rem !important;
+    line-height: 1.1;
+  }
+
+  .trainerLabel, .trainerHelp {
+    font-size: 0.6rem;
+  }
+
+  .trainerInput {
+    min-height: 2rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .trainerForm button[type="submit"] {
+    min-height: 2rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.6rem;
+    white-space: normal;
+    line-height: 1.1;
   }
 
   .trainerSpriteFrame {
-    flex: 0 0 clamp(4rem, 24%, 5.25rem);
+    flex: 0 0 clamp(3.5rem, 20%, 4.5rem);
   }
 
   .profileLedger__tab {

@@ -23,6 +23,72 @@ function playUrl(url, volume = 0.45) {
   })
 }
 
+let homeThemeAudio = null
+let isHomeThemeActive = false
+let gestureListener = null
+
+function cleanupGestureListener() {
+  if (gestureListener && typeof window !== 'undefined') {
+    window.removeEventListener('pointerdown', gestureListener)
+    window.removeEventListener('keydown', gestureListener)
+    window.removeEventListener('click', gestureListener)
+    gestureListener = null
+  }
+}
+
+/**
+ * Inicia la reproducción en bucle del tema principal (pokemon-theme.mp3)
+ * para la pantalla de inicio. Si el navegador bloquea el autoplay,
+ * se engancha al primer gesto del usuario (click, toque o tecla) para
+ * iniciar la reproducción automáticamente sin errores.
+ */
+export function playHomeThemeMusic(volume = 0.35) {
+  if (typeof Audio === 'undefined') return
+
+  isHomeThemeActive = true
+
+  if (!homeThemeAudio) {
+    homeThemeAudio = new Audio('/assets/audio/pokemon-theme.mp3')
+    homeThemeAudio.loop = true
+  }
+
+  homeThemeAudio.volume = volume
+
+  // Si ya está reproduciéndose, no reiniciar
+  if (!homeThemeAudio.paused) return
+
+  const playPromise = homeThemeAudio.play()
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+      // Autoplay bloqueado por el navegador: esperar a la primera interacción del usuario
+      if (!gestureListener && typeof window !== 'undefined') {
+        gestureListener = () => {
+          cleanupGestureListener()
+          if (isHomeThemeActive && homeThemeAudio && homeThemeAudio.paused) {
+            homeThemeAudio.play().catch(() => {})
+          }
+        }
+        window.addEventListener('pointerdown', gestureListener, { once: true })
+        window.addEventListener('keydown', gestureListener, { once: true })
+        window.addEventListener('click', gestureListener, { once: true })
+      }
+    })
+  }
+}
+
+/**
+ * Detiene la música de inicio de forma limpia y reinicia su posición.
+ */
+export function stopHomeThemeMusic() {
+  isHomeThemeActive = false
+  cleanupGestureListener()
+
+  if (homeThemeAudio) {
+    homeThemeAudio.pause()
+    homeThemeAudio.currentTime = 0
+  }
+}
+
 /**
  * Reproduce un efecto local por acción y, cuando existe, el grito específico
  * del Pokémon. Nunca bloquea el turno ni la persistencia si el audio falla.
@@ -35,3 +101,5 @@ export function playBattleAudio(action, card = null) {
     setTimeout(() => playUrl(card.cryUrl, 0.28), normalized === 'defeated' ? 0 : 90)
   }
 }
+
+

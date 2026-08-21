@@ -9,7 +9,7 @@ import {
 } from '../../services/gameController.js'
 import { getPlayers } from '../../api/playersApi.js'
 import { getBattles } from '../../api/battlesApi.js'
-import { playBattleAudio } from '../../services/audioService.js'
+import { playBattleAudio, playHomeThemeMusic, stopHomeThemeMusic } from '../../services/audioService.js'
 
 const viewLabels = {
   home: 'Inicio',
@@ -53,6 +53,10 @@ class GameApp extends HTMLElement {
     
     await this.#loadInitialData()
     this.#render()
+
+    if (this.#currentView === 'home') {
+      playHomeThemeMusic()
+    }
   }
 
   disconnectedCallback() {
@@ -65,6 +69,7 @@ class GameApp extends HTMLElement {
     this.removeEventListener('battle-action', this.#handleBattleAction)
     clearTimeout(this.#machineTurnTimer)
     clearTimeout(this.#noticeTimer)
+    stopHomeThemeMusic()
   }
 
   async #loadInitialData() {
@@ -92,6 +97,12 @@ class GameApp extends HTMLElement {
 
   #handleNavigation = async (event) => {
     this.#currentView = event.detail.view
+
+    if (this.#currentView === 'home') {
+      playHomeThemeMusic()
+    } else {
+      stopHomeThemeMusic()
+    }
 
     if (this.#currentView === 'leaderboard') {
       await this.#loadLeaderboard()
@@ -142,6 +153,7 @@ class GameApp extends HTMLElement {
     if (this.#preview.active) {
       this.#currentPlayer = { id: 'preview-1', alias, points: 0 }
       this.#currentView = 'pool'
+      stopHomeThemeMusic()
       this.#render()
       return
     }
@@ -150,6 +162,7 @@ class GameApp extends HTMLElement {
     if (result.success) {
       this.#currentPlayer = result.player
       this.#currentView = 'pool'
+      stopHomeThemeMusic()
       await this.#loadCardsSession()
       this.#render()
     } else {
@@ -160,6 +173,7 @@ class GameApp extends HTMLElement {
   #handleSelectPlayer = async (event) => {
     this.#currentPlayer = event.detail.player
     this.#currentView = 'pool'
+    stopHomeThemeMusic()
     if (!this.#preview.active) {
       await this.#loadCardsSession()
     }
@@ -409,6 +423,7 @@ class GameApp extends HTMLElement {
     `
     section.querySelector('[data-view]').addEventListener('click', () => {
       this.#currentView = 'home'
+      playHomeThemeMusic()
       this.#render()
     })
     return section

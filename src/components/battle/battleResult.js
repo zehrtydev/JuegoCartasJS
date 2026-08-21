@@ -29,16 +29,22 @@ class BattleResult extends HTMLElement {
         <div class="p-8 text-center sm:p-10">
           <p class="font-mono text-lg font-bold text-cream">${detail}</p>
           <p class="mt-3 text-sm text-muted">${persistenceMessage}</p>
-          <button class="pixelButton mt-8 w-full bg-action px-5 py-3 font-mono text-sm font-black tracking-[0.12em] text-arena-deep" type="button" data-view="home">VOLVER AL INICIO</button>
+          <button class="pixelButton mt-8 w-full bg-action px-5 py-3 font-mono text-sm font-black tracking-[0.12em] text-arena-deep hover:bg-[#ffda68]" type="button" data-view="home">VOLVER AL INICIO</button>
+          <div class="mt-4 grid grid-cols-2 gap-4">
+            <button class="pixelButton w-full bg-panel px-5 py-3 font-mono text-sm font-black tracking-[0.12em] text-cream hover:bg-brass/20" type="button" data-view="history">HISTORIAL</button>
+            <button class="pixelButton w-full bg-panel px-5 py-3 font-mono text-sm font-black tracking-[0.12em] text-cream hover:bg-brass/20" type="button" data-view="leaderboard">RANKING</button>
+          </div>
         </div>
       </section>
     `
 
-    this.querySelector('[data-view]').addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('navigate', {
-        bubbles: true,
-        detail: { view: 'home' },
-      }))
+    this.querySelectorAll('[data-view]').forEach((button) => {
+      button.addEventListener('click', () => {
+        this.dispatchEvent(new CustomEvent('navigate', {
+          bubbles: true,
+          detail: { view: button.dataset.view },
+        }))
+      })
     })
   }
 }

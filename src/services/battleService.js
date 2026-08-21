@@ -259,34 +259,75 @@ export function reduceCooldowns(deck) {
   });
 }
 
-export function chooseMachineAction(machineCard) {
+export function chooseMachineAction(machineCard, playerCard) {
   if (!machineCard) return null;
 
-  const available = [];
+  if (!playerCard) {
+    // Fallback si no hay carta de jugador (por seguridad)
+    const available = [];
+    const specialUses = machineCard.special?.currentUses ?? MAX_SPECIAL_USES;
+    if (specialUses > 0 && (machineCard.specialCooldown ?? 0) <= 0 && (machineCard.turnCount ?? 0) >= (machineCard.special?.unlockTurn ?? 2)) {
+      available.push('special');
+    }
+    const attacks = machineCard.attacks || [];
+    attacks.forEach((attack, index) => {
+      if ((attack.currentUses ?? MAX_ATTACK_USES) > 0) available.push(`attack-${index + 1}`);
+    });
+    available.push('defend');
+    return available[Math.floor(Math.random() * available.length)];
+  }
 
-  // Especial solo si tiene usos > 0, no está en cooldown y cumple turnCount
+  const options = [];
+
+  // 1. Evaluar ataques básicos
+  const attacks = machineCard.attacks || [];
+  attacks.forEach((attack, index) => {
+    const uses = attack.currentUses ?? MAX_ATTACK_USES;
+    if (uses > 0) {
+      const attackType = attack.type || machineCard.type || 'Normal';
+      const defenderType = playerCard.type || 'Normal';
+      const multiplier = getTypeMultiplier(attackType, defenderType);
+      
+      const expectedDamage = Math.round((attack.baseDamage ?? 25) * multiplier);
+      options.push({ action: `attack-${index + 1}`, expectedDamage });
+    }
+  });
+
+  // 2. Evaluar ataque especial
   const specialUses = machineCard.special?.currentUses ?? MAX_SPECIAL_USES;
   if (
     specialUses > 0 &&
     (machineCard.specialCooldown ?? 0) <= 0 &&
     (machineCard.turnCount ?? 0) >= (machineCard.special?.unlockTurn ?? 2)
   ) {
-    available.push('special');
+    const attackType = machineCard.special?.type || machineCard.type || 'Normal';
+    const defenderType = playerCard.type || 'Normal';
+    const multiplier = getTypeMultiplier(attackType, defenderType);
+    
+    const expectedDamage = Math.round((machineCard.special?.baseDamage ?? 65) * multiplier);
+    options.push({ action: 'special', expectedDamage });
   }
 
-  // Ataques con usos > 0
-  const attacks = machineCard.attacks || [];
-  attacks.forEach((attack, index) => {
-    const uses = attack.currentUses ?? MAX_ATTACK_USES;
-    if (uses > 0) {
-      available.push(`attack-${index + 1}`);
-    }
-  });
+  // 3. Evaluar defensa
+  // Si la vida es menor al 35%, hay un 40% de probabilidad de usar defensa para sobrevivir más tiempo
+  const hpPercent = (machineCard.hp || 0) / 250; 
+  if (hpPercent <= 0.35 && Math.random() < 0.40) {
+    return 'defend';
+  }
 
-  // Defensa siempre disponible
-  available.push('defend');
+  // Ordenar opciones de mayor a menor daño esperado
+  options.sort((a, b) => b.expectedDamage - a.expectedDamage);
 
-  return available[Math.floor(Math.random() * available.length)];
+  // Elegir la mejor opción casi siempre, pero dar un 10% de probabilidad a la segunda mejor para cierta aleatoriedad
+  if (options.length > 1 && Math.random() < 0.1) {
+    return options[1].action;
+  }
+  
+  if (options.length > 0) {
+    return options[0].action;
+  }
+
+  return 'defend';
 }
 
 export function evaluateBattleEnd(playerDeck, machineDeck) {

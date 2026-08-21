@@ -312,7 +312,7 @@ export function performMachineAction(state) {
     return { success: false, message: 'Todavía no es el turno de la máquina.' };
   }
 
-  const action = chooseMachineAction(activeMachine);
+  const action = chooseMachineAction(activeMachine, activePlayer);
 
   if (action === 'defend') {
     const defended = defend(activeMachine);

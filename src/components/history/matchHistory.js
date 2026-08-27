@@ -1,5 +1,8 @@
+import { resolveHistoryDeck } from '../../utils/historyDeck.js'
+
 class MatchHistory extends HTMLElement {
   #records = []
+  #cards = []
   #state = 'empty'
 
   set records(value) {
@@ -9,6 +12,15 @@ class MatchHistory extends HTMLElement {
 
   get records() {
     return this.#records
+  }
+
+  set cards(value) {
+    this.#cards = Array.isArray(value) ? value : []
+    if (this.isConnected) this.#render()
+  }
+
+  get cards() {
+    return this.#cards
   }
 
   set state(value) {
@@ -41,7 +53,15 @@ class MatchHistory extends HTMLElement {
 
   #renderDeck(deck, label) {
     if (!Array.isArray(deck) || deck.length === 0) return '<span class="historyDeck__empty">Sin datos</span>'
-    return `<ul class="historyDeck" aria-label="${label}">${deck.map((cardId) => `<li>${this.#escapeHtml(cardId)}</li>`).join('')}</ul>`
+    const resolvedDeck = resolveHistoryDeck(deck, this.#cards)
+    return `<ul class="historyDeck" aria-label="${label}">${resolvedDeck.map((card) => `
+      <li class="historyDeck__card">
+        ${card.spriteUrl
+          ? `<img class="historyDeck__sprite" src="${this.#escapeHtml(card.spriteUrl)}" alt="" loading="lazy">`
+          : '<span class="historyDeck__sprite historyDeck__sprite--missing" aria-hidden="true">?</span>'}
+        <span class="historyDeck__name">${this.#escapeHtml(card.name)}</span>
+      </li>
+    `).join('')}</ul>`
   }
 
   #renderRecords() {

@@ -23,6 +23,7 @@ El acceso está disponible desde el módulo **Admin**. Las credenciales se inclu
 
 ## Funcionalidades entregadas
 
+- Golpes criticos con 15% de probabilidad aumentando el daño en x1.5
 - Registro y selección de perfil de jugador.
 - Catálogo completo de 151 Pokémon de Kanto con imagen y grito.
 - Pool fijo de 20 cartas activas con imágenes locales; validación de al menos 10 activas para poder formar ambos equipos.

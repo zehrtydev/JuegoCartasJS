@@ -28,9 +28,11 @@ El acceso está disponible desde el módulo **Admin**. Las credenciales se inclu
 - Pool fijo de 20 cartas activas con imágenes locales; validación de al menos 10 activas para poder formar ambos equipos.
 - Selección y orden de 5 cartas, rival automático sin repetir cartas del jugador y combate por turnos 5v5.
 - Ataques, defensa que reduce el siguiente daño, especial habilitado desde el segundo turno y cooldown de 3 turnos.
+- Selector de batalla manual o automática; el modo automático ejecuta ambos participantes con pausas mediante `setTimeout()` y deshabilita los controles manuales.
+- Golpes críticos con 12% de probabilidad y multiplicador ×1.5, además de esquives con 8% de probabilidad y daño 0.
 - Relevo automático hasta que los cinco Pokémon de un equipo sean derrotados.
 - Barra de vida, defensa activa, estado del especial, animaciones de ataque/defensa/KO y sonidos locales más gritos de Pokémon.
-- Resultado persistido, puntos, historial desde `/battles` y ranking ordenado con podio visual para los tres primeros lugares.
+- Resultado persistido con el modo jugado, puntos, historial desde `/battles` y ranking ordenado con podio visual para los tres primeros lugares.
 - Administración de cartas con login y operaciones REST visibles: GET, POST, PUT, PATCH y DELETE; la eliminación se confirma dentro de la interfaz.
 
 ## Ejecutar localmente

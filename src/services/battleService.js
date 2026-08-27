@@ -1,8 +1,10 @@
-import { normalizeDamage, getNextTurn, applyDefenseReduction } from '../utils/battleEngine.js';
 import { getTypeMultiplier, getTypeEffectivenessMessage } from '../utils/typeEffectiveness.js';
 
 export const MAX_ATTACK_USES = 5;
 export const MAX_SPECIAL_USES = 2;
+export const DODGE_CHANCE = 0.08;
+export const CRITICAL_CHANCE = 0.12;
+export const CRITICAL_MULTIPLIER = 1.5;
 
 function initializeCardForBattle(card) {
   if (!card) return null;
@@ -109,6 +111,46 @@ export function prepareCardForTurn(card) {
   return prepared;
 }
 
+function resolveDamage(attacker, defender, move) {
+  const attackType = move.type || attacker.type || 'Normal';
+  const defenderType = defender.type || 'Normal';
+  const multiplier = getTypeMultiplier(attackType, defenderType);
+  const randomFactor = 0.85 + Math.random() * 0.3;
+  const typeDamage = move.baseDamage * randomFactor * multiplier;
+  const dodged = Math.random() < DODGE_CHANCE;
+
+  if (dodged) {
+    return {
+      damage: 0,
+      defender: { ...defender },
+      finished: false,
+      isCritical: false,
+      dodged: true,
+      multiplier,
+      effectMessage: getTypeEffectivenessMessage(multiplier),
+      message: '¡ATAQUE ESQUIVADO!',
+    };
+  }
+
+  const isCritical = Math.random() < CRITICAL_CHANCE;
+  const criticalDamage = isCritical ? typeDamage * CRITICAL_MULTIPLIER : typeDamage;
+  const defendedDamage = defender.isDefending ? criticalDamage * 0.5 : criticalDamage;
+  const damage = Math.round(defendedDamage);
+  const nextHp = Math.max(0, (defender.hp ?? 250) - damage);
+  const finished = nextHp <= 0;
+
+  return {
+    damage,
+    defender: { ...defender, hp: nextHp, defeated: finished, isDefending: false },
+    finished,
+    isCritical,
+    dodged: false,
+    multiplier,
+    effectMessage: getTypeEffectivenessMessage(multiplier),
+    message: isCritical ? '¡GOLPE CRÍTICO!' : '',
+  };
+}
+
 export function applyAttack(attacker, defender, attack) {
   if (!attacker || !defender || !attack) {
     return { damage: 0, defender, attacker, finished: false, message: 'Acción inválida.', success: false };
@@ -134,31 +176,16 @@ export function applyAttack(attacker, defender, attack) {
     return { ...a };
   });
 
-  const attackType = attack.type || attacker.type || 'Normal';
-  const defenderType = defender.type || 'Normal';
-  const multiplier = getTypeMultiplier(attackType, defenderType);
-
-  const rawDamage = normalizeDamage(attack.baseDamage);
-  const typeDamage = multiplier === 0 ? Math.floor(Math.random() * 10) + 1 : Math.round(rawDamage * multiplier);
-  const reduced = defender.isDefending ? applyDefenseReduction(typeDamage, true) : typeDamage;
-  const nextHp = Math.max(0, (defender.hp || 250) - reduced);
-  const finished = nextHp <= 0;
-
-  const effectMsg = getTypeEffectivenessMessage(multiplier);
-  let message = finished ? `${defender.name} fue derrotado.` : `${defender.name} recibió ${reduced} de daño.`;
-  if (multiplier === 0 && !finished) {
-    message = `¡Casi no tuvo efecto contra ${defender.name}! (${reduced} daño)`;
-  } else if (effectMsg && !finished) {
-    message = `${effectMsg} ${defender.name} recibió ${reduced} de daño.`;
-  }
+  const resolution = resolveDamage(attacker, defender, attack);
+  const eventMessage = resolution.message ? `${resolution.message} ` : '';
+  const effectMessage = resolution.effectMessage ? `${resolution.effectMessage} ` : '';
+  const message = resolution.finished
+    ? `${eventMessage}${defender.name} fue derrotado.`
+    : `${eventMessage}${effectMessage}${defender.name} recibió ${resolution.damage} de daño.`;
 
   return {
-    damage: reduced,
-    multiplier,
-    effectMessage: effectMsg,
-    defender: { ...defender, hp: nextHp, defeated: finished, isDefending: false },
+    ...resolution,
     attacker: { ...attacker, attacks: updatedAttacks },
-    finished,
     message,
     success: true,
   };
@@ -189,26 +216,12 @@ export function useSpecial(attacker, defender) {
     return { damage: 0, defender, attacker, finished: false, message: 'El poder está en cooldown.', success: false };
   }
 
-  const attackType = special.type || attacker.type || 'Normal';
-  const defenderType = defender.type || 'Normal';
-  const multiplier = getTypeMultiplier(attackType, defenderType);
-
-  const rawDamage = normalizeDamage(special.baseDamage);
-  const typeDamage = multiplier === 0 ? Math.floor(Math.random() * 10) + 1 : Math.round(rawDamage * multiplier);
-  const reduced = defender.isDefending ? applyDefenseReduction(typeDamage, true) : typeDamage;
-  const nextHp = Math.max(0, (defender.hp || 250) - reduced);
-  const finished = nextHp <= 0;
-
-  const effectMsg = getTypeEffectivenessMessage(multiplier);
-  let message = `Poder especial usado: ${special.name}.`;
-  if (multiplier === 0 && !finished) {
-    message = `¡${special.name} casi no tuvo efecto contra ${defender.name}! (${reduced} daño)`;
-  } else if (effectMsg && !finished) {
-    message = `${special.name}: ${effectMsg} ${defender.name} recibió ${reduced} de daño.`;
-  }
-  if (finished) {
-    message = `¡${special.name}! ${defender.name} fue derrotado.`;
-  }
+  const resolution = resolveDamage(attacker, defender, special);
+  const eventMessage = resolution.message ? `${resolution.message} ` : '';
+  const effectMessage = resolution.effectMessage ? `${resolution.effectMessage} ` : '';
+  const message = resolution.finished
+    ? `${eventMessage}¡${special.name}! ${defender.name} fue derrotado.`
+    : `${eventMessage}${special.name}: ${effectMessage}${defender.name} recibió ${resolution.damage} de daño.`;
 
   const updatedAttacker = {
     ...attacker,
@@ -219,20 +232,9 @@ export function useSpecial(attacker, defender) {
     },
   };
 
-  const updatedDefender = {
-    ...defender,
-    hp: nextHp,
-    defeated: finished,
-    isDefending: false,
-  };
-
   return {
-    damage: reduced,
-    multiplier,
-    effectMessage: effectMsg,
-    defender: updatedDefender,
+    ...resolution,
     attacker: updatedAttacker,
-    finished,
     message,
     success: true,
   };
@@ -259,75 +261,42 @@ export function reduceCooldowns(deck) {
   });
 }
 
-export function chooseMachineAction(machineCard, playerCard) {
-  if (!machineCard) return null;
+export function getAvailableActions(card) {
+  if (!card) return [];
 
-  if (!playerCard) {
-    // Fallback si no hay carta de jugador (por seguridad)
-    const available = [];
-    const specialUses = machineCard.special?.currentUses ?? MAX_SPECIAL_USES;
-    if (specialUses > 0 && (machineCard.specialCooldown ?? 0) <= 0 && (machineCard.turnCount ?? 0) >= (machineCard.special?.unlockTurn ?? 2)) {
-      available.push('special');
-    }
-    const attacks = machineCard.attacks || [];
-    attacks.forEach((attack, index) => {
-      if ((attack.currentUses ?? MAX_ATTACK_USES) > 0) available.push(`attack-${index + 1}`);
-    });
-    available.push('defend');
-    return available[Math.floor(Math.random() * available.length)];
+  const actions = (card.attacks || [])
+    .map((attack, index) => ((attack.currentUses ?? MAX_ATTACK_USES) > 0 ? `attack-${index + 1}` : null))
+    .filter(Boolean);
+
+  actions.push('defend');
+
+  const specialUses = card.special?.currentUses ?? MAX_SPECIAL_USES;
+  const specialUnlocked = (card.turnCount ?? 0) >= (card.special?.unlockTurn ?? 2);
+  if (specialUses > 0 && specialUnlocked && (card.specialCooldown ?? 0) === 0) {
+    actions.push('special');
   }
 
-  const options = [];
+  return actions;
+}
 
-  // 1. Evaluar ataques básicos
-  const attacks = machineCard.attacks || [];
-  attacks.forEach((attack, index) => {
-    const uses = attack.currentUses ?? MAX_ATTACK_USES;
-    if (uses > 0) {
-      const attackType = attack.type || machineCard.type || 'Normal';
-      const defenderType = playerCard.type || 'Normal';
-      const multiplier = getTypeMultiplier(attackType, defenderType);
-      
-      const expectedDamage = Math.round((attack.baseDamage ?? 25) * multiplier);
-      options.push({ action: `attack-${index + 1}`, expectedDamage });
-    }
-  });
+export function chooseAutomaticAction(card, opponentCard) {
+  const availableActions = getAvailableActions(card, opponentCard);
+  if (availableActions.length === 0) return null;
 
-  // 2. Evaluar ataque especial
-  const specialUses = machineCard.special?.currentUses ?? MAX_SPECIAL_USES;
-  if (
-    specialUses > 0 &&
-    (machineCard.specialCooldown ?? 0) <= 0 &&
-    (machineCard.turnCount ?? 0) >= (machineCard.special?.unlockTurn ?? 2)
-  ) {
-    const attackType = machineCard.special?.type || machineCard.type || 'Normal';
-    const defenderType = playerCard.type || 'Normal';
-    const multiplier = getTypeMultiplier(attackType, defenderType);
-    
-    const expectedDamage = Math.round((machineCard.special?.baseDamage ?? 65) * multiplier);
-    options.push({ action: 'special', expectedDamage });
+  if (availableActions.includes('special') && (opponentCard?.hp ?? 0) > 100) {
+    return 'special';
   }
 
-  // 3. Evaluar defensa
-  // Si la vida es menor al 35%, hay un 40% de probabilidad de usar defensa para sobrevivir más tiempo
-  const hpPercent = (machineCard.hp || 0) / 250; 
-  if (hpPercent <= 0.35 && Math.random() < 0.40) {
+  const hpPercent = (card.hp ?? 0) / 250;
+  if (hpPercent <= 0.35 && Math.random() < 0.4) {
     return 'defend';
   }
 
-  // Ordenar opciones de mayor a menor daño esperado
-  options.sort((a, b) => b.expectedDamage - a.expectedDamage);
+  return availableActions.find((action) => action.startsWith('attack-')) || 'defend';
+}
 
-  // Elegir la mejor opción casi siempre, pero dar un 10% de probabilidad a la segunda mejor para cierta aleatoriedad
-  if (options.length > 1 && Math.random() < 0.1) {
-    return options[1].action;
-  }
-  
-  if (options.length > 0) {
-    return options[0].action;
-  }
-
-  return 'defend';
+export function chooseMachineAction(machineCard, playerCard) {
+  return chooseAutomaticAction(machineCard, playerCard);
 }
 
 export function evaluateBattleEnd(playerDeck, machineDeck) {

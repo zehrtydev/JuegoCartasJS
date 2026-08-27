@@ -5,6 +5,7 @@ import {
   createCombatSession,
   performPlayerAction,
   performMachineAction,
+  performAutomaticAction,
   finishGameSession
 } from '../../services/gameController.js'
 import { getPlayers } from '../../api/playersApi.js'
@@ -21,6 +22,13 @@ const viewLabels = {
   admin: 'Administración',
 }
 
+const BATTLE_MODES = {
+  MANUAL: 'manual',
+  AUTOMATIC: 'automatic',
+}
+
+const AUTOMATIC_TURN_DELAY_MS = 1000
+
 class GameApp extends HTMLElement {
   #preview = getPreviewMode()
   #currentView = this.#preview.view
@@ -30,7 +38,8 @@ class GameApp extends HTMLElement {
   #playersList = []
   #playerDeck = []
   #battleState = null
-  #machineTurnTimer = null
+  #battleTurnTimer = null
+  #battleMode = BATTLE_MODES.MANUAL
   #battleFinalized = false
   #battleResult = null
   #noticeMessage = ''
@@ -48,6 +57,7 @@ class GameApp extends HTMLElement {
     this.addEventListener('pool-selection-changed', this.#handlePoolSelection)
     this.addEventListener('team-confirmed', this.#handleTeamConfirmed)
     this.addEventListener('battle-action', this.#handleBattleAction)
+    this.addEventListener('battle-mode-changed', this.#handleBattleModeChanged)
     
     await this.#loadInitialData()
     this.#render()
@@ -62,7 +72,8 @@ class GameApp extends HTMLElement {
     this.removeEventListener('pool-selection-changed', this.#handlePoolSelection)
     this.removeEventListener('team-confirmed', this.#handleTeamConfirmed)
     this.removeEventListener('battle-action', this.#handleBattleAction)
-    clearTimeout(this.#machineTurnTimer)
+    this.removeEventListener('battle-mode-changed', this.#handleBattleModeChanged)
+    this.#cancelBattleTurn()
     clearTimeout(this.#noticeTimer)
     stopBgm()
   }
@@ -185,24 +196,37 @@ class GameApp extends HTMLElement {
       this.#battleResult = null
       this.#battleStartedAt = new Date().toISOString()
       this.#battleEffect = null
+      this.#battleMode = BATTLE_MODES.MANUAL
       this.#currentView = 'arena'
       playViewBgm('arena')
       playBattleIntro()
       this.#render()
-      this.#scheduleMachineTurn()
+      this.#scheduleBattleTurn()
     } else {
       this.#showNotice(combat.message || 'Error al iniciar el combate')
     }
   }
 
   #handleBattleAction = async (event) => {
+    if (this.#battleMode === BATTLE_MODES.AUTOMATIC) {
+      this.#showNotice('Los controles manuales están deshabilitados en modo automático.')
+      return
+    }
+
     const { action, attackId } = event.detail
     const actingCard = this.#battleState?.activePlayerCard
     const targetCard = this.#battleState?.activeMachineCard
     const result = performPlayerAction(this.#battleState, action, attackId)
     if (result.success) {
       this.#battleState = result.state
-      this.#battleEffect = { id: Date.now(), actor: 'player', action, isKo: result.result?.isKo === true }
+      this.#battleEffect = {
+        id: Date.now(),
+        actor: 'player',
+        action,
+        isKo: result.result?.isKo === true,
+        isCritical: result.result?.isCritical === true,
+        dodged: result.result?.dodged === true,
+      }
       playBattleAudio(action, actingCard)
       if (result.result?.isKo) playBattleAudio('defeated', targetCard)
       await this.#handleBattleProgress()
@@ -211,34 +235,66 @@ class GameApp extends HTMLElement {
     }
   }
 
-  #scheduleMachineTurn() {
+  #handleBattleModeChanged = (event) => {
+    const requestedMode = event.detail?.mode
+    if (!Object.values(BATTLE_MODES).includes(requestedMode)) return
+    if ((this.#battleState?.log?.length ?? 0) > 0) {
+      this.#showNotice('El modo de batalla no puede cambiar después de la primera acción.')
+      return
+    }
+
+    this.#battleMode = requestedMode
+    this.#cancelBattleTurn()
+    this.#render()
+    this.#scheduleBattleTurn()
+  }
+
+  #cancelBattleTurn() {
+    clearTimeout(this.#battleTurnTimer)
+    this.#battleTurnTimer = null
+  }
+
+  #scheduleBattleTurn() {
     if (
       !this.#battleState ||
       this.#battleState.battleFinished ||
-      this.#battleState.currentTurn !== 'machine' ||
-      this.#machineTurnTimer !== null
+      this.#battleTurnTimer !== null ||
+      (this.#battleMode === BATTLE_MODES.MANUAL && this.#battleState.currentTurn !== 'machine')
     ) {
       return
     }
 
-    this.#machineTurnTimer = setTimeout(() => {
-      this.#machineTurnTimer = null
+    this.#battleTurnTimer = setTimeout(() => {
+      this.#battleTurnTimer = null
 
-      if (!this.#battleState || this.#battleState.battleFinished || this.#battleState.currentTurn !== 'machine') {
+      if (!this.#battleState || this.#battleState.battleFinished) {
         return
       }
 
-      const machineResult = performMachineAction(this.#battleState)
-      if (machineResult.success) {
-        const machineCard = this.#battleState.activeMachineCard
-        const playerCard = this.#battleState.activePlayerCard
-        this.#battleState = machineResult.state
-        this.#battleEffect = { id: Date.now(), actor: 'machine', action: machineResult.action, isKo: machineResult.result?.isKo === true }
-        playBattleAudio(machineResult.action, machineCard)
-        if (machineResult.result?.isKo) playBattleAudio('defeated', playerCard)
+      const actor = this.#battleState.currentTurn
+      const actingCard = actor === 'player' ? this.#battleState.activePlayerCard : this.#battleState.activeMachineCard
+      const targetCard = actor === 'player' ? this.#battleState.activeMachineCard : this.#battleState.activePlayerCard
+      const automaticResult = this.#battleMode === BATTLE_MODES.AUTOMATIC
+        ? performAutomaticAction(this.#battleState, actor)
+        : performMachineAction(this.#battleState)
+
+      if (automaticResult.success) {
+        const action = automaticResult.action || 'attack-1'
+        const audioAction = action.startsWith('attack-') ? 'attack' : action
+        this.#battleState = automaticResult.state
+        this.#battleEffect = {
+          id: Date.now(),
+          actor,
+          action: audioAction,
+          isKo: automaticResult.result?.isKo === true,
+          isCritical: automaticResult.result?.isCritical === true,
+          dodged: automaticResult.result?.dodged === true,
+        }
+        playBattleAudio(audioAction, actingCard)
+        if (automaticResult.result?.isKo) playBattleAudio('defeated', targetCard)
         void this.#handleBattleProgress()
       }
-    }, 1000)
+    }, AUTOMATIC_TURN_DELAY_MS)
   }
 
   async #handleBattleProgress() {
@@ -248,7 +304,7 @@ class GameApp extends HTMLElement {
     }
 
     this.#render()
-    this.#scheduleMachineTurn()
+    this.#scheduleBattleTurn()
   }
 
   #showNotice(message) {
@@ -271,6 +327,7 @@ class GameApp extends HTMLElement {
   async #finalizeBattle() {
     if (this.#battleFinalized || !this.#battleState?.battleFinished) return
 
+    this.#cancelBattleTurn()
     this.#battleFinalized = true
     const result = this.#battleState.winner === 'player' ? 'win' : 'loss'
 
@@ -284,6 +341,7 @@ class GameApp extends HTMLElement {
           playerNickname: this.#currentPlayer.nickname || this.#currentPlayer.alias,
           startedAt: this.#battleStartedAt,
           endedAt: new Date().toISOString(),
+          mode: this.#battleMode,
         },
       )
 
@@ -360,6 +418,7 @@ class GameApp extends HTMLElement {
       const arena = document.createElement('battle-arena')
       arena.battle = this.#battleState
       arena.effect = this.#battleEffect
+      arena.mode = this.#battleMode
       return arena
     }
 

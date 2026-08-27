@@ -9,6 +9,7 @@ import {
   createCombatSession,
   performPlayerAction,
   performMachineAction,
+  performAutomaticAction,
   checkBattleWinner,
   FIXED_POOL_CARDS,
   selectFixedPool,
@@ -38,6 +39,17 @@ globalThis.fetch = async (url) => {
     json: async () => [],
   };
 };
+
+function withRandomValues(values, callback) {
+  const originalRandom = Math.random;
+  let index = 0;
+  Math.random = () => values[index++] ?? values.at(-1) ?? 0.5;
+  try {
+    return callback();
+  } finally {
+    Math.random = originalRandom;
+  }
+}
 
 test('initializeGameSession filtra las cartas activas según el pool fijo', async () => {
   const result = await initializeGameSession();
@@ -152,7 +164,8 @@ test('Relevo del jugador tras KO', async () => {
   state.currentTurn = 'machine';
   // Force machine attack, which KOs Player A (10 HP) and triggers relevo to Player B
   const originalRandom = Math.random;
-  Math.random = () => 0;
+  const randomValues = [0, 0.5, 0.5];
+  Math.random = () => randomValues.shift() ?? 0.5;
   const result = performMachineAction(state);
   Math.random = originalRandom;
 
@@ -179,7 +192,7 @@ test('Relevo del bot tras KO', async () => {
 
   state.currentTurn = 'player';
   // Force player attack, which KOs Bot A (10 HP) and triggers relevo to Bot B
-  const result = performPlayerAction(state, 'attack', 0);
+  const result = withRandomValues([0.5, 0.5, 0.5], () => performPlayerAction(state, 'attack', 0));
 
   assert.equal(result.success, true);
   assert.equal(state.machineDeck[0].defeated, true);
@@ -203,7 +216,7 @@ test('Combate termina solo al derrotar las cinco cartas', async () => {
   const state = session.state;
 
   state.currentTurn = 'player';
-  const result1 = performPlayerAction(state, 'attack', 0);
+  const result1 = withRandomValues([0.5, 0.5, 0.5], () => performPlayerAction(state, 'attack', 0));
   assert.equal(result1.success, true);
   assert.equal(state.battleFinished, true, 'El combate debe terminar cuando el bot no tiene más cartas');
   assert.equal(state.winner, 'player');
@@ -211,7 +224,7 @@ test('Combate termina solo al derrotar las cinco cartas', async () => {
   const session2 = await createCombatSession(playerDeck, machineDeck);
   const state2 = session2.state;
   state2.currentTurn = 'machine';
-  const result2 = performMachineAction(state2); // KOs Player A, but Player B is alive
+  const result2 = withRandomValues([0.5, 0.5, 0.5], () => performMachineAction(state2)); // KOs Player A, but Player B is alive
   assert.equal(result2.success, true);
   assert.equal(state2.battleFinished, false, 'El combate no debe terminar si el jugador tiene cartas vivas');
   assert.equal(state2.winner, null);
@@ -333,5 +346,19 @@ test('Cooldown del especial', async () => {
 
   const successSpec = performPlayerAction(state, 'special');
   assert.equal(successSpec.success, true);
+});
+
+test('performAutomaticAction ejecuta un turno legal para el jugador', async () => {
+  const state = (await createCombatSession(
+    [{ id: 'card-001', name: 'A', hp: 250, attacks: [{ name: 'Attack', baseDamage: 20, currentUses: 1 }] }],
+    [{ id: 'card-006', name: 'B', hp: 250, attacks: [{ name: 'Attack', baseDamage: 20 }] }]
+  )).state;
+  state.currentTurn = 'player';
+
+  const result = performAutomaticAction(state, 'player');
+
+  assert.equal(result.success, true);
+  assert.ok(['attack-1', 'defend', 'special'].includes(result.action));
+  assert.equal(state.currentTurn, 'machine');
 });
 

@@ -58,6 +58,7 @@ class MatchHistory extends HTMLElement {
             <dl class="historyMeta">
               <div><dt>FECHA</dt><dd>${this.#escapeHtml(this.#formatDate(record.endedAt || record.startedAt))}</dd></div>
               <div><dt>ID DE PARTIDA</dt><dd>${this.#escapeHtml(record.id || 'Sin ID')}</dd></div>
+              <div><dt>MODO</dt><dd>${record.mode === 'automatic' ? 'AUTOMÁTICO' : 'MANUAL'}</dd></div>
             </dl>
             <div class="historyTeams">
               <section><h3>EQUIPO JUGADOR</h3>${this.#renderDeck(record.playerDeck, 'Equipo del jugador')}</section>

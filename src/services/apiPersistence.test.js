@@ -49,10 +49,12 @@ test('saveBattleRecord crea un registro con datos mínimos válidos', async () =
     machineDeck: ['card-006', 'card-007', 'card-008', 'card-009', 'card-010'],
     startedAt: '2026-08-18T00:00:00.000Z',
     endedAt: '2026-08-18T00:08:00.000Z',
+    mode: 'automatic',
   });
 
   assert.equal(result.success, true);
   assert.equal(result.message, 'Partida guardada correctamente.');
+  assert.equal(result.battle.mode, 'automatic');
 });
 
 test('registerPlayer valida nickname y devuelve éxito o error', async () => {

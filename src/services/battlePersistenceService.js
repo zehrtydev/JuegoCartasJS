@@ -11,6 +11,7 @@ export async function saveBattleRecord(battle) {
     playerNickname: battle.playerNickname,
     result: battle.result || 'pending',
     pointsAwarded: battle.pointsAwarded || 0,
+    mode: battle.mode === 'automatic' ? 'automatic' : 'manual',
     playerDeck: battle.playerDeck || [],
     machineDeck: battle.machineDeck || [],
     startedAt: battle.startedAt || new Date().toISOString(),

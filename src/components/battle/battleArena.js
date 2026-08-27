@@ -4,6 +4,7 @@ class BattleArena extends HTMLElement {
   #battle = null
   #effect = null
   #effectTimer = null
+  #mode = 'manual'
 
   set battle(value) {
     this.#battle = value
@@ -12,6 +13,15 @@ class BattleArena extends HTMLElement {
 
   get battle() {
     return this.#battle
+  }
+
+  set mode(value) {
+    this.#mode = value === 'automatic' ? 'automatic' : 'manual'
+    if (this.isConnected) this.#render()
+  }
+
+  get mode() {
+    return this.#mode
   }
 
   set effect(value) {
@@ -78,13 +88,13 @@ class BattleArena extends HTMLElement {
     `
   }
 
-  #renderTeamCard(card, isPlayerTeam, isActiveCard, isPlayerTurn, isFinished) {
+  #renderTeamCard(card, isPlayerTeam, isActiveCard, isPlayerTurn, isFinished, isAutomatic) {
     const spriteUrl = this.#getSpriteUrl(card)
     const scale = this.#getSpriteScale(card) * 1.3
     const stateClass = card.defeated ? 'opacity-30 grayscale' : (isActiveCard ? 'ring-2 ring-action/80 bg-action/10' : '')
     const label = `${card.name}${card.defeated ? ' derrotado' : `, ${Math.max(0, card.hp)} PS`}`
 
-    const canSwitch = isPlayerTeam && !card.defeated && !isActiveCard && isPlayerTurn && !isFinished
+    const canSwitch = isPlayerTeam && !card.defeated && !isActiveCard && isPlayerTurn && !isFinished && !isAutomatic
     const tag = canSwitch ? 'button' : 'div'
     const buttonProps = canSwitch 
       ? `type="button" class="action-btn w-full h-full flex flex-col items-center justify-between transition hover:bg-brass/20 cursor-pointer" data-action="switch" data-attack-id="${card.id}"` 
@@ -145,6 +155,8 @@ class BattleArena extends HTMLElement {
 
     if (owner === attacker && this.#effect.action === 'defend') return 'battleCard--defending'
     if (owner === attacker) return this.#effect.action === 'special' ? 'battleCard--special' : 'battleCard--attacking'
+    if (owner === defender && this.#effect.dodged) return 'battleCard--dodged'
+    if (owner === defender && this.#effect.isCritical) return 'battleCard--critical-hit'
     if (owner === defender && this.#effect.isKo && card?.defeated) return 'battleCard--defeated'
     if (owner === defender && this.#effect.action !== 'defend') return 'battleCard--damaged'
     return ''
@@ -172,6 +184,8 @@ class BattleArena extends HTMLElement {
     const machine = this.#battle.activeMachineCard
     const isPlayerTurn = this.#battle.currentTurn === 'player'
     const isFinished = this.#battle.battleFinished
+    const isAutomatic = this.#mode === 'automatic'
+    const modeLocked = this.#battle.log.length > 0
     const specialState = this.#getSpecialState(player)
     const specialUses = player?.special?.currentUses ?? 2
     const hasSpecialUses = specialUses > 0
@@ -190,7 +204,14 @@ class BattleArena extends HTMLElement {
             <p class="font-mono text-xs font-bold tracking-[0.2em] text-action">COMBATE POR TURNOS</p>
             <h1 class="mt-1 text-2xl font-black tracking-[0.06em] text-cream sm:text-3xl" id="arena-title">ARENA DE BATALLA</h1>
           </div>
-          <p class="border border-brass bg-surface px-3 py-2 font-mono text-xs font-bold tracking-wider text-cream">TURNO: <span class="text-muted">${isPlayerTurn ? 'TUYO' : 'DEL BOT'}</span></p>
+          <div class="flex flex-wrap items-center gap-3">
+            <fieldset class="battleModeSelector" ${modeLocked ? 'disabled' : ''}>
+              <legend>MODO DE BATALLA</legend>
+              <label><input type="radio" name="battle-mode" value="manual" ${!isAutomatic ? 'checked' : ''}> MANUAL</label>
+              <label><input type="radio" name="battle-mode" value="automatic" ${isAutomatic ? 'checked' : ''}> AUTOMÁTICO</label>
+            </fieldset>
+            <p class="border border-brass bg-surface px-3 py-2 font-mono text-xs font-bold tracking-wider text-cream">TURNO: <span class="text-muted">${isPlayerTurn ? 'JUGADOR' : 'BOT'}</span></p>
+          </div>
         </header>
         <div class="grid lg:grid-cols-[1.35fr_0.65fr]">
           <div class="p-6 sm:p-8">
@@ -215,8 +236,10 @@ class BattleArena extends HTMLElement {
             <section class="mt-5 border border-brass bg-arena-deep/50 p-4" aria-labelledby="actions-title">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="font-mono text-xs font-bold tracking-[0.18em] text-cream" id="actions-title">ACCIONES DE COMBATE</h2>
-                <span class="font-mono text-xs text-muted">${isFinished ? 'PARTIDA TERMINADA' : (isPlayerTurn ? 'TU TURNO' : 'ESPERANDO AL BOT...')}</span>
+                <span class="font-mono text-xs text-muted">${isFinished ? 'PARTIDA TERMINADA' : (isAutomatic ? 'MODO AUTOMÁTICO ACTIVO' : (isPlayerTurn ? 'TU TURNO' : 'ESPERANDO AL BOT...'))}</span>
               </div>
+              ${this.#effect?.isCritical ? '<p class="battleEvent battleEvent--critical" role="status">¡GOLPE CRÍTICO!</p>' : ''}
+              ${this.#effect?.dodged ? '<p class="battleEvent battleEvent--dodged" role="status">¡ATAQUE ESQUIVADO!</p>' : ''}
               <div class="mt-4 grid gap-3 sm:grid-cols-2">
                 ${player ? player.attacks.slice(0, 4).map((attack, index) => {
                   const uses = attack.currentUses ?? 5
@@ -224,7 +247,7 @@ class BattleArena extends HTMLElement {
                   const badge = machine ? getTypeBadgeInfo(attack.type || player.type || 'Normal', machine.type || 'Normal') : null
                   const effectivenessTag = badge && badge.multiplier !== 1 ? `<span class="${badge.cssClass}"> · ${badge.label}</span>` : ''
                   return `
-                    <button class="action-btn border border-brass bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-brass/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="attack" data-attack-id="${index}" ${!isPlayerTurn || isFinished || !hasUses ? 'disabled' : ''}>
+                    <button class="action-btn border border-brass bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-brass/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="attack" data-attack-id="${index}" ${!isPlayerTurn || isFinished || isAutomatic || !hasUses ? 'disabled' : ''}>
                       <div class="flex items-center justify-between gap-2">
                         <span>${this.#escapeHtml(attack.name)}</span>
                         <span class="text-[0.68rem] px-1.5 py-0.5 rounded border ${hasUses ? 'border-brass/60 text-action' : 'border-danger/60 text-danger'}">${hasUses ? `USOS: ${uses}/5` : 'SIN USOS'}</span>
@@ -236,14 +259,14 @@ class BattleArena extends HTMLElement {
                     </button>
                   `
                 }).join('') : ''}
-                <button class="action-btn border border-defense bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-defense/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="defend" ${!isPlayerTurn || isFinished ? 'disabled' : ''}>
+                <button class="action-btn border border-defense bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-defense/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="defend" ${!isPlayerTurn || isFinished || isAutomatic ? 'disabled' : ''}>
                   <div class="flex items-center justify-between gap-2">
                     <span>DEFENSA</span>
                     <span class="text-[0.68rem] px-1.5 py-0.5 rounded border border-defense/60 text-[#68d391]">ILIMITADA</span>
                   </div>
                   <span class="mt-1 block font-normal text-muted">${player?.defense?.name || 'Bloqueo'} (-50% daño)</span>
                 </button>
-                <button class="action-btn border border-action bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-action/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="special" ${!isPlayerTurn || isFinished || specialState.locked || !hasSpecialUses ? 'disabled' : ''}>
+                <button class="action-btn border border-action bg-surface px-4 py-3 text-left font-mono text-xs font-bold text-cream transition hover:bg-action/20 focus:outline-none focus:ring-2 disabled:opacity-40" type="button" data-action="special" ${!isPlayerTurn || isFinished || isAutomatic || specialState.locked || !hasSpecialUses ? 'disabled' : ''}>
                   <div class="flex items-center justify-between gap-2">
                     <span>ESPECIAL: ${this.#escapeHtml(player?.special?.name || 'Ataque Especial')}</span>
                     <span class="text-[0.68rem] px-1.5 py-0.5 rounded border ${hasSpecialUses ? 'border-action/60 text-action' : 'border-danger/60 text-danger'}">${hasSpecialUses ? `USOS: ${specialUses}/2` : 'SIN USOS'}</span>
@@ -272,11 +295,11 @@ class BattleArena extends HTMLElement {
               <p class="font-mono text-xs font-bold tracking-wider text-cream">EQUIPOS RESTANTES</p>
               <p class="text-xs text-muted mt-2">Jugador:</p>
               <ul class="mt-1 grid grid-cols-5 gap-2" aria-label="Cartas restantes del jugador">
-                ${this.#battle.playerDeck.map((card) => this.#renderTeamCard(card, true, card.id === player?.id, isPlayerTurn, isFinished)).join('')}
+                ${this.#battle.playerDeck.map((card) => this.#renderTeamCard(card, true, card.id === player?.id, isPlayerTurn, isFinished, isAutomatic)).join('')}
               </ul>
               <p class="text-xs text-muted mt-2">Máquina:</p>
               <ul class="mt-1 grid grid-cols-5 gap-2" aria-label="Cartas restantes de la máquina">
-                ${this.#battle.machineDeck.map((card) => this.#renderTeamCard(card, false, card.id === machine?.id, isPlayerTurn, isFinished)).join('')}
+                ${this.#battle.machineDeck.map((card) => this.#renderTeamCard(card, false, card.id === machine?.id, isPlayerTurn, isFinished, isAutomatic)).join('')}
               </ul>
             </div>
           </aside>
@@ -289,6 +312,15 @@ class BattleArena extends HTMLElement {
         const action = btn.dataset.action
         const attackId = btn.dataset.attackId
         this.#dispatchAction(action, attackId)
+      })
+    })
+
+    this.querySelectorAll('input[name="battle-mode"]').forEach(input => {
+      input.addEventListener('change', () => {
+        this.dispatchEvent(new CustomEvent('battle-mode-changed', {
+          bubbles: true,
+          detail: { mode: input.value },
+        }))
       })
     })
   }

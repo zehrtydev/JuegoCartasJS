@@ -19,10 +19,33 @@ import {
   defend,
   useSpecial,
   chooseMachineAction,
+  chooseAutomaticAction,
   evaluateBattleEnd,
   replaceDefeatedCard,
   progressCardTurn,
 } from './battleService.js';
+
+function buildAttackLog(actorLabel, moveName, result) {
+  const eventMessage = result.dodged
+    ? '¡ATAQUE ESQUIVADO! '
+    : (result.isCritical ? '¡GOLPE CRÍTICO! ' : '');
+  const effectMessage = result.effectMessage ? `(${result.effectMessage}) ` : '';
+  return `${eventMessage}${actorLabel} usa ${moveName} ${effectMessage}e inflige ${result.damage} daño.`;
+}
+
+function enrichActionResult(result, outcome) {
+  return {
+    damage: result.damage,
+    multiplier: result.multiplier,
+    effectMessage: result.effectMessage,
+    isCritical: result.isCritical === true,
+    dodged: result.dodged === true,
+    message: result.message,
+    isKo: outcome.isKo,
+    relevo: outcome.relevo,
+    newActiveCard: outcome.newActiveCard,
+  };
+}
 
 /**
  * Catálogo fijo de la experiencia de juego. Cada carta tiene un recurso visual
@@ -256,22 +279,12 @@ export function performPlayerAction(state, action, attackId = null) {
     
     const outcome = processActionOutcome(state, activePlayer, activeMachine, result, true);
 
-    const logEntry = result.effectMessage
-      ? `Jugador usa ${attack.name} (${result.effectMessage}) e inflige ${result.damage} daño.`
-      : `Jugador usa ${attack.name} e inflige ${result.damage} daño.`;
+    const logEntry = buildAttackLog('Jugador', attack.name, result);
     state.log.push(logEntry);
 
     return {
       success: true,
-      result: {
-        damage: result.damage,
-        multiplier: result.multiplier,
-        effectMessage: result.effectMessage,
-        message: logEntry,
-        isKo: outcome.isKo,
-        relevo: outcome.relevo,
-        newActiveCard: outcome.newActiveCard
-      },
+      result: { ...enrichActionResult(result, outcome), message: logEntry },
       state
     };
   }
@@ -318,22 +331,12 @@ export function performPlayerAction(state, action, attackId = null) {
 
     const outcome = processActionOutcome(state, result.attacker, result.defender, result, true);
 
-    const logEntry = result.effectMessage
-      ? `Jugador usa ${activePlayer.special?.name || 'Poder Especial'} (${result.effectMessage}) e inflige ${result.damage} daño.`
-      : `Jugador usa ${activePlayer.special?.name || 'Poder Especial'} e inflige ${result.damage} daño.`;
+    const logEntry = buildAttackLog('Jugador', activePlayer.special?.name || 'Poder Especial', result);
     state.log.push(logEntry);
 
     return {
       success: true,
-      result: {
-        damage: result.damage,
-        multiplier: result.multiplier,
-        effectMessage: result.effectMessage,
-        message: logEntry,
-        isKo: outcome.isKo,
-        relevo: outcome.relevo,
-        newActiveCard: outcome.newActiveCard
-      },
+      result: { ...enrichActionResult(result, outcome), message: logEntry },
       state
     };
   }
@@ -394,23 +397,13 @@ export function performMachineAction(state) {
     const result = useSpecial(activeMachine, activePlayer);
     const outcome = processActionOutcome(state, result.attacker, result.defender, result, false);
 
-    const logEntry = result.effectMessage
-      ? `Máquina usa ${activeMachine.special?.name || 'poder especial'} (${result.effectMessage}) e inflige ${result.damage} daño.`
-      : `Máquina usa ${activeMachine.special?.name || 'poder especial'} e inflige ${result.damage} daño.`;
+    const logEntry = buildAttackLog('Máquina', activeMachine.special?.name || 'poder especial', result);
     state.log.push(logEntry);
 
     return {
       success: true,
       action,
-      result: {
-        damage: result.damage,
-        multiplier: result.multiplier,
-        effectMessage: result.effectMessage,
-        message: logEntry,
-        isKo: outcome.isKo,
-        relevo: outcome.relevo,
-        newActiveCard: outcome.newActiveCard
-      },
+      result: { ...enrichActionResult(result, outcome), message: logEntry },
       state
     };
   }
@@ -421,25 +414,38 @@ export function performMachineAction(state) {
 
   const outcome = processActionOutcome(state, activeMachine, activePlayer, result, false);
 
-  const logEntry = result.effectMessage
-    ? `Máquina usa ${attack.name} (${result.effectMessage}) e inflige ${result.damage} daño.`
-    : `Máquina usa ${attack.name} e inflige ${result.damage} daño.`;
+  const logEntry = buildAttackLog('Máquina', attack.name, result);
   state.log.push(logEntry);
 
   return {
     success: true,
     action,
-    result: {
-      damage: result.damage,
-      multiplier: result.multiplier,
-      effectMessage: result.effectMessage,
-      message: logEntry,
-      isKo: outcome.isKo,
-      relevo: outcome.relevo,
-      newActiveCard: outcome.newActiveCard
-    },
+    result: { ...enrichActionResult(result, outcome), message: logEntry },
     state
   };
+}
+
+export function performAutomaticAction(state, actor = state?.currentTurn) {
+  if (!state || state.battleFinished || actor !== state.currentTurn) {
+    return { success: false, message: 'No se puede ejecutar una acción automática en este turno.' };
+  }
+
+  if (actor === 'machine') {
+    return performMachineAction(state);
+  }
+
+  if (actor !== 'player') {
+    return { success: false, message: 'Participante automático no válido.' };
+  }
+
+  const action = chooseAutomaticAction(state.activePlayerCard, state.activeMachineCard);
+  if (!action) return { success: false, message: 'No hay acciones automáticas disponibles.' };
+  if (action === 'special' || action === 'defend') {
+    return { ...performPlayerAction(state, action), action };
+  }
+
+  const attackIndex = Number(action.replace('attack-', '')) - 1;
+  return { ...performPlayerAction(state, 'attack', attackIndex), action };
 }
 
 export async function finishGameSession(playerId, result, playerDeck, machineDeck, battleInfo = {}) {

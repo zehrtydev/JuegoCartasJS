@@ -9,6 +9,7 @@ import {
   finishGameSession
 } from '../../services/gameController.js'
 import { getPlayers } from '../../api/playersApi.js'
+import { getCards } from '../../api/cardsApi.js'
 import { getBattles } from '../../api/battlesApi.js'
 import { playBattleAudio, playViewBgm, stopBgm, playBattleIntro } from '../../services/audioService.js'
 
@@ -46,6 +47,7 @@ class GameApp extends HTMLElement {
   #noticeTimer = null
   #leaderboardState = 'empty'
   #historyRecords = []
+  #historyCards = []
   #historyState = 'empty'
   #battleStartedAt = null
   #battleEffect = null
@@ -138,7 +140,15 @@ class GameApp extends HTMLElement {
     this.#render()
 
     try {
-      this.#historyRecords = this.#preview.active ? [] : (await getBattles() || [])
+      if (this.#preview.active) {
+        this.#historyRecords = []
+        this.#historyCards = []
+      } else {
+        const [battlesResult, cardsResult] = await Promise.allSettled([getBattles(), getCards()])
+        if (battlesResult.status === 'rejected') throw battlesResult.reason
+        this.#historyRecords = battlesResult.value || []
+        this.#historyCards = cardsResult.status === 'fulfilled' ? (cardsResult.value || []) : []
+      }
       this.#historyState = this.#historyRecords.length > 0 ? 'ready' : 'empty'
     } catch (error) {
       console.error('Error loading match history:', error)
@@ -427,6 +437,7 @@ class GameApp extends HTMLElement {
     if (this.#currentView === 'history') {
       const history = document.createElement('match-history')
       history.records = this.#historyRecords
+      history.cards = this.#historyCards
       history.state = this.#historyState
       history.addEventListener('retry-history-requested', () => {
         void this.#loadHistory()

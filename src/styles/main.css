@@ -800,6 +800,10 @@
   .historyTeams { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
   .historyDeck { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
   .historyDeck li { border: 1px solid #5f4b27; background: #181611; padding: 0.35rem 0.5rem; color: var(--color-cream); font-family: ui-monospace, monospace; font-size: 0.62rem; }
+  .historyDeck__card { display: inline-flex; min-width: 7.5rem; align-items: center; gap: 0.45rem; }
+  .historyDeck__sprite { width: 2.5rem; height: 2.5rem; flex: 0 0 2.5rem; image-rendering: pixelated; object-fit: contain; }
+  .historyDeck__sprite--missing { display: grid; place-items: center; border: 1px dashed currentColor; color: var(--color-muted); font-size: 0.9rem; }
+  .historyDeck__name { overflow-wrap: anywhere; }
   .historyDeck__empty { color: var(--color-muted); font-size: 0.72rem; }
 
   .leaderboardRow { transition: transform 150ms, box-shadow 150ms; }

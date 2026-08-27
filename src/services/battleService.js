@@ -111,7 +111,7 @@ export function prepareCardForTurn(card) {
   return prepared;
 }
 
-function resolveDamage(attacker, defender, move) {
+function resolveDamage(attacker, defender, move, options = {}) {
   const attackType = move.type || attacker.type || 'Normal';
   const defenderType = defender.type || 'Normal';
   const multiplier = getTypeMultiplier(attackType, defenderType);
@@ -132,10 +132,14 @@ function resolveDamage(attacker, defender, move) {
     };
   }
 
-  const isCritical = Math.random() < CRITICAL_CHANCE;
+  const criticalRoll = Math.random();
+  const isCritical = multiplier > 0 && criticalRoll < CRITICAL_CHANCE;
   const criticalDamage = isCritical ? typeDamage * CRITICAL_MULTIPLIER : typeDamage;
   const defendedDamage = defender.isDefending ? criticalDamage * 0.5 : criticalDamage;
-  const damage = Math.round(defendedDamage);
+  const immunityBreak = multiplier === 0 && options.automaticImmunityBreak === true;
+  const damage = immunityBreak
+    ? Math.floor(Math.random() * 10) + 1
+    : Math.round(defendedDamage);
   const nextHp = Math.max(0, (defender.hp ?? 250) - damage);
   const finished = nextHp <= 0;
 
@@ -146,12 +150,15 @@ function resolveDamage(attacker, defender, move) {
     isCritical,
     dodged: false,
     multiplier,
-    effectMessage: getTypeEffectivenessMessage(multiplier),
-    message: isCritical ? '¡GOLPE CRÍTICO!' : '',
+    immunityBreak,
+    effectMessage: immunityBreak ? null : getTypeEffectivenessMessage(multiplier),
+    message: immunityBreak
+      ? '¡FORCEJEO AUTOMÁTICO! La inmunidad causa daño residual.'
+      : (isCritical ? '¡GOLPE CRÍTICO!' : ''),
   };
 }
 
-export function applyAttack(attacker, defender, attack) {
+export function applyAttack(attacker, defender, attack, options = {}) {
   if (!attacker || !defender || !attack) {
     return { damage: 0, defender, attacker, finished: false, message: 'Acción inválida.', success: false };
   }
@@ -176,7 +183,7 @@ export function applyAttack(attacker, defender, attack) {
     return { ...a };
   });
 
-  const resolution = resolveDamage(attacker, defender, attack);
+  const resolution = resolveDamage(attacker, defender, attack, options);
   const eventMessage = resolution.message ? `${resolution.message} ` : '';
   const effectMessage = resolution.effectMessage ? `${resolution.effectMessage} ` : '';
   const message = resolution.finished
@@ -197,7 +204,7 @@ export function defend(card) {
   return defended;
 }
 
-export function useSpecial(attacker, defender) {
+export function useSpecial(attacker, defender, options = {}) {
   if (!attacker || !defender || !attacker.special) {
     return { damage: 0, defender, attacker, finished: false, message: 'No se puede usar el poder.', success: false };
   }
@@ -216,7 +223,7 @@ export function useSpecial(attacker, defender) {
     return { damage: 0, defender, attacker, finished: false, message: 'El poder está en cooldown.', success: false };
   }
 
-  const resolution = resolveDamage(attacker, defender, special);
+  const resolution = resolveDamage(attacker, defender, special, options);
   const eventMessage = resolution.message ? `${resolution.message} ` : '';
   const effectMessage = resolution.effectMessage ? `${resolution.effectMessage} ` : '';
   const message = resolution.finished
@@ -277,6 +284,26 @@ export function getAvailableActions(card) {
   }
 
   return actions;
+}
+
+function getOffensiveMoveTypes(card) {
+  const moveTypes = [
+    ...(card?.attacks || []).map((attack) => attack.type || card?.type || 'Normal'),
+    card?.special?.type || card?.type,
+  ].filter(Boolean);
+
+  return moveTypes.length > 0 ? moveTypes : [card?.type || 'Normal'];
+}
+
+export function hasMutualImmunityLock(firstCard, secondCard) {
+  if (!firstCard || !secondCard) return false;
+
+  const firstBlocked = getOffensiveMoveTypes(firstCard)
+    .every((moveType) => getTypeMultiplier(moveType, secondCard.type || 'Normal') === 0);
+  const secondBlocked = getOffensiveMoveTypes(secondCard)
+    .every((moveType) => getTypeMultiplier(moveType, firstCard.type || 'Normal') === 0);
+
+  return firstBlocked && secondBlocked;
 }
 
 export function chooseAutomaticAction(card, opponentCard) {

@@ -238,10 +238,6 @@ class GameApp extends HTMLElement {
   #handleBattleModeChanged = (event) => {
     const requestedMode = event.detail?.mode
     if (!Object.values(BATTLE_MODES).includes(requestedMode)) return
-    if ((this.#battleState?.log?.length ?? 0) > 0) {
-      this.#showNotice('El modo de batalla no puede cambiar después de la primera acción.')
-      return
-    }
 
     this.#battleMode = requestedMode
     this.#cancelBattleTurn()

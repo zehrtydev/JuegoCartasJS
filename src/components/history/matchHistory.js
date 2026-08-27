@@ -49,10 +49,14 @@ class MatchHistory extends HTMLElement {
       .sort((first, second) => new Date(second.endedAt || 0) - new Date(first.endedAt || 0))
       .map((record) => {
         const won = record.result === 'win'
+        const outcomeLabel = won ? 'VICTORIA' : 'DERROTA'
         return `
-          <article class="historyRecord ${won ? 'historyRecord--win' : 'historyRecord--loss'}">
+          <article class="historyRecord ${won ? 'historyRecord--win' : 'historyRecord--loss'}" aria-label="${outcomeLabel}: partida de ${this.#escapeHtml(record.playerNickname || 'Entrenador')}">
             <header>
-              <div><p>${this.#escapeHtml(record.playerNickname || 'Entrenador')}</p><h2>${won ? 'VICTORIA' : 'DERROTA'}</h2></div>
+              <div class="historyOutcome">
+                <span class="historyOutcomeBadge" aria-hidden="true">${won ? '★' : '✕'}</span>
+                <div><p>${this.#escapeHtml(record.playerNickname || 'Entrenador')}</p><h2>${outcomeLabel}</h2></div>
+              </div>
               <strong>${Number(record.pointsAwarded || 0) >= 0 ? '+' : ''}${Number(record.pointsAwarded || 0)} PTS</strong>
             </header>
             <dl class="historyMeta">

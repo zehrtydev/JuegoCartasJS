@@ -91,7 +91,7 @@ class LeaderboardView extends HTMLElement {
             <div class="mb-2 hidden grid-cols-[5.5rem_1fr_5rem_9rem] gap-3 px-4 font-mono text-xs font-bold tracking-wider text-muted sm:grid">
               <span>POS.</span><span>ENTRENADOR</span><span>PUNTOS</span><span>ESTADÍSTICAS</span>
             </div>
-            <ol class="space-y-2" aria-label="Clasificación de entrenadores">${this.#renderRows()}</ol>
+            <ol class="leaderboardList space-y-2" aria-label="Clasificación de entrenadores">${this.#renderRows()}</ol>
           ` : `
             <ui-state state="${this.#state}" title="EL RANKING AÚN ESTÁ VACÍO" message="Termina una partida para aparecer aquí. El ranking se ordena por puntos y victorias."></ui-state>
           `}

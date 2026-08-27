@@ -761,7 +761,26 @@
 
   .adminDialog { width: min(100%, 30rem); background: var(--color-surface); padding: 1.5rem; }
 
-  .historyList { display: grid; gap: 1rem; }
+  .historyList,
+  .leaderboardList {
+    display: grid;
+    max-height: min(58svh, 38rem);
+    gap: 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding: 0.25rem 0.6rem 0.25rem 0.25rem;
+    scrollbar-color: #8c5f1d rgba(111, 78, 18, 0.2);
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+  }
+
+  .historyList::-webkit-scrollbar,
+  .leaderboardList::-webkit-scrollbar { width: 0.55rem; }
+  .historyList::-webkit-scrollbar-track,
+  .leaderboardList::-webkit-scrollbar-track { background: rgba(111, 78, 18, 0.2); }
+  .historyList::-webkit-scrollbar-thumb,
+  .leaderboardList::-webkit-scrollbar-thumb { border: 1px solid #3d2a10; background: #8c5f1d; }
   .historyRecord { border: 1px solid var(--color-brass); background: rgba(11, 10, 8, 0.64); padding: 1rem; }
   .historyRecord--win { box-shadow: inset 4px 0 0 var(--color-success); }
   .historyRecord--loss { box-shadow: inset 4px 0 0 var(--color-danger); }
@@ -961,8 +980,23 @@
   }
 
   .poolCarousel {
-    position: relative;
+    display: flex;
+    flex-direction: column;
     height: 100%;
+  }
+
+  .poolCarouselPagination {
+    display: grid;
+    justify-items: center;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+  }
+
+  .poolCarouselControls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
   }
 
   .poolCarouselButton {
@@ -1450,10 +1484,8 @@
     }
 
     .poolCarousel {
-      display: grid;
-      grid-template-columns: 2.4rem minmax(0, 1fr) 2.4rem;
-      align-items: center;
-      gap: 0.5rem;
+      display: flex;
+      flex-direction: column;
     }
 
     .poolCarouselButton {
@@ -1464,17 +1496,14 @@
     }
 
     .poolCarouselButton--previous {
-      grid-column: 1;
     }
 
     .poolCarouselButton--next {
-      grid-column: 3;
     }
 
     .poolCarouselStatus {
       position: static;
-      grid-column: 2;
-      margin-top: 0.45rem;
+      margin-top: 0;
       text-align: center;
       transform: none;
     }

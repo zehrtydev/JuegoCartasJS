@@ -189,10 +189,14 @@ class PoolGrid extends HTMLElement {
               <p class="mb-5 text-sm text-muted">Selecciona cinco Pokémon del catálogo para formar tu equipo.</p>
               ${hasCards ? `
                 <div class="poolCarousel w-full max-w-3xl mx-auto">
-                  <button class="poolCarouselButton poolCarouselButton--previous" type="button" data-page-direction="-1" ${this.#currentPage === 0 ? 'disabled' : ''} aria-label="Ver las tres cartas anteriores">←</button>
                   <ul class="poolCardGrid">${visibleCards.map((card) => this.#renderCard(card)).join('')}</ul>
-                  <button class="poolCarouselButton poolCarouselButton--next" type="button" data-page-direction="1" ${this.#currentPage === pageCount - 1 ? 'disabled' : ''} aria-label="Ver las tres cartas siguientes">→</button>
-                  <p class="poolCarouselStatus" aria-live="polite">${firstCardIndex + 1}–${Math.min(firstCardIndex + 3, cards.length)} / ${cards.length}</p>
+                  <div class="poolCarouselPagination">
+                    <div class="poolCarouselControls" role="group" aria-label="Cambiar página del catálogo">
+                      <button class="poolCarouselButton poolCarouselButton--previous" type="button" data-page-direction="-1" ${this.#currentPage === 0 ? 'disabled' : ''} aria-label="Ver las tres cartas anteriores">←</button>
+                      <button class="poolCarouselButton poolCarouselButton--next" type="button" data-page-direction="1" ${this.#currentPage === pageCount - 1 ? 'disabled' : ''} aria-label="Ver las tres cartas siguientes">→</button>
+                    </div>
+                    <p class="poolCarouselStatus" aria-live="polite">${firstCardIndex + 1}–${Math.min(firstCardIndex + 3, cards.length)} / ${cards.length}</p>
+                  </div>
                 </div>
               ` : `
                 <ui-state state="empty" title="EL POOL AÚN NO ESTÁ DISPONIBLE" message="No hay cartas activas cargadas desde la API local. Cuando el catálogo esté disponible, aquí aparecerán las cartas para escoger cinco Pokémon diferentes."></ui-state>

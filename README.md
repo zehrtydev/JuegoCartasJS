@@ -22,7 +22,7 @@ Juego web de combate por turnos con cartas Pokémon de la primera generación. C
 El acceso está disponible desde el módulo **Admin**. Las credenciales se incluyen únicamente para la demostración académica con JSON Server; no son un esquema seguro para producción.
 
 ## Funcionalidades entregadas
-
+- Se agrega boton para batalla automatica en combate tiempo real.
 - Registro y selección de perfil de jugador.
 - Catálogo completo de 151 Pokémon de Kanto con imagen y grito.
 - Pool fijo de 20 cartas activas con imágenes locales; validación de al menos 10 activas para poder formar ambos equipos.

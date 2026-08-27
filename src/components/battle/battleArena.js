@@ -185,7 +185,6 @@ class BattleArena extends HTMLElement {
     const isPlayerTurn = this.#battle.currentTurn === 'player'
     const isFinished = this.#battle.battleFinished
     const isAutomatic = this.#mode === 'automatic'
-    const modeLocked = this.#battle.log.length > 0
     const specialState = this.#getSpecialState(player)
     const specialUses = player?.special?.currentUses ?? 2
     const hasSpecialUses = specialUses > 0
@@ -205,10 +204,10 @@ class BattleArena extends HTMLElement {
             <h1 class="mt-1 text-2xl font-black tracking-[0.06em] text-cream sm:text-3xl" id="arena-title">ARENA DE BATALLA</h1>
           </div>
           <div class="flex flex-wrap items-center gap-3">
-            <fieldset class="battleModeSelector" ${modeLocked ? 'disabled' : ''}>
+            <fieldset class="battleModeSelector" ${isFinished ? 'disabled' : ''}>
               <legend>MODO DE BATALLA</legend>
-              <label><input type="radio" name="battle-mode" value="manual" ${!isAutomatic ? 'checked' : ''}> MANUAL</label>
-              <label><input type="radio" name="battle-mode" value="automatic" ${isAutomatic ? 'checked' : ''}> AUTOMÁTICO</label>
+              <label class="${!isAutomatic ? 'battleModeSelector__option--active' : ''}"><input type="radio" name="battle-mode" value="manual" ${!isAutomatic ? 'checked' : ''}> MANUAL</label>
+              <label class="${isAutomatic ? 'battleModeSelector__option--active' : ''}"><input type="radio" name="battle-mode" value="automatic" ${isAutomatic ? 'checked' : ''}> AUTOMÁTICO</label>
             </fieldset>
             <p class="border border-brass bg-surface px-3 py-2 font-mono text-xs font-bold tracking-wider text-cream">TURNO: <span class="text-muted">${isPlayerTurn ? 'JUGADOR' : 'BOT'}</span></p>
           </div>

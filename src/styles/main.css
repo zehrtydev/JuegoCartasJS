@@ -807,7 +807,9 @@
   .battleCard--defeated { animation: battleDefeat 650ms ease-in both; }
   .battleModeSelector { display: flex; gap: 0.65rem; border: 1px solid var(--color-brass); background: var(--color-surface); padding: 0.45rem 0.65rem; color: var(--color-cream); font-family: ui-monospace, monospace; font-size: 0.62rem; font-weight: 900; }
   .battleModeSelector legend { padding: 0 0.25rem; color: var(--color-action); }
-  .battleModeSelector label { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+  .battleModeSelector label { display: flex; min-height: 2rem; align-items: center; gap: 0.3rem; border: 1px solid transparent; padding: 0.25rem 0.45rem; cursor: pointer; }
+  .battleModeSelector label:hover { border-color: var(--color-brass); }
+  .battleModeSelector__option--active { border-color: var(--color-action) !important; background: rgba(246, 201, 69, 0.18); color: var(--color-action); }
   .battleModeSelector:disabled { opacity: 0.65; }
   .battleEvent { margin-top: 0.75rem; border: 2px solid; padding: 0.55rem; font-family: ui-monospace, monospace; font-size: 0.75rem; font-weight: 900; text-align: center; }
   .battleEvent--critical { border-color: var(--color-danger); background: rgba(174, 48, 55, 0.22); color: #ff8c92; }
@@ -2724,6 +2726,46 @@ match-history .historyDeck li {
   color: #f5f1e8;
   background: linear-gradient(180deg, #4b5159 0 20%, #24272c 20% 100%);
   box-shadow: 2px 2px 0 #696f78;
+}
+
+match-history .historyRecord--win {
+  border: 3px solid #397447 !important;
+  background: linear-gradient(110deg, #eef5e9 0%, #cbdcc8 58%, #9db9a0 100%) !important;
+  box-shadow: inset 7px 0 0 #397447, inset 2px 2px 0 #fffdf6, inset -2px -2px 0 #657b68, 4px 4px 0 #08090a;
+}
+
+match-history .historyRecord--loss {
+  border: 3px solid #9f3038 !important;
+  background: linear-gradient(110deg, #f6e9e5 0%, #dfc5c2 58%, #bd9999 100%) !important;
+  box-shadow: inset 7px 0 0 #9f3038, inset 2px 2px 0 #fffdf6, inset -2px -2px 0 #826060, 4px 4px 0 #08090a;
+}
+
+match-history .historyOutcome { display: flex; align-items: center; gap: 0.8rem; }
+match-history .historyOutcomeBadge { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border: 2px solid currentColor; font-family: ui-monospace, monospace; font-size: 1.25rem; font-weight: 900; }
+match-history .historyRecord--win .historyOutcomeBadge,
+match-history .historyRecord--win > header h2 { color: #285e36 !important; }
+match-history .historyRecord--loss .historyOutcomeBadge,
+match-history .historyRecord--loss > header h2 { color: #8b222c !important; }
+
+leaderboard-view .leaderboardPosition { display: grid; justify-items: start; gap: 0.3rem; }
+leaderboard-view .leaderboardMedal { display: inline-flex; min-width: 4.25rem; align-items: center; justify-content: center; gap: 0.3rem; border: 2px solid currentColor; padding: 0.25rem 0.4rem; font-size: 0.58rem; letter-spacing: 0.05em; }
+leaderboard-view .leaderboardMedal--gold { color: #ffe27a; background: #6d5311; }
+leaderboard-view .leaderboardMedal--silver { color: #f1f4f7; background: #59616b; }
+leaderboard-view .leaderboardMedal--bronze { color: #ffd0a1; background: #78431f; }
+leaderboard-view .leaderboardRow--top1 {
+  border-color: #f6c945 !important;
+  background: linear-gradient(90deg, rgba(246, 201, 69, 0.32), rgba(34, 37, 42, 0.96)) !important;
+  box-shadow: inset 5px 0 0 #f6c945, 4px 4px 0 #6f4e12;
+}
+leaderboard-view .leaderboardRow--top2 {
+  border-color: #c8d0da !important;
+  background: linear-gradient(90deg, rgba(200, 208, 218, 0.28), rgba(34, 37, 42, 0.96)) !important;
+  box-shadow: inset 5px 0 0 #c8d0da, 4px 4px 0 #4a5058;
+}
+leaderboard-view .leaderboardRow--top3 {
+  border-color: #c98245 !important;
+  background: linear-gradient(90deg, rgba(201, 130, 69, 0.3), rgba(34, 37, 42, 0.96)) !important;
+  box-shadow: inset 5px 0 0 #c98245, 4px 4px 0 #5a3019;
 }
 
 /* Contenedor general para módulos de juego */

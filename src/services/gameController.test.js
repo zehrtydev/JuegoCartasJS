@@ -362,3 +362,118 @@ test('performAutomaticAction ejecuta un turno legal para el jugador', async () =
   assert.equal(state.currentTurn, 'machine');
 });
 
+function createMutuallyImmuneCard(id, name, type, hp = 250, currentUses = 5) {
+  return {
+    id,
+    name,
+    type,
+    hp,
+    attacks: [{ name: `Golpe ${type}`, type, baseDamage: 20, currentUses }],
+    special: {
+      name: `Especial ${type}`,
+      type,
+      baseDamage: 65,
+      unlockTurn: 2,
+      cooldown: 3,
+      currentUses,
+    },
+  };
+}
+
+test('performAutomaticAction rompe la inmunidad Normal contra Fantasma sin cambiar el multiplicador', async () => {
+  const state = (await createCombatSession(
+    [createMutuallyImmuneCard('normal', 'Normal', 'Normal')],
+    [createMutuallyImmuneCard('ghost', 'Fantasma', 'Fantasma')]
+  )).state;
+  state.currentTurn = 'player';
+
+  const result = withRandomValues([0.5, 0.5, 0.5, 0.4], () => performAutomaticAction(state, 'player'));
+
+  assert.equal(result.success, true);
+  assert.equal(result.result.multiplier, 0);
+  assert.equal(result.result.damage, 5);
+  assert.equal(result.result.immunityBreak, true);
+  assert.equal(result.result.effectMessage, null);
+  assert.match(result.result.message, /forcejeo|inmunidad/i);
+});
+
+test('performAutomaticAction rompe la inmunidad Fantasma contra Normal', async () => {
+  const state = (await createCombatSession(
+    [createMutuallyImmuneCard('normal', 'Normal', 'Normal')],
+    [createMutuallyImmuneCard('ghost', 'Fantasma', 'Fantasma')]
+  )).state;
+  state.currentTurn = 'machine';
+
+  const result = withRandomValues([0.5, 0.5, 0.5, 0], () => performAutomaticAction(state, 'machine'));
+
+  assert.equal(result.success, true);
+  assert.equal(result.result.multiplier, 0);
+  assert.equal(result.result.damage, 1);
+  assert.equal(result.result.immunityBreak, true);
+});
+
+test('performAutomaticAction usa forcejeo ilimitado cuando se agotan los movimientos inmunes', async () => {
+  const state = (await createCombatSession(
+    [createMutuallyImmuneCard('normal', 'Normal', 'Normal', 250, 0)],
+    [createMutuallyImmuneCard('ghost', 'Fantasma', 'Fantasma', 250, 0)]
+  )).state;
+  state.currentTurn = 'player';
+
+  const result = withRandomValues([0.9], () => performAutomaticAction(state, 'player'));
+
+  assert.equal(result.success, true);
+  assert.equal(result.action, 'struggle');
+  assert.equal(result.result.damage, 10);
+  assert.equal(result.result.multiplier, 0);
+  assert.equal(result.result.immunityBreak, true);
+  assert.equal(result.state.activePlayerCard.attacks[0].currentUses, 0);
+  assert.match(result.result.message, /forcejeo/i);
+});
+
+test('performAutomaticAction usa forcejeo si todo movimiento ofensivo está agotado aunque exista un tipo alternativo', async () => {
+  const normalCard = createMutuallyImmuneCard('normal', 'Normal', 'Normal', 250, 0);
+  normalCard.attacks.push({
+    name: 'Mordisco agotado',
+    type: 'Siniestro',
+    baseDamage: 30,
+    currentUses: 0,
+  });
+  const state = (await createCombatSession(
+    [normalCard],
+    [createMutuallyImmuneCard('ghost', 'Fantasma', 'Fantasma', 250, 0)]
+  )).state;
+  state.currentTurn = 'player';
+
+  const result = withRandomValues([0.4], () => performAutomaticAction(state, 'player'));
+
+  assert.equal(result.success, true);
+  assert.equal(result.action, 'struggle');
+  assert.equal(result.result.damage, 5);
+  assert.equal(result.result.multiplier, 1);
+  assert.equal(result.result.immunityBreak, false);
+  assert.equal(result.result.effectMessage, null);
+  assert.doesNotMatch(result.result.message, /inmunidad/i);
+});
+
+test('un combate automático 1v1 mutuamente inmune termina incluso con daño mínimo', async () => {
+  const state = (await createCombatSession(
+    [createMutuallyImmuneCard('normal', 'Normal', 'Normal', 3, 0)],
+    [createMutuallyImmuneCard('ghost', 'Fantasma', 'Fantasma', 3, 0)]
+  )).state;
+  state.currentTurn = 'player';
+
+  withRandomValues([0], () => {
+    let turns = 0;
+    while (!state.battleFinished && turns < 8) {
+      const result = performAutomaticAction(state, state.currentTurn);
+      assert.equal(result.success, true);
+      assert.equal(result.result.damage, 1);
+      turns += 1;
+    }
+    assert.ok(turns < 8, 'El combate automático quedó en bucle');
+  });
+
+  assert.equal(state.battleFinished, true);
+  assert.ok(['player', 'machine'].includes(state.winner));
+});
+

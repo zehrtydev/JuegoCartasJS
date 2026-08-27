@@ -20,13 +20,17 @@ import {
   useSpecial,
   chooseMachineAction,
   chooseAutomaticAction,
+  getAvailableActions,
+  hasMutualImmunityLock,
   evaluateBattleEnd,
   replaceDefeatedCard,
   progressCardTurn,
 } from './battleService.js';
 
 function buildAttackLog(actorLabel, moveName, result) {
-  const eventMessage = result.dodged
+  const eventMessage = result.immunityBreak
+    ? '¡FORCEJEO AUTOMÁTICO CONTRA INMUNIDAD! '
+    : result.dodged
     ? '¡ATAQUE ESQUIVADO! '
     : (result.isCritical ? '¡GOLPE CRÍTICO! ' : '');
   const effectMessage = result.effectMessage ? `(${result.effectMessage}) ` : '';
@@ -40,6 +44,7 @@ function enrichActionResult(result, outcome) {
     effectMessage: result.effectMessage,
     isCritical: result.isCritical === true,
     dodged: result.dodged === true,
+    immunityBreak: result.immunityBreak === true,
     message: result.message,
     isKo: outcome.isKo,
     relevo: outcome.relevo,
@@ -214,7 +219,7 @@ function processActionOutcome(state, activeAttacker, activeDefender, result, isP
   };
 }
 
-export function performPlayerAction(state, action, attackId = null) {
+export function performPlayerAction(state, action, attackId = null, options = {}) {
   const activePlayer = state.activePlayerCard;
   const activeMachine = state.activeMachineCard;
 
@@ -272,7 +277,7 @@ export function performPlayerAction(state, action, attackId = null) {
     if (!attack) {
       return { success: false, message: 'No hay ataques disponibles.' };
     }
-    const result = applyAttack(activePlayer, activeMachine, attack);
+    const result = applyAttack(activePlayer, activeMachine, attack, options);
     if (!result.success && result.damage === 0) {
       return { success: false, message: result.message };
     }
@@ -324,7 +329,7 @@ export function performPlayerAction(state, action, attackId = null) {
   }
 
   if (action === 'special') {
-    const result = useSpecial(activePlayer, activeMachine);
+    const result = useSpecial(activePlayer, activeMachine, options);
     if (!result.success && result.damage === 0) {
       return { success: false, message: result.message };
     }
@@ -344,7 +349,7 @@ export function performPlayerAction(state, action, attackId = null) {
   return { success: false, message: 'Acción no válida.' };
 }
 
-export function performMachineAction(state) {
+export function performMachineAction(state, options = {}) {
   const activePlayer = state.activePlayerCard;
   const activeMachine = state.activeMachineCard;
 
@@ -356,7 +361,7 @@ export function performMachineAction(state) {
     return { success: false, message: 'Todavía no es el turno de la máquina.' };
   }
 
-  const action = chooseMachineAction(activeMachine, activePlayer);
+  const action = options.actionOverride || chooseMachineAction(activeMachine, activePlayer);
 
   if (action === 'defend') {
     const defended = defend(activeMachine);
@@ -394,7 +399,7 @@ export function performMachineAction(state) {
   }
 
   if (action === 'special') {
-    const result = useSpecial(activeMachine, activePlayer);
+    const result = useSpecial(activeMachine, activePlayer, options);
     const outcome = processActionOutcome(state, result.attacker, result.defender, result, false);
 
     const logEntry = buildAttackLog('Máquina', activeMachine.special?.name || 'poder especial', result);
@@ -410,7 +415,7 @@ export function performMachineAction(state) {
 
   const attackIndex = Number(action.replace('attack-', '')) - 1;
   const attack = activeMachine.attacks?.[attackIndex] || activeMachine.attacks?.[0];
-  const result = applyAttack(activeMachine, activePlayer, attack);
+  const result = applyAttack(activeMachine, activePlayer, attack, options);
 
   const outcome = processActionOutcome(state, activeMachine, activePlayer, result, false);
 
@@ -425,27 +430,86 @@ export function performMachineAction(state) {
   };
 }
 
+function performAutomaticStruggle(state, actor, immunityLock) {
+  const isPlayerAttacking = actor === 'player';
+  const attacker = isPlayerAttacking ? state.activePlayerCard : state.activeMachineCard;
+  const defender = isPlayerAttacking ? state.activeMachineCard : state.activePlayerCard;
+  const damage = Math.floor(Math.random() * 10) + 1;
+  const nextHp = Math.max(0, (defender.hp ?? 250) - damage);
+  const result = {
+    success: true,
+    attacker: { ...attacker },
+    defender: {
+      ...defender,
+      hp: nextHp,
+      defeated: nextHp === 0,
+      isDefending: false,
+    },
+    damage,
+    finished: nextHp === 0,
+    multiplier: immunityLock ? 0 : 1,
+    effectMessage: null,
+    isCritical: false,
+    dodged: false,
+    immunityBreak: immunityLock,
+    message: immunityLock
+      ? '¡FORCEJEO AUTOMÁTICO! La inmunidad causa daño residual.'
+      : '¡FORCEJEO AUTOMÁTICO! Sin movimientos disponibles, causa daño residual.',
+  };
+  const outcome = processActionOutcome(state, attacker, defender, result, isPlayerAttacking);
+  const actorLabel = isPlayerAttacking ? 'Jugador' : 'Máquina';
+  const logEntry = buildAttackLog(actorLabel, 'Forcejeo', result);
+  state.log.push(logEntry);
+
+  return {
+    success: true,
+    action: 'struggle',
+    result: { ...enrichActionResult(result, outcome), message: logEntry },
+    state,
+  };
+}
+
 export function performAutomaticAction(state, actor = state?.currentTurn) {
   if (!state || state.battleFinished || actor !== state.currentTurn) {
     return { success: false, message: 'No se puede ejecutar una acción automática en este turno.' };
   }
 
-  if (actor === 'machine') {
-    return performMachineAction(state);
-  }
-
-  if (actor !== 'player') {
+  if (actor !== 'player' && actor !== 'machine') {
     return { success: false, message: 'Participante automático no válido.' };
   }
 
-  const action = chooseAutomaticAction(state.activePlayerCard, state.activeMachineCard);
+  const attacker = actor === 'player' ? state.activePlayerCard : state.activeMachineCard;
+  const defender = actor === 'player' ? state.activeMachineCard : state.activePlayerCard;
+  const immunityLock = hasMutualImmunityLock(attacker, defender);
+  const offensiveActions = getAvailableActions(attacker)
+    .filter((availableAction) => availableAction !== 'defend');
+  let action = actor === 'player'
+    ? chooseAutomaticAction(attacker, defender)
+    : chooseMachineAction(attacker, defender);
+
+  if (offensiveActions.length === 0) {
+    action = 'struggle';
+  } else if (immunityLock && action === 'defend') {
+    action = offensiveActions[0] || 'struggle';
+  }
+
   if (!action) return { success: false, message: 'No hay acciones automáticas disponibles.' };
+
+  if (action === 'struggle') {
+    return performAutomaticStruggle(state, actor, immunityLock);
+  }
+
+  const automaticOptions = immunityLock ? { automaticImmunityBreak: true } : {};
+  if (actor === 'machine') {
+    return performMachineAction(state, { ...automaticOptions, actionOverride: action });
+  }
+
   if (action === 'special' || action === 'defend') {
-    return { ...performPlayerAction(state, action), action };
+    return { ...performPlayerAction(state, action, null, automaticOptions), action };
   }
 
   const attackIndex = Number(action.replace('attack-', '')) - 1;
-  return { ...performPlayerAction(state, 'attack', attackIndex), action };
+  return { ...performPlayerAction(state, 'attack', attackIndex, automaticOptions), action };
 }
 
 export async function finishGameSession(playerId, result, playerDeck, machineDeck, battleInfo = {}) {

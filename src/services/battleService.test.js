@@ -149,6 +149,39 @@ test('applyAttack aplica multiplicador x0 para inmunidad (Normal contra Fantasma
   assert.equal(result.defender.hp, 250);
 });
 
+test('la inmunidad manual permanece estricta en ambas direcciones y con especiales', () => {
+  const normalCard = {
+    id: 'normal',
+    name: 'Normal',
+    type: 'Normal',
+    hp: 250,
+    turnCount: 2,
+    specialCooldown: 0,
+    attacks: [{ name: 'Golpe Normal', type: 'Normal', baseDamage: 20 }],
+    special: { name: 'Especial Normal', type: 'Normal', baseDamage: 65, unlockTurn: 2, currentUses: 2 },
+  };
+  const ghostCard = {
+    id: 'ghost',
+    name: 'Fantasma',
+    type: 'Fantasma',
+    hp: 250,
+    turnCount: 2,
+    specialCooldown: 0,
+    attacks: [{ name: 'Golpe Fantasma', type: 'Fantasma', baseDamage: 20 }],
+    special: { name: 'Especial Fantasma', type: 'Fantasma', baseDamage: 65, unlockTurn: 2, currentUses: 2 },
+  };
+
+  const normalAttack = withRandomValues([0.5, 0.5, 0.5], () => applyAttack(normalCard, ghostCard, normalCard.attacks[0]));
+  const ghostAttack = withRandomValues([0.5, 0.5, 0.5], () => applyAttack(ghostCard, normalCard, ghostCard.attacks[0]));
+  const normalSpecial = withRandomValues([0.5, 0.5, 0.5], () => useSpecial(normalCard, ghostCard));
+
+  for (const result of [normalAttack, ghostAttack, normalSpecial]) {
+    assert.equal(result.multiplier, 0);
+    assert.equal(result.damage, 0);
+    assert.equal(result.immunityBreak ?? false, false);
+  }
+});
+
 test('replaceDefeatedCard devuelve la siguiente carta activa si existe', () => {
   const deck = [
     { id: 'p1', name: 'A', hp: 0, defeated: true },
